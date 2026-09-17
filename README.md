@@ -8,8 +8,8 @@
  4. [Селибов Артём](https://github.com/BezFantasii)
 
 ### Внешние ссылки - TODO
+ - [Бэкенд проекта](https://github.com/go-park-mail-ru/2026_2_Na_Vse_200)
  - [Figma](https://google.com)
- - [Backend](https://google.com)
  - [Deploy](https://google.com)
  - [Jira](https://google.com)
 
