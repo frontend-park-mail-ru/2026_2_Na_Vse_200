@@ -1,5 +1,5 @@
 # 2026_2_Na_Vse_200
-Репозиторий команды На все 200 с проектом Spotify/Яндекс Музыка
+Frontend репозиторий команды На все 200 с проектом Spotify/Яндекс Музыка
 
 ### Участники команды
  1. [Федоров Федор](https://github.com/1ffedor)
@@ -8,13 +8,12 @@
  4. [Селибов Артём](https://github.com/BezFantasii)
 
 ### Внешние ссылки - TODO
+ - [Бэкенд проекта](https://github.com/go-park-mail-ru/2026_2_Na_Vse_200)
  - [Figma](https://google.com)
- - [Backend](https://google.com)
  - [Deploy](https://google.com)
- - [Jira](https://google.com)
 
 ### Правила оформления Pull Requests
-  1. Ветка создается с названием `MUSIC-###`, где ### - номер задачи в jira.
-  2. Название Pull Request'а соответствует названию задачки в jira: `MUSIC-###: description`, где description - название из jira.
-  3. При создании Pull Request'а нужно указать в описании ссылку на задачу в jira.
-  4. Для того, чтобы залить изменения в ветку main нужен апрув от [Ярослава](https://t.me/ykarmannikov)
+  1. Ветка создается с названием `MUSIC-###`, где ### - номер задачи.
+  2. Название Pull Request'а соответствует названию задачи: `MUSIC-###: description`,
+     где description - название задачи (что вы реализовали в этом Pull Request'е).
+  3. Для того, чтобы залить изменения в ветку main нужен апрув от [Ярослава](https://t.me/ykarmannikov)
