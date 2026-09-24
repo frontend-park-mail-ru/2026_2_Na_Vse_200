@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="data:,">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Mini React</title>
+    <style>
+        :root { font-family: Inter, ui-sans-serif, system-ui, sans-serif; color: #20242b; background: #f2f4f7; }
+        body { min-height: 100vh; margin: 0; display: grid; place-items: center; }
+        .counter { width: min(420px, calc(100vw - 48px)); padding: 40px; box-sizing: border-box; text-align: center; background: white; border: 1px solid #e3e7ed; border-radius: 20px; box-shadow: 0 16px 48px #1c2b4412; }
+        .eyebrow { color: #5267d8; font-size: 12px; font-weight: 700; letter-spacing: .12em; }
+        h1 { margin: 18px 0 4px; font-size: 30px; }
+        .count { margin: 24px 0; font-size: 56px; font-weight: 750; font-variant-numeric: tabular-nums; }
+        button { padding: 12px 18px; border: 0; border-radius: 10px; background: #5267d8; color: white; font: inherit; font-weight: 650; cursor: pointer; }
+        button:hover { background: #4053c1; }
+        .hint { margin: 20px 0 0; color: #747d8b; font-size: 13px; line-height: 1.5; }
+        .navigation { display: flex; justify-content: center; gap: 18px; margin-top: 22px; }
+        a { color: #5267d8; font-weight: 600; }
+        .task-list { display: grid; gap: 10px; padding: 0; margin: 24px 0; list-style: none; text-align: left; }
+        .task-list li { padding: 12px 14px; border: 1px solid #e3e7ed; border-radius: 10px; }
+        .task-page > a { display: block; margin-top: 20px; }
+    </style>
+</head>
+
+<body>
+
+    <div id="root"></div>
+
+    <script
+        type="module"
+        src="./src/main.jsx"
+    ></script>
+
+</body>
+
+</html>

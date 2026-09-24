@@ -1,0 +1,13 @@
+{
+    "name": "myReact",
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "vite",
+        "build": "vite build",
+        "test": "node --test"
+    },
+    "devDependencies": {
+        "vite": "^8.3.0"
+    }
+}
