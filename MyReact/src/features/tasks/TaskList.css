@@ -1,0 +1,9 @@
+.tasks-feature { max-width: 640px; margin: 0 auto; }
+.tasks-feature h1 { margin: 18px 0 0; color: #20242b; font-size: clamp(27px, 5vw, 38px); }
+.tasks-feature .feature-hint { margin: 12px 0 24px; color: #747d8b; font-size: 14px; line-height: 1.6; }
+.task-list { display: grid; gap: 10px; padding: 0; margin: 0 0 22px; list-style: none; }
+.task-card { display: flex; align-items: center; gap: 13px; padding: 15px; border: 1px solid #e3e7ed; border-radius: 12px; background: #fff; }
+.task-check { display: grid; width: 30px; height: 30px; flex: 0 0 auto; place-items: center; border-radius: 9px; background: #eef0ff; color: #5267d8; font-weight: 800; }
+.task-card strong,.task-card small { display: block; }
+.task-card strong { color: #303847; font-size: 14px; }
+.task-card small { margin-top: 4px; color: #89919e; font-size: 12px; }

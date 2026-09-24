@@ -49,6 +49,17 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         return null
     }
 
+    if (
+        typeof element.type === "function" &&
+        previousElement &&
+        previousElement.type !== element.type
+    ) {
+        if (dom) parentDom.removeChild(dom)
+        clearPath(path)
+        dom = null
+        previousElement = null
+    }
+
     if (typeof element.type === "function") {
         const previousPath = currentPath
         const previousHookIndex = currentHookIndex

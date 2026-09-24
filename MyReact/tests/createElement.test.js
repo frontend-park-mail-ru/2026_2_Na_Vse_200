@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { createElement } from "../src/myReact/createElement.js"
+import { createElement } from "../myReact/createElement.js"
 
 test("createElement keeps key outside DOM props", () => {
     const element = createElement("li", { key: "task-1", className: "task" }, "Learn")

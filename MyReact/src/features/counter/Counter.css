@@ -1,0 +1,5 @@
+.counter-feature { max-width: 600px; margin: 0 auto; text-align: center; }
+.eyebrow { color: #5267d8; font-size: 12px; font-weight: 750; letter-spacing: .12em; }
+.counter-feature h1 { margin: 18px 0 0; color: #20242b; font-size: clamp(27px, 5vw, 38px); }
+.counter-value { margin: 22px 0; color: #20242b; font-size: clamp(56px, 12vw, 82px); font-weight: 780; font-variant-numeric: tabular-nums; line-height: 1; }
+.feature-hint { max-width: 440px; margin: 22px auto 0; color: #747d8b; font-size: 14px; line-height: 1.6; }

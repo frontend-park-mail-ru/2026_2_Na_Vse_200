@@ -1,7 +1,7 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { createElement } from "../src/myReact/createElement.js"
-import { render } from "../src/myReact/render.js"
+import { createElement } from "../myReact/createElement.js"
+import { render } from "../myReact/render.js"
 
 class FakeNode {
     constructor() {

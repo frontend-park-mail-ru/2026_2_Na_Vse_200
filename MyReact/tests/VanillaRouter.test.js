@@ -1,6 +1,6 @@
 import test from "node:test"
 import assert from "node:assert/strict"
-import { VanillaRouter } from "../src/router/VanillaRouter.js"
+import { VanillaRouter } from "../src/shared/lib/VanillaRouter.js"
 
 class DetailEvent extends Event {
     constructor(type, { detail } = {}) {
