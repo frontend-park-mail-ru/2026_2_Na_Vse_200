@@ -26,7 +26,13 @@ body {
 .navigation {
   display: flex;
   gap: 20px;
+  align-items: center;
+  flex-wrap: wrap;
 }
+.user-greeting { color: #d2d2d2; font-size: 13px; }
+.logout-button { border: 1px solid #666; border-radius: 7px; padding: 6px 10px; background: transparent; color: #fff; cursor: pointer; }
+.session-error { margin: 0; padding: 10px 24px; background: #3b2028; color: #ffc0c9; font-size: 13px; }
+.session-loading { min-height: 100dvh; display: grid; place-items: center; background: #0d0e12; color: #f4f3f5; }
 
 .page {
   max-width: 960px;

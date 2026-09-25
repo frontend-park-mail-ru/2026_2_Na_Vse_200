@@ -11,7 +11,7 @@ const links = [
  * @param {{route: string, children: Array<object>}} props Current route and page.
  * @returns {object} Virtual element rendered by the project's own template engine.
  */
-export function AppLayout({ route, children }) {
+export function AppLayout({ route, user, onLogout, sessionError, children }) {
     if (route === 'signup' || route === 'login') return <main id="main-content" tabIndex={-1}>{children}</main>;
     return <div className="app-shell">
         <a className="skip-link" href="#main-content">К содержимому</a>
@@ -22,8 +22,10 @@ export function AppLayout({ route, children }) {
                     aria-current={route === link.route ? 'page' : undefined}>
                     {link.label}
                 </a>)}
+                {user ? <><span className="user-greeting">{user.display_name || user.email}</span><button className="logout-button" type="button" onClick={onLogout}>Выйти</button></> : null}
             </nav>
         </header>
+        {sessionError ? <p className="session-error" role="alert">{sessionError}</p> : null}
         <main id="main-content" tabIndex={-1}>{children}</main>
     </div>;
 }

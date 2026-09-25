@@ -13,6 +13,7 @@
 .login-remember input { width: 15px; height: 15px; margin: 0; accent-color: #a28aff; cursor: pointer; }
 .login-text-button { border: 0; padding: 0; background: none; color: #ad98ff; font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
 .login-submit { min-height: 41px; margin-top: 13px; padding: 11px 16px; font-size: 12px; }
+.login-submit:disabled { opacity: .65; cursor: wait; }
 .login-divider { display: flex; align-items: center; gap: 8px; color: #777b8a; font-size: 12px; margin: 20px 0; }
 .login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: #242630; }
 .login-code-button { width: 100%; min-height: 41px; border: 0; border-radius: 24px; padding: 11px 14px; background: #22242d; color: #f4f3f5; font: inherit; font-weight: 700; font-size: 12px; cursor: pointer; }
