@@ -33,3 +33,20 @@ body {
   margin: 0 auto;
   padding: 48px 24px;
 }
+
+a { color: #3452a4; text-underline-offset: 4px; }
+.navigation a[aria-current="page"] { text-decoration: underline; text-decoration-thickness: 2px; }
+.logo { font-weight: 700; }
+.page h1 { font-size: clamp(28px, 6vw, 46px); margin: 12px 0 20px; }
+.page p { line-height: 1.6; }
+.eyebrow { color: #626674; font-size: 14px; letter-spacing: .06em; }
+.action-link { display: inline-block; margin-top: 16px; padding: 12px 20px; border-radius: 8px; background: #3452a4; color: white; text-decoration: none; }
+:focus-visible { outline: 3px solid #d57b00; outline-offset: 5px; }
+h1:focus { outline: none; }
+.skip-link { position: absolute; left: 16px; top: -100px; padding: 12px; background: white; z-index: 1; }
+.skip-link:focus { top: 12px; }
+@media (max-width: 560px) {
+  .header { align-items: flex-start; flex-direction: column; gap: 20px; padding: 20px; }
+  .navigation { flex-wrap: wrap; gap: 16px; }
+  .page { padding: 32px 20px; }
+}

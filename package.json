@@ -1,0 +1,20 @@
+{
+    "name": "na-vse-200",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+        "start": "vite --host 127.0.0.1",
+        "build": "vite build",
+        "preview": "vite preview --host 127.0.0.1",
+        "lint": "eslint . --max-warnings 0",
+        "test": "node --test",
+        "test:routes": "npm run build && node scripts/check-routes.js"
+    },
+    "devDependencies": {
+        "@eslint/js": "^9.39.5",
+        "eslint": "^9.39.5",
+        "globals": "^17.12.0",
+        "vite": "^8.3.0"
+    }
+}
