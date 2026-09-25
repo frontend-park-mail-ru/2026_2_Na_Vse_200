@@ -20,11 +20,17 @@ const pages = {
  */
 export function mountApp(container, router) {
     let initial = true;
+    let notice = '';
+    const onRegistered = () => {
+        notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.';
+        router.navigate('/login');
+    };
     const handleRoute = ({ detail }) => {
         const route = detail.route ?? 'not-found';
         const { component: Page, title } = pages[route] ?? pages['not-found'];
         document.title = `${title} — На все 200`;
-        render(<AppLayout route={route}><Page /></AppLayout>, container);
+        render(<AppLayout route={route}><Page onRegistered={onRegistered} notice={notice} /></AppLayout>, container);
+        notice = '';
         if (!initial) {
             container.querySelector('h1')?.focus();
             window.scrollTo(0, 0);
