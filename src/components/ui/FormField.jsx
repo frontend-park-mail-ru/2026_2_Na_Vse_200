@@ -1,8 +1,8 @@
 import { createElement } from '../../../index.js';
 
 /** @param {object} props Input attributes, label, error and callbacks. @returns {object} Accessible field. */
-export function FormField({ name, label, type = 'text', placeholder, autoComplete, error, onInput, onBlur, disabled }) {
-    const id = `signup-${name}`;
+export function FormField({ name, label, type = 'text', placeholder, autoComplete, error, onInput, onBlur, disabled, idPrefix = 'signup' }) {
+    const id = `${idPrefix}-${name}`;
     return <div className="signup-field">
         <label htmlFor={id}>{label}</label>
         <input id={id} name={name} type={type} placeholder={placeholder}

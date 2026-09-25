@@ -1,0 +1,34 @@
+.login-screen { padding: 8px; }
+.login-art { min-height: 580px; padding: 22px 20px; }
+.login-art p { font-size: clamp(34px, 4.4vw, 64px); line-height: 1.2; }
+.login-panel { padding: 62px 24px 48px; }
+.login-content { max-width: 274px; }
+.login-content h1 { font-size: 38px; margin-bottom: 12px; }
+.login-intro { font-size: 12px; line-height: 1.35; margin-bottom: 12px; }
+.login-content .signup-field { margin-bottom: 12px; }
+.login-content .signup-field label { font-size: 13px; margin-bottom: 10px; }
+.login-content .signup-field input { height: 41px; font-size: 13px; }
+.login-options { display: flex; align-items: center; justify-content: space-between; gap: 12px; font-size: 12px; }
+.login-remember { display: inline-flex; align-items: center; gap: 10px; cursor: pointer; white-space: nowrap; }
+.login-remember input { width: 15px; height: 15px; margin: 0; accent-color: #a28aff; cursor: pointer; }
+.login-text-button { border: 0; padding: 0; background: none; color: #ad98ff; font: inherit; text-decoration: underline; text-underline-offset: 2px; cursor: pointer; }
+.login-submit { min-height: 41px; margin-top: 13px; padding: 11px 16px; font-size: 12px; }
+.login-divider { display: flex; align-items: center; gap: 8px; color: #777b8a; font-size: 12px; margin: 20px 0; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; height: 1px; background: #242630; }
+.login-code-button { width: 100%; min-height: 41px; border: 0; border-radius: 24px; padding: 11px 14px; background: #22242d; color: #f4f3f5; font: inherit; font-weight: 700; font-size: 12px; cursor: pointer; }
+.login-code-button:hover { background: #303340; }
+.login-signup { margin-top: 20px; font-size: 12px; }
+.login-notice, .login-feedback { font-size: 12px; line-height: 1.5; color: #d1c6ff; }
+.login-notice { padding: 10px 12px; border-radius: 10px; background: #211c32; margin: 0 0 16px; }
+.login-feedback:empty { display: none; }
+.login-feedback { margin: 12px 0 0; }
+.login-screen button:focus-visible, .login-remember input:focus-visible { outline: 2px solid #aa98ff; outline-offset: 4px; }
+@media (min-width: 1200px) { .login-panel { padding-top: clamp(64px, 10vh, 120px); } .login-content { max-width: 360px; } }
+@media (max-width: 680px) {
+    .login-art { min-height: 180px; padding: 24px; }
+    .login-art p { font-size: 32px; }
+    .login-panel { padding: 12px 20px 44px; }
+    .login-content { max-width: 380px; }
+    .login-content h1 { font-size: 36px; }
+    .login-options { flex-wrap: wrap; }
+}

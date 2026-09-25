@@ -12,7 +12,7 @@ const links = [
  * @returns {object} Virtual element rendered by the project's own template engine.
  */
 export function AppLayout({ route, children }) {
-    if (route === 'signup') return <main id="main-content" tabIndex={-1}>{children}</main>;
+    if (route === 'signup' || route === 'login') return <main id="main-content" tabIndex={-1}>{children}</main>;
     return <div className="app-shell">
         <a className="skip-link" href="#main-content">К содержимому</a>
         <header className="header">
