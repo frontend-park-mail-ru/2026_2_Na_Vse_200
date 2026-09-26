@@ -7,6 +7,7 @@ let componentOutputByPath = new Map()
 let domByPath = new Map()
 let currentPath = ""
 let currentHookIndex = 0
+const SVG_NAMESPACE = "http://www.w3.org/2000/svg"
 
 export function render(element, container) {
     const previousRootElement = rootElement
@@ -91,9 +92,12 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     const sameType = dom && previousElement && element.type === previousElement.type
 
     if (!dom || (!sameType && !(isText && previousIsText))) {
+        const isSvgElement = element.type === "svg" || parentDom.namespaceURI === SVG_NAMESPACE
         const replacement = isText
             ? document.createTextNode(element.props.nodeValue)
-            : document.createElement(element.type)
+            : isSvgElement
+                ? document.createElementNS(SVG_NAMESPACE, element.type)
+                : document.createElement(element.type)
         if (dom) parentDom.replaceChild(replacement, dom)
         else parentDom.appendChild(replacement)
         clearPath(path)
@@ -173,6 +177,7 @@ function clearPath(path) {
 }
 
 function updateProps(dom, previousProps, nextProps) {
+    const isSvgElement = dom.namespaceURI === SVG_NAMESPACE
     const names = new Set([
         ...Object.keys(previousProps),
         ...Object.keys(nextProps)
@@ -192,10 +197,11 @@ function updateProps(dom, previousProps, nextProps) {
 
         if (nextValue === null || nextValue === undefined || nextValue === false) {
             if (name === "style") dom.removeAttribute("style")
-            else if (name in dom && !name.startsWith("aria-") && !name.startsWith("data-")) {
+            else if (name === "className") dom.removeAttribute("class")
+            else if (!isSvgElement && name in dom && !name.startsWith("aria-") && !name.startsWith("data-")) {
                 dom[name] = typeof dom[name] === "boolean" ? false : ""
             } else {
-                dom.removeAttribute(name)
+                dom.removeAttribute(name === "className" ? "class" : name)
             }
             continue
         }
@@ -207,10 +213,10 @@ function updateProps(dom, previousProps, nextProps) {
                 if (!(styleName in nextValue)) dom.style[styleName] = ""
             }
             Object.assign(dom.style, nextValue)
-        } else if (name in dom && !name.startsWith("aria-") && !name.startsWith("data-")) {
+        } else if (!isSvgElement && name in dom && !name.startsWith("aria-") && !name.startsWith("data-")) {
             dom[name] = nextValue
         } else {
-            dom.setAttribute(name, nextValue === true ? "" : nextValue)
+            dom.setAttribute(name === "className" ? "class" : name, nextValue === true ? "" : nextValue)
         }
     }
 }

@@ -30,25 +30,16 @@ function formatDuration(seconds) {
 function PageHeader() {
     return <header className="home-header">
         <div>
-            <p className="home-eyebrow">ТВОЯ МУЗЫКА, ТВОЙ РИТМ</p>
             <h1>Главная</h1>
         </div>
         <button className="profile-button" type="button" aria-label="Профиль">А</button>
     </header>
 }
 
-function SectionHeading({ eyebrow, title, id }) {
-    return <div className="section-heading">
-        <div>
-            <p className="section-kicker">{eyebrow}</p>
-            <h2 id={id}>{title}</h2>
-        </div>
-    </div>
-}
+
 
 function TrackList({ activeTrack, onTrackSelect }) {
     return <section className="home-section" aria-labelledby="popular-title">
-        <SectionHeading id="popular-title" eyebrow="СЕГОДНЯ ДЛЯ ТЕБЯ" title="Популярные треки" />
         <ol className="track-list" aria-label="Популярные треки">
             {tracks.slice(0, 5).map((track, index) => {
                 const isActive = activeTrack.id === track.id
@@ -104,7 +95,7 @@ function MixList({ activeMix, onMixSelect }) {
     return <section className="discovery-panel" aria-labelledby="mixes-title">
         <div className="subsection-heading">
             <h3 id="mixes-title">Подборки</h3>
-            <button className="text-button" type="button">Все <Icon name="arrowRight" size={14} /></button>
+            <button className="text-button" type="button">Все <Icon name="trackPrevious" size={14} /></button>
         </div>
         <div className="mix-list">
             {mixes.map((mix, index) => <button
@@ -131,9 +122,9 @@ export function MainPage({ activeTrack = tracks[0], onTrackSelect = () => {} }) 
 
     return <div className="home-page">
         <PageHeader />
+        <div className="home-page-divider"></div>
         <TrackList activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
         <section className="home-section discovery-section" aria-labelledby="discovery-title">
-            <SectionHeading id="discovery-title" eyebrow="ЛЮДИ И МУЗЫКА" title="Открой для себя" />
             <div className="discovery-grid">
                 <ArtistList />
                 <MixList activeMix={activeMix} onMixSelect={setActiveMix} />

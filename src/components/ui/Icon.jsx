@@ -28,14 +28,121 @@ const glyphs = {
     check: ["m5 12 4 4L19 6"]
 }
 
-export function Icon({ name, size = 20, className = "", label }) {
+const customGlyphs = new Map()
+const allowedElements = new Set(["path", "circle", "ellipse", "rect", "line", "polyline", "polygon"])
+
+/**
+ * Register SVG shapes from another icon set or a project-specific icon.
+ * Attributes use regular SVG names, for example `stroke-width` and `fill`.
+ *
+ * registerIcon("brand", {
+ *     viewBox: "0 0 24 24",
+ *     elements: [{ tag: "path", attributes: { d: "M4 4h16v16H4z", fill: "currentColor", stroke: "none" } }]
+ * })
+ */
+export function registerIcon(name, definition) {
+    if (typeof name !== "string" || !name.trim()) {
+        throw new TypeError("An icon name must be a non-empty string.")
+    }
+
+    if (!definition || typeof definition !== "object" || !Array.isArray(definition.elements)) {
+        throw new TypeError("An icon definition must contain an elements array.")
+    }
+
+    const elements = definition.elements.map((element, index) => {
+        if (!element || !allowedElements.has(element.tag)) {
+            throw new TypeError(`Unsupported SVG element at index ${index}.`)
+        }
+
+        const attributes = element.attributes ?? {}
+        if (Object.keys(attributes).some(attribute => /^on/i.test(attribute))) {
+            throw new TypeError("Event handler attributes are not allowed in SVG icons.")
+        }
+
+        return { tag: element.tag, attributes: { ...attributes } }
+    })
+
+    customGlyphs.set(name, {
+        viewBox: definition.viewBox ?? "0 0 24 24",
+        transform: definition.transform,
+        elements
+    })
+}
+
+function getIconDefinition(name) {
+    const customDefinition = customGlyphs.get(name)
+    if (customDefinition) return customDefinition
+
     const paths = glyphs[name] ?? glyphs.sparkle
+    return {
+        viewBox: "0 0 24 24",
+        elements: paths.map(d => ({ tag: "path", attributes: { d } }))
+    }
+}
+
+registerIcon("trackPrevious", {
+    viewBox: "0 0 33 30",
+    elements: [
+        {
+            tag: "path",
+            attributes: {
+                d: "M26.75 3.75L9.25 15L26.75 26.25V3.75Z",
+                stroke: "#D9D9D9",
+                "stroke-width": "4",
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round"
+            }
+        },
+        {
+            tag: "line",
+            attributes: {
+                x1: "2",
+                y1: "1",
+                x2: "2",
+                y2: "29",
+                stroke: "white",
+                "stroke-width": "4"
+            }
+        }
+    ]
+})
+
+registerIcon("trackNext", {
+    viewBox: "0 0 33 30",
+    transform: "rotate(180 16.5 15)",
+    elements: [
+        {
+            tag: "path",
+            attributes: {
+                d: "M26.75 3.75L9.25 15L26.75 26.25V3.75Z",
+                stroke: "#D9D9D9",
+                "stroke-width": "4",
+                "stroke-linecap": "round",
+                "stroke-linejoin": "round"
+            }
+        },
+        {
+            tag: "line",
+            attributes: {
+                x1: "2",
+                y1: "1",
+                x2: "2",
+                y2: "29",
+                stroke: "white",
+                "stroke-width": "4"
+            }
+        }
+    ]
+})
+export function Icon({ name, size = 20, className = "", label }) {
+    const definition = getIconDefinition(name)
 
     return <svg
         className={className}
         width={size}
         height={size}
-        viewBox="0 0 24 24"
+        viewBox={definition.viewBox}
+        transform={definition.transform}
         fill="none"
         stroke="currentColor"
         stroke-width="1.8"
@@ -46,6 +153,9 @@ export function Icon({ name, size = 20, className = "", label }) {
         role={label ? "img" : undefined}
         focusable="false"
     >
-        {paths.map((path, index) => <path d={path} key={`${name}-${index}`} />)}
+        {definition.elements.map((element, index) => {
+            const SvgElement = element.tag
+            return <SvgElement {...element.attributes} key={`${name}-${index}`} />
+        })}
     </svg>
 }

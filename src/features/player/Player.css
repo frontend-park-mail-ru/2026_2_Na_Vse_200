@@ -9,7 +9,7 @@
     padding: 10px 20px;
     border: 1px solid rgba(255, 255, 255, .06);
     border-radius: 19px;
-    background: #1b1d27;
+    background: var(--color-panel);
     color: #f4f4fa;
     box-shadow: 0 -12px 35px #0002;
 }
@@ -68,7 +68,8 @@
 .player-like:hover,
 .player-extra button:hover {
     transform: scale(1.08);
-    color: #e2a5ce;
+    background: var(--color-hover);
+    color: #fff;
 }
 
 .player-center {
@@ -100,6 +101,7 @@
 }
 
 .secondary-control:hover {
+    background: var(--color-hover);
     color: #fff;
 }
 
@@ -115,7 +117,8 @@
 
 .play-toggle:hover {
     transform: scale(1.06);
-    background: #d8caff;
+    background: var(--color-hover);
+    color: #fff;
 }
 
 .player-timeline {

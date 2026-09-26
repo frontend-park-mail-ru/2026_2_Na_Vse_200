@@ -9,7 +9,7 @@
     margin: 0 auto;
     padding: 10px;
     overflow: hidden;
-    background: #08090d;
+    background: var(--color-background);
 }
 
 .app-main-column {
@@ -18,7 +18,7 @@
     overflow: hidden;
     border: 1px solid rgba(255,255,255,.045);
     border-radius: 22px;
-    background: linear-gradient(145deg, #1a2033 0%, #12141d 46%, #101117 100%);
+    background: var(--color-panel);
 }
 
 .app-content {

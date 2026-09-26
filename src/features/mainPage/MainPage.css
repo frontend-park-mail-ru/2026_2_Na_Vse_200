@@ -1,5 +1,6 @@
 /* Page layout */
 .home-page {
+    background: linear-gradient(180deg, #212942 0%, #16181F 35%);
     max-width: 1440px;
     min-height: 100%;
     margin: 0 auto;
@@ -21,20 +22,19 @@
     margin-bottom: clamp(30px, 4.5vw, 56px);
 }
 
-.home-eyebrow,
-.section-kicker {
-    margin: 0 0 8px;
-    color: #9299b2;
-    font-size: 10px;
-    font-weight: 750;
-    letter-spacing: .16em;
-}
+
 
 .home-header h1 {
     margin: 0;
     font-size: clamp(27px, 3vw, 36px);
     line-height: 1.1;
     letter-spacing: -.045em;
+}
+
+.home-page-divider {
+    height: 1px;
+    margin: 24px 0 18px;
+    background: rgba(255, 255, 255, .12);
 }
 
 .profile-button {
@@ -50,10 +50,11 @@
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 6px 22px #0003;
-    transition: transform .18s ease, box-shadow .18s ease;
+    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
 }
 
 .profile-button:hover {
+    background: var(--color-hover);
     transform: translateY(-2px);
     box-shadow: 0 9px 26px #0005;
 }
@@ -90,11 +91,15 @@
     font: inherit;
     font-size: 12px;
     cursor: pointer;
-    transition: color .18s ease;
+    transition: color .18s ease, background .18s ease;
 }
 
 .text-button:hover
 {
+    padding-right: 8px;
+    padding-left: 8px;
+    border-radius: 6px;
+    background: var(--color-hover);
     color: #fff;
 }
 .text-button svg
@@ -132,7 +137,7 @@
 .track-row:hover,
 .track-row.is-active {
     border-color: rgba(184, 160, 255, .2);
-    background: rgba(177, 157, 255, .09);
+    background: var(--color-hover);
 }
 
 .track-row:hover
@@ -269,7 +274,7 @@
 
 .artist-card:hover {
     transform: translateY(-3px);
-    background: rgba(255, 255, 255, .045);
+    background: var(--color-hover);
 }
 
 .artist-avatar {
@@ -345,7 +350,7 @@
 .mix-card.is-selected {
     transform: translateY(-1px);
     border-color: rgba(184, 160, 255, .25);
-    background: rgba(177, 157, 255, .085);
+    background: var(--color-hover);
 }
 
 .mix-art {
