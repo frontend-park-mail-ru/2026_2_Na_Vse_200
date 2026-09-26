@@ -22,7 +22,7 @@ export function AppLayout({ route, user, onLogout, sessionError, children }) {
                     aria-current={route === link.route ? 'page' : undefined}>
                     {link.label}
                 </a>)}
-                {user ? <><span className="user-greeting">{user.display_name || user.email}</span><button className="logout-button" type="button" onClick={onLogout}>Выйти</button></> : null}
+                {user ? <span className="user-menu"><span className="user-greeting">{user.display_name || user.email}</span><button className="logout-button" type="button" onClick={onLogout}>Выйти</button></span> : null}
             </nav>
         </header>
         {sessionError ? <p className="session-error" role="alert">{sessionError}</p> : null}
