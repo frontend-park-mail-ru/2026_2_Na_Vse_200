@@ -77,7 +77,7 @@ function ArtistList() {
     return <section className="discovery-panel" aria-labelledby="artists-title">
         <div className="subsection-heading">
             <h3 id="artists-title">Артисты</h3>
-            <button className="text-button" type="button">Все <Icon name="arrowRight" size={14} /></button>
+            <button className="text-button" type="button">Все </button>
         </div>
         <div className="artist-list">
             {artists.map((artist, index) => <article className="artist-card" key={artist.name}>
@@ -95,7 +95,7 @@ function MixList({ activeMix, onMixSelect }) {
     return <section className="discovery-panel" aria-labelledby="mixes-title">
         <div className="subsection-heading">
             <h3 id="mixes-title">Подборки</h3>
-            <button className="text-button" type="button">Все <Icon name="trackPrevious" size={14} /></button>
+            <button className="text-button" type="button">Все </button>
         </div>
         <div className="mix-list">
             {mixes.map((mix, index) => <button

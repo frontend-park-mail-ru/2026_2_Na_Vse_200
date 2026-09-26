@@ -50,9 +50,6 @@ export function Sidebar() {
             </a>)}
         </nav>
 
-        <div className="sidebar-bottom">
-            <span className="online-indicator"></span>
-            Хорошего прослушивания
-        </div>
+        
     </aside>
 }
