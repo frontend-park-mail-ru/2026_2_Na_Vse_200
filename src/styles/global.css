@@ -65,6 +65,21 @@ input:focus-visible {
     outline-offset: 3px;
 }
 
+.skip-link {
+    position: absolute;
+    z-index: 10;
+    top: -100px;
+    left: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #fff;
+    color: #17151f;
+}
+
+.skip-link:focus {
+    top: 12px;
+}
+
 .text-page {
     max-width: 650px;
     margin: 0 auto;
