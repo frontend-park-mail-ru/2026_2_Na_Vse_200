@@ -2,7 +2,6 @@
 
 import { createElement, useState } from "../../../MyReact/index.js"
 import { Icon } from "../../components/ui/Icon.jsx"
-import tracks from "./tracks.json"
 import "./MainPage.css"
 
 const artists = [
@@ -38,7 +37,7 @@ function PageHeader() {
 
 
 
-function TrackList({ activeTrack, onTrackSelect }) {
+function TrackList({ tracks, activeTrack, onTrackSelect }) {
     return <section className="home-section" aria-labelledby="popular-title">
         <ol className="track-list" aria-label="Популярные треки">
             {tracks.slice(0, 5).map((track, index) => {
@@ -117,13 +116,13 @@ function MixList({ activeMix, onMixSelect }) {
     </section>
 }
 
-export function MainPage({ activeTrack = tracks[0], onTrackSelect = () => {} }) {
+export function MainPage({ tracks = [], activeTrack = tracks[0], onTrackSelect = () => {} }) {
     const [activeMix, setActiveMix] = useState(0)
 
     return <div className="home-page">
         <PageHeader />
         <div className="home-page-divider"></div>
-        <TrackList activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
+        <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
         <section className="home-section discovery-section" aria-labelledby="discovery-title">
             <div className="discovery-grid">
                 <ArtistList />
