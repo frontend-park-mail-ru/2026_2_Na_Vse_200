@@ -1,8 +1,7 @@
 import { createElement } from '../../index.js';
 
-/** @returns {object} Fallback page for unknown client-side URLs. */
 export function NotFoundPage() {
-    return <section className="page">
+    return <section className="text-page not-found-page">
         <p className="eyebrow">404</p>
         <h1 tabIndex={-1}>Страница не найдена</h1>
         <p>Проверь адрес или вернись на главную.</p>

@@ -1,4 +1,5 @@
 import { createElement, render } from '../../index.js';
+import { appStore } from './store.js';
 import { getCurrentUser, logout } from '../features/auth/api.js';
 import { AppLayout } from '../components/layout/AppLayout.jsx';
 import { HomePage } from '../pages/HomePage.jsx';
@@ -14,10 +15,10 @@ const pages = {
 };
 
 /**
- * Mount the app and subscribe to route changes without reloading the document.
- * @param {HTMLElement} container Root DOM element.
- * @param {import('../shared/lib/VanillaRouter.js').VanillaRouter} router App router.
- * @returns {() => void} Remove navigation listeners, including during Vite HMR.
+ * Mount the application shell, music page, and authentication screens.
+ * @param {HTMLElement} container App root.
+ * @param {import('../shared/lib/VanillaRouter.js').VanillaRouter} router Client router.
+ * @returns {() => void} Cleanup callback for hot reload.
  */
 export function mountApp(container, router) {
     let initial = true;
@@ -26,15 +27,20 @@ export function mountApp(container, router) {
     let sessionState = 'loading';
     let sessionError = '';
     let authAction = false;
+    let activeTrack = appStore.getState().tracks[0];
+
     const onRegistered = () => {
         notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.';
         router.navigate('/login');
     };
+
     const onAuthenticated = (nextUser) => {
         user = nextUser;
+        sessionError = '';
         notice = 'Вы вошли в аккаунт.';
         router.navigate('/');
     };
+
     const onLogout = async () => {
         if (authAction) return;
         authAction = true;
@@ -43,6 +49,7 @@ export function mountApp(container, router) {
             await logout();
             user = null;
             sessionError = '';
+            authAction = false;
             notice = 'Вы вышли из аккаунта.';
             router.navigate('/');
         } catch (error) {
@@ -51,18 +58,42 @@ export function mountApp(container, router) {
             renderCurrent();
         }
     };
+
+    const onTrackSelect = (track) => {
+        activeTrack = track;
+        renderCurrent();
+    };
+
     function renderCurrent() {
         const route = router.getCurrentUrl().pathname;
         const routeName = router.findRoute(route)?.value ?? 'not-found';
         const { component: Page, title } = pages[routeName] ?? pages['not-found'];
         document.title = `${title} — На все 200`;
+
         if (sessionState === 'loading' && routeName === 'home') {
             render(<main className="session-loading" aria-live="polite">Проверяем сессию…</main>, container);
             return;
         }
-        render(<AppLayout route={routeName} user={user} onLogout={onLogout} sessionError={sessionError}>
-            <Page onRegistered={onRegistered} onAuthenticated={onAuthenticated} notice={notice} />
+
+        render(<AppLayout
+            route={routeName}
+            user={user}
+            onLogout={onLogout}
+            onTrackSelect={onTrackSelect}
+            activeTrack={activeTrack}
+            sessionError={sessionError}
+            authAction={authAction}
+        >
+            <Page
+                tracks={appStore.getState().tracks}
+                activeTrack={activeTrack}
+                onTrackSelect={onTrackSelect}
+                onRegistered={onRegistered}
+                onAuthenticated={onAuthenticated}
+                notice={notice}
+            />
         </AppLayout>, container);
+
         notice = '';
         if (!initial) {
             container.querySelector('h1')?.focus();
@@ -70,20 +101,19 @@ export function mountApp(container, router) {
         }
         initial = false;
     }
-    const handleRoute = ({ detail }) => {
-        if (detail.route === 'home' && sessionState === 'loading') renderCurrent();
-        else renderCurrent();
-    };
 
+    const handleRoute = () => renderCurrent();
     router.on('route', handleRoute).listen();
-    getCurrentUser().then(nextUser => {
+
+    getCurrentUser().then((nextUser) => {
         user = nextUser;
         sessionState = 'ready';
         renderCurrent();
-    }).catch(error => {
+    }).catch((error) => {
         sessionState = 'error';
         sessionError = error.message;
         renderCurrent();
     });
+
     return () => router.off('route', handleRoute).destroy();
 }
