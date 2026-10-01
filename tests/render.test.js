@@ -1,9 +1,9 @@
-"use strict";
+'use strict'
 
-import test from "node:test"
-import assert from "node:assert/strict"
-import { createElement } from "../createElement.js"
-import { render } from "../render.js"
+import test from 'node:test'
+import assert from 'node:assert/strict'
+import { createElement } from '../createElement.js'
+import { render } from '../render.js'
 
 class FakeNode {
     constructor() {
@@ -11,7 +11,9 @@ class FakeNode {
         this.parentNode = null
     }
 
-    get firstChild() { return this.childNodes[0] ?? null }
+    get firstChild() {
+        return this.childNodes[0] ?? null
+    }
 
     appendChild(node) {
         if (node.parentNode) node.parentNode.removeChild(node)
@@ -32,7 +34,7 @@ class FakeNode {
 
     removeChild(node) {
         const index = this.childNodes.indexOf(node)
-        if (index === -1) throw new Error("Node is not a child")
+        if (index === -1) throw new Error('Node is not a child')
         this.childNodes.splice(index, 1)
         node.parentNode = null
         return node
@@ -40,7 +42,7 @@ class FakeNode {
 
     replaceChild(next, previous) {
         const index = this.childNodes.indexOf(previous)
-        if (index === -1) throw new Error("Node is not a child")
+        if (index === -1) throw new Error('Node is not a child')
         if (next.parentNode) next.parentNode.removeChild(next)
         this.childNodes[index] = next
         next.parentNode = this
@@ -62,8 +64,12 @@ class FakeElement extends FakeNode {
         this.style = {}
     }
 
-    setAttribute(name, value) { this.attributes.set(name, String(value)) }
-    removeAttribute(name) { this.attributes.delete(name) }
+    setAttribute(name, value) {
+        this.attributes.set(name, String(value))
+    }
+    removeAttribute(name) {
+        this.attributes.delete(name)
+    }
     addEventListener() {}
     removeEventListener() {}
 }
@@ -77,50 +83,63 @@ class FakeText extends FakeNode {
 
 globalThis.document = {
     createElement: tagName => new FakeElement(tagName),
-    createTextNode: value => new FakeText(value)
+    createTextNode: value => new FakeText(value),
 }
 
-test("keyed children keep their DOM nodes when their order changes", () => {
-    const container = new FakeElement("root")
-    const list = items => createElement("ul", null,
-        items.map(item => createElement("li", { key: item.id }, item.label))
+test('keyed children keep their DOM nodes when their order changes', () => {
+    const container = new FakeElement('root')
+    const list = items =>
+        createElement(
+            'ul',
+            null,
+            items.map(item => createElement('li', { key: item.id }, item.label)),
+        )
+
+    render(
+        list([
+            { id: 'a', label: 'Alpha' },
+            { id: 'b', label: 'Beta' },
+            { id: 'c', label: 'Gamma' },
+        ]),
+        container,
     )
 
-    render(list([
-        { id: "a", label: "Alpha" },
-        { id: "b", label: "Beta" },
-        { id: "c", label: "Gamma" }
-    ]), container)
+    const originalNodes = new Map(container.firstChild.childNodes.map(node => [node.firstChild.nodeValue, node]))
 
-    const originalNodes = new Map(
-        container.firstChild.childNodes.map(node => [node.firstChild.nodeValue, node])
+    render(
+        list([
+            { id: 'c', label: 'Gamma' },
+            { id: 'a', label: 'Alpha' },
+            { id: 'b', label: 'Beta' },
+        ]),
+        container,
     )
-
-    render(list([
-        { id: "c", label: "Gamma" },
-        { id: "a", label: "Alpha" },
-        { id: "b", label: "Beta" }
-    ]), container)
 
     const reorderedNodes = container.firstChild.childNodes
-    assert.deepEqual(reorderedNodes.map(node => node.firstChild.nodeValue), ["Gamma", "Alpha", "Beta"])
-    assert.equal(reorderedNodes[0], originalNodes.get("Gamma"))
-    assert.equal(reorderedNodes[1], originalNodes.get("Alpha"))
-    assert.equal(reorderedNodes[2], originalNodes.get("Beta"))
-
-    const nestedView = showList => createElement("main", null,
-        showList
-            ? createElement("div", null,
-                createElement("ul", null,
-                    createElement("li", { key: "stale" }, "Old list item")
-                )
-            )
-            : createElement("button", null, "Different branch")
+    assert.deepEqual(
+        reorderedNodes.map(node => node.firstChild.nodeValue),
+        ['Gamma', 'Alpha', 'Beta'],
     )
+    assert.equal(reorderedNodes[0], originalNodes.get('Gamma'))
+    assert.equal(reorderedNodes[1], originalNodes.get('Alpha'))
+    assert.equal(reorderedNodes[2], originalNodes.get('Beta'))
+
+    const nestedView = showList =>
+        createElement(
+            'main',
+            null,
+            showList
+                ? createElement(
+                      'div',
+                      null,
+                      createElement('ul', null, createElement('li', { key: 'stale' }, 'Old list item')),
+                  )
+                : createElement('button', null, 'Different branch'),
+        )
 
     render(nestedView(true), container)
     render(nestedView(false), container)
-    assert.equal(container.firstChild.firstChild.tagName, "BUTTON")
+    assert.equal(container.firstChild.firstChild.tagName, 'BUTTON')
     render(nestedView(true), container)
-    assert.equal(container.firstChild.firstChild.firstChild.firstChild.firstChild.nodeValue, "Old list item")
+    assert.equal(container.firstChild.firstChild.firstChild.firstChild.firstChild.nodeValue, 'Old list item')
 })

@@ -1,25 +1,27 @@
-import js from '@eslint/js';
-import globals from 'globals';
+import js from '@eslint/js'
+import globals from 'globals'
 
-// JSX is compiled to our own createElement factory. Tell no-unused-vars about
-// these implicit references without disabling checks for other variables.
+// JSX неявно использует createElement и компоненты.
+// Помечаем их как используемые, чтобы no-unused-vars не ругался.
 const jsxReferences = {
     meta: { schema: [] },
     create(context) {
-        const sourceCode = context.sourceCode;
+        const sourceCode = context.sourceCode
         return {
             JSXOpeningElement(node) {
-                sourceCode.markVariableAsUsed('createElement', node);
-                let name = node.name;
-                while (name.type === 'JSXMemberExpression') name = name.object;
-                if (name.type === 'JSXIdentifier' &&
-                    (node.name.type === 'JSXMemberExpression' || /^[A-Z]/.test(name.name))) {
-                    sourceCode.markVariableAsUsed(name.name, node);
+                sourceCode.markVariableAsUsed('createElement', node)
+                let name = node.name
+                while (name.type === 'JSXMemberExpression') name = name.object
+                if (
+                    name.type === 'JSXIdentifier' &&
+                    (node.name.type === 'JSXMemberExpression' || /^[A-Z]/.test(name.name))
+                ) {
+                    sourceCode.markVariableAsUsed(name.name, node)
                 }
             },
-        };
+        }
     },
-};
+}
 
 export default [
     { ignores: ['dist/**', 'node_modules/**'] },
@@ -46,4 +48,4 @@ export default [
         plugins: { templates: { rules: { 'jsx-references': jsxReferences } } },
         rules: { 'templates/jsx-references': 'error' },
     },
-];
+]

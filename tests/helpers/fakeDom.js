@@ -4,9 +4,13 @@ class FakeNode {
         this.parentNode = null
     }
 
-    get isConnected() { return this.tagName === "ROOT" || Boolean(this.parentNode?.isConnected) }
+    get isConnected() {
+        return this.tagName === 'ROOT' || Boolean(this.parentNode?.isConnected)
+    }
 
-    get firstChild() { return this.childNodes[0] ?? null }
+    get firstChild() {
+        return this.childNodes[0] ?? null
+    }
 
     appendChild(node) {
         if (node.parentNode) node.parentNode.removeChild(node)
@@ -27,7 +31,7 @@ class FakeNode {
 
     removeChild(node) {
         const index = this.childNodes.indexOf(node)
-        if (index === -1) throw new Error("Node is not a child")
+        if (index === -1) throw new Error('Node is not a child')
         this.childNodes.splice(index, 1)
         node.parentNode = null
         return node
@@ -35,7 +39,7 @@ class FakeNode {
 
     replaceChild(next, previous) {
         const index = this.childNodes.indexOf(previous)
-        if (index === -1) throw new Error("Node is not a child")
+        if (index === -1) throw new Error('Node is not a child')
         if (next.parentNode) next.parentNode.removeChild(next)
         this.childNodes[index] = next
         next.parentNode = this
@@ -63,16 +67,33 @@ export class FakeElement extends FakeNode {
         this.id = ''
     }
 
-    setAttribute(name, value) { this.attributes.set(name, String(value)) }
-    removeAttribute(name) { this.attributes.delete(name) }
-    addEventListener(name, callback) { this.listeners.set(name, callback) }
-    removeEventListener(name, callback) { if (this.listeners.get(name) === callback) this.listeners.delete(name) }
-    focus() { globalThis.document.activeElement = this }
-    get form() { return this.tagName === 'FORM' ? this : this.parentNode?.form }
-    get elements() { return { namedItem: name => this.find(node => node.name === name) } }
+    setAttribute(name, value) {
+        this.attributes.set(name, String(value))
+    }
+    removeAttribute(name) {
+        this.attributes.delete(name)
+    }
+    addEventListener(name, callback) {
+        this.listeners.set(name, callback)
+    }
+    removeEventListener(name, callback) {
+        if (this.listeners.get(name) === callback) this.listeners.delete(name)
+    }
+    focus() {
+        globalThis.document.activeElement = this
+    }
+    get form() {
+        return this.tagName === 'FORM' ? this : this.parentNode?.form
+    }
+    get elements() {
+        return { namedItem: name => this.find(node => node.name === name) }
+    }
     find(predicate) {
         if (predicate(this)) return this
-        for (const child of this.childNodes) { const found = child.find?.(predicate); if (found) return found }
+        for (const child of this.childNodes) {
+            const found = child.find?.(predicate)
+            if (found) return found
+        }
     }
 }
 
@@ -85,6 +106,5 @@ class FakeText extends FakeNode {
 
 globalThis.document = {
     createElement: tagName => new FakeElement(tagName),
-    createTextNode: value => new FakeText(value)
+    createTextNode: value => new FakeText(value),
 }
-

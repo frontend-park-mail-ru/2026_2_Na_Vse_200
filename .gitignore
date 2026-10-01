@@ -1,9 +1,9 @@
-# Dependencies
+# Зависимости
 node_modules/
 .pnp/
 .pnp.cjs
 
-# Build output and test artifacts
+# Результаты сборки и артефакты тестов
 /dist/
 /dist-ssr/
 /coverage/
@@ -11,7 +11,7 @@ node_modules/
 /test-results/
 /blob-report/
 
-# Tool caches
+# Кеши инструментов
 /.vite/
 /.cache/
 /.turbo/
@@ -19,13 +19,13 @@ node_modules/
 .eslintcache
 *.tsbuildinfo
 
-# Local environment files
+# Локальные файлы переменных окружения
 .env
 .env.*
 !.env.example
 !.env.*.example
 
-# Logs
+# Журналы
 logs/
 *.log
 npm-debug.log*
@@ -33,7 +33,7 @@ yarn-debug.log*
 yarn-error.log*
 pnpm-debug.log*
 
-# Editor and IDE settings
+# Настройки редакторов и IDE
 .idea/
 .vscode/*
 !.vscode/extensions.json
@@ -43,7 +43,7 @@ pnpm-debug.log*
 *.sln
 *.sw?
 
-# Operating system files
+# Файлы операционной системы
 .DS_Store
 .AppleDouble
 .LSOverride

@@ -7,7 +7,7 @@
     gap: 20px;
     min-width: 0;
     padding: 10px 20px;
-    border: 1px solid rgba(255, 255, 255, .06);
+    border: 1px solid rgba(255, 255, 255, 0.06);
     border-radius: 19px;
     background: var(--color-panel);
     color: #f4f4fa;
@@ -28,7 +28,9 @@
     flex: 0 0 48px;
     place-items: center;
     border-radius: 11px;
-    background: radial-gradient(circle at 65% 28%, #e9c496, transparent 25%), linear-gradient(145deg, #67537b, #292f4d 60%, #c57969);
+    background:
+        radial-gradient(circle at 65% 28%, #e9c496, transparent 25%),
+        linear-gradient(145deg, #67537b, #292f4d 60%, #c57969);
     color: #fff9;
 }
 
@@ -58,7 +60,9 @@
     background: transparent;
     color: #a9aabc;
     cursor: pointer;
-    transition: color .18s ease, transform .18s ease;
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .player-like {
@@ -93,29 +97,31 @@
     cursor: pointer;
 }
 
-.secondary-control {
+.player__secondary-control {
     padding: 5px;
     background: transparent;
     color: #c4c5d0;
-    transition: color .18s ease;
+    transition: color 0.18s ease;
 }
 
-.secondary-control:hover {
+.player__secondary-control:hover {
     background: var(--color-hover);
     color: #fff;
 }
 
-.play-toggle {
+.player__play-toggle {
     width: 36px;
     height: 36px;
     border-radius: 50%;
     background: #f0eff5;
     color: #292a33;
     box-shadow: 0 3px 12px #0003;
-    transition: transform .18s ease, background .18s ease;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease;
 }
 
-.play-toggle:hover {
+.player__play-toggle:hover {
     transform: scale(1.06);
     background: var(--color-hover);
     color: #fff;
@@ -230,7 +236,7 @@
         gap: 10px;
     }
 
-    .play-toggle {
+    .player__play-toggle {
         width: 31px;
         height: 31px;
     }

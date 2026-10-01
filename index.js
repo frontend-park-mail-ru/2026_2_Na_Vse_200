@@ -1,13 +1,12 @@
-"use strict";
+'use strict'
 
-export {
-    createElement
-} from "./createElement.js"
+/**
+ * @module
+ * Общая точка импорта движка: создание элементов, отрисовка и состояние компонентов.
+ */
 
-export {
-    render
-} from "./render.js"
+export { createElement } from './createElement.js'
 
-export {
-    useState
-} from "./render.js"
+export { render } from './render.js'
+
+export { useState } from './render.js'

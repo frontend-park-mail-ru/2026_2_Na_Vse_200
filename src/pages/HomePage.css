@@ -1,40 +1,37 @@
-/* Page layout */
+/* Разметка страницы */
 .home-page {
-    background: linear-gradient(180deg, #212942 0%, #16181F 35%);
-    max-width: 1440px;
+    background: linear-gradient(180deg, #212942 0%, #16181f 35%);
+    width: 100%;
     min-height: 100%;
-    margin: 0 auto;
+    margin: 0;
     padding: clamp(24px, 4vw, 50px) clamp(22px, 4vw, 56px) 32px;
     color: #f4f5fb;
 }
 
 .home-header,
 .section-heading,
-.subsection-heading {
+.main-page__subsection-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
     gap: 16px;
 }
 
-.home-header
-{
+.home-header {
     margin-bottom: clamp(30px, 4.5vw, 56px);
 }
-
-
 
 .home-header h1 {
     margin: 0;
     font-size: clamp(27px, 3vw, 36px);
     line-height: 1.1;
-    letter-spacing: -.045em;
+    letter-spacing: -0.045em;
 }
 
 .home-page-divider {
     height: 1px;
     margin: 24px 0 18px;
-    background: rgba(255, 255, 255, .12);
+    background: rgba(255, 255, 255, 0.12);
 }
 
 .profile-button {
@@ -42,7 +39,7 @@
     width: 42px;
     height: 42px;
     place-items: center;
-    border: 1px solid rgba(255, 255, 255, .13);
+    border: 1px solid rgba(255, 255, 255, 0.13);
     border-radius: 50%;
     background: linear-gradient(145deg, #bb9cf5, #6655a9);
     color: #fff;
@@ -50,7 +47,10 @@
     font-weight: 800;
     cursor: pointer;
     box-shadow: 0 6px 22px #0003;
-    transition: transform .18s ease, box-shadow .18s ease, background .18s ease;
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease,
+        background 0.18s ease;
 }
 
 .profile-button:hover {
@@ -59,8 +59,7 @@
     box-shadow: 0 9px 26px #0005;
 }
 
-.home-section
-{
+.home-section {
     margin-bottom: clamp(34px, 5vw, 58px);
 }
 
@@ -72,7 +71,7 @@
 .section-heading h2 {
     margin: 0;
     font-size: clamp(19px, 2vw, 24px);
-    letter-spacing: -.025em;
+    letter-spacing: -0.025em;
 }
 
 .section-kicker {
@@ -80,7 +79,7 @@
     font-size: 9px;
 }
 
-.text-button {
+.main-page__text-button {
     display: inline-flex;
     align-items: center;
     gap: 5px;
@@ -91,23 +90,23 @@
     font: inherit;
     font-size: 12px;
     cursor: pointer;
-    transition: color .18s ease, background .18s ease;
+    transition:
+        color 0.18s ease,
+        background 0.18s ease;
 }
 
-.text-button:hover
-{
+.main-page__text-button:hover {
     padding-right: 8px;
     padding-left: 8px;
     border-radius: 6px;
     background: var(--color-hover);
     color: #fff;
 }
-.text-button svg
-{
+.main-page__text-button svg {
     color: #b69bff;
 }
 
-/* Popular track list */
+/* Список популярных треков */
 .track-list {
     display: grid;
     gap: 4px;
@@ -118,7 +117,7 @@
 
 .track-row {
     display: grid;
-    grid-template-columns: 26px 44px minmax(110px, 1.2fr) minmax(80px, .8fr) 48px 24px;
+    grid-template-columns: 26px 44px minmax(110px, 1.2fr) minmax(80px, 0.8fr) 48px 24px;
     align-items: center;
     gap: 13px;
     width: 100%;
@@ -126,22 +125,24 @@
     padding: 7px 12px;
     border: 1px solid transparent;
     border-radius: 12px;
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255, 255, 255, 0.035);
     color: inherit;
     text-align: left;
     font: inherit;
     cursor: pointer;
-    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .track-row:hover,
 .track-row.is-active {
-    border-color: rgba(184, 160, 255, .2);
+    border-color: rgba(184, 160, 255, 0.2);
     background: var(--color-hover);
 }
 
-.track-row:hover
-{
+.track-row:hover {
     transform: translateY(-1px);
 }
 
@@ -157,8 +158,7 @@
     place-items: center;
 }
 
-.track-playing-icon
-{
+.track-playing-icon {
     color: #c6adff;
 }
 
@@ -173,25 +173,28 @@
     box-shadow: inset 0 0 20px #fff1;
 }
 
-.cover-tone-1
-{
-    background: radial-gradient(circle at 70% 25%, #f1c08e, transparent 28%), linear-gradient(135deg, #755f8e, #252b48 58%, #e08c74);
+.cover-tone-1 {
+    background:
+        radial-gradient(circle at 70% 25%, #f1c08e, transparent 28%),
+        linear-gradient(135deg, #755f8e, #252b48 58%, #e08c74);
 }
-.cover-tone-2
-{
-    background: radial-gradient(circle at 35% 40%, #ffd98a, transparent 25%), linear-gradient(145deg, #e78674, #713d60 65%, #362641);
+.cover-tone-2 {
+    background:
+        radial-gradient(circle at 35% 40%, #ffd98a, transparent 25%),
+        linear-gradient(145deg, #e78674, #713d60 65%, #362641);
 }
-.cover-tone-3
-{
+.cover-tone-3 {
     background: radial-gradient(circle at 65% 40%, #b9a8ff, transparent 24%), linear-gradient(135deg, #343f7c, #b26e9a);
 }
-.cover-tone-4
-{
-    background: radial-gradient(circle at 50% 35%, #b8d9d8, transparent 25%), linear-gradient(140deg, #516f7c, #242f47 60%, #a990b0);
+.cover-tone-4 {
+    background:
+        radial-gradient(circle at 50% 35%, #b8d9d8, transparent 25%),
+        linear-gradient(140deg, #516f7c, #242f47 60%, #a990b0);
 }
-.cover-tone-5
-{
-    background: radial-gradient(circle at 60% 40%, #f9d49b, transparent 25%), linear-gradient(140deg, #758a6e, #37473e 60%, #c8865e);
+.cover-tone-5 {
+    background:
+        radial-gradient(circle at 60% 40%, #f9d49b, transparent 25%),
+        linear-gradient(140deg, #758a6e, #37473e 60%, #c8865e);
 }
 
 .track-meta,
@@ -228,32 +231,28 @@
     white-space: nowrap;
 }
 
-.track-more
-{
+.track-more {
     justify-self: center;
     color: #a4a9bb;
 }
-.discovery-section
-{
+.discovery-section {
     margin-bottom: 24px;
 }
 
-/* Artist and mix recommendations */
+/* Рекомендации исполнителей и миксов */
 .discovery-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.04fr) minmax(0, .96fr);
+    grid-template-columns: minmax(0, 1.04fr) minmax(0, 0.96fr);
     gap: clamp(24px, 4vw, 52px);
 }
 
-.subsection-heading
-{
+.main-page__subsection-heading {
     margin-bottom: 15px;
 }
-.subsection-heading h3
-{
+.main-page__subsection-heading h3 {
     margin: 0;
     font-size: 16px;
-    letter-spacing: -.02em;
+    letter-spacing: -0.02em;
 }
 
 .artist-list {
@@ -269,7 +268,9 @@
     min-width: 0;
     padding: 8px 4px 10px;
     border-radius: 14px;
-    transition: background .18s ease, transform .18s ease;
+    transition:
+        background 0.18s ease,
+        transform 0.18s ease;
 }
 
 .artist-card:hover {
@@ -282,26 +283,22 @@
     width: clamp(54px, 7vw, 76px);
     aspect-ratio: 1;
     place-items: center;
-    border: 3px solid rgba(255, 255, 255, .12);
+    border: 3px solid rgba(255, 255, 255, 0.12);
     border-radius: 50%;
     color: #fff;
     box-shadow: 0 8px 24px #0003;
 }
 
-.artist-avatar-1
-{
+.artist-avatar-1 {
     background-image: radial-gradient(circle at 35% 25%, #ffe4c7, transparent 30%);
 }
-.artist-avatar-2
-{
+.artist-avatar-2 {
     background-image: linear-gradient(145deg, transparent 35%, #202c55aa);
 }
-.artist-avatar-3
-{
+.artist-avatar-3 {
     background-image: radial-gradient(circle at 65% 30%, #ffe6ff88, transparent 25%);
 }
-.artist-avatar-4
-{
+.artist-avatar-4 {
     background-image: linear-gradient(145deg, #ffffff22, transparent 60%);
 }
 
@@ -313,13 +310,11 @@
     white-space: nowrap;
 }
 
-.artist-name
-{
+.artist-name {
     font-size: 11px;
     font-weight: 650;
 }
-.artist-style
-{
+.artist-style {
     color: #898fa4;
     font-size: 9px;
 }
@@ -336,20 +331,23 @@
     gap: 10px;
     min-width: 0;
     padding: 9px;
-    border: 1px solid rgba(255, 255, 255, .055);
+    border: 1px solid rgba(255, 255, 255, 0.055);
     border-radius: 13px;
-    background: rgba(255, 255, 255, .035);
+    background: rgba(255, 255, 255, 0.035);
     color: inherit;
     text-align: left;
     font: inherit;
     cursor: pointer;
-    transition: background .18s ease, border-color .18s ease, transform .18s ease;
+    transition:
+        background 0.18s ease,
+        border-color 0.18s ease,
+        transform 0.18s ease;
 }
 
 .mix-card:hover,
 .mix-card.is-selected {
     transform: translateY(-1px);
-    border-color: rgba(184, 160, 255, .25);
+    border-color: rgba(184, 160, 255, 0.25);
     background: var(--color-hover);
 }
 
@@ -364,33 +362,30 @@
     box-shadow: inset 0 0 18px #fff2;
 }
 
-.mix-art-1
-{
-    background-image: radial-gradient(circle at 35% 35%, #fff8, transparent 25%), linear-gradient(135deg, transparent, #34445c);
+.mix-art-1 {
+    background-image:
+        radial-gradient(circle at 35% 35%, #fff8, transparent 25%), linear-gradient(135deg, transparent, #34445c);
 }
-.mix-art-2
-{
-    background-image: radial-gradient(circle at 70% 30%, #ffd9c577, transparent 25%), linear-gradient(135deg, transparent, #493449);
+.mix-art-2 {
+    background-image:
+        radial-gradient(circle at 70% 30%, #ffd9c577, transparent 25%), linear-gradient(135deg, transparent, #493449);
 }
-.mix-art-3
-{
-    background-image: radial-gradient(circle at 30% 70%, #c7a8ff66, transparent 30%), linear-gradient(135deg, transparent, #302b50);
+.mix-art-3 {
+    background-image:
+        radial-gradient(circle at 30% 70%, #c7a8ff66, transparent 30%), linear-gradient(135deg, transparent, #302b50);
 }
-.mix-art-4
-{
-    background-image: radial-gradient(circle at 70% 25%, #fff5, transparent 23%), linear-gradient(135deg, transparent, #314c50);
+.mix-art-4 {
+    background-image:
+        radial-gradient(circle at 70% 25%, #fff5, transparent 23%), linear-gradient(135deg, transparent, #314c50);
 }
 
-.mix-copy
-{
+.mix-copy {
     flex: 1;
 }
-.mix-copy strong
-{
+.mix-copy strong {
     font-size: 11px;
 }
-.mix-copy small
-{
+.mix-copy small {
     font-size: 9px;
 }
 
@@ -399,7 +394,9 @@
     color: #eee8ff;
     opacity: 0;
     transform: translateY(3px);
-    transition: opacity .18s ease, transform .18s ease;
+    transition:
+        opacity 0.18s ease,
+        transform 0.18s ease;
 }
 
 .mix-card:hover .mix-play,
@@ -408,22 +405,19 @@
     transform: none;
 }
 
-/* Responsive layout */
+/* Адаптивная разметка */
 @media (max-width: 1000px) {
-    .discovery-grid
-    {
+    .discovery-grid {
         grid-template-columns: 1fr;
         gap: 25px;
     }
-    .artist-list
-    {
+    .artist-list {
         max-width: 520px;
     }
 }
 
 @media (max-width: 760px) {
-    .home-page
-    {
+    .home-page {
         padding: 28px 22px 24px;
     }
 
@@ -433,32 +427,26 @@
         min-height: 58px;
     }
 
-    .track-cover
-    {
+    .track-cover {
         width: 40px;
         height: 40px;
     }
-    .track-album
-    {
+    .track-album {
         display: none;
     }
 }
 
 @media (max-width: 520px) {
-    .home-page
-    {
+    .home-page {
         padding: 25px 17px 28px;
     }
-    .home-header
-    {
+    .home-header {
         margin-bottom: 29px;
     }
-    .home-eyebrow
-    {
+    .home-eyebrow {
         font-size: 8px;
     }
-    .section-heading h2
-    {
+    .section-heading h2 {
         font-size: 19px;
     }
 
@@ -468,21 +456,17 @@
         padding: 6px 5px;
     }
 
-    .track-cover
-    {
+    .track-cover {
         width: 38px;
         height: 38px;
     }
-    .track-meta strong
-    {
+    .track-meta strong {
         font-size: 11px;
     }
-    .track-meta small
-    {
+    .track-meta small {
         font-size: 10px;
     }
-    .track-more
-    {
+    .track-more {
         display: none;
     }
 
@@ -491,28 +475,22 @@
         gap: 4px;
     }
 
-    .artist-avatar
-    {
+    .artist-avatar {
         width: 52px;
     }
-    .artist-name
-    {
+    .artist-name {
         font-size: 9px;
     }
-    .artist-style
-    {
+    .artist-style {
         display: none;
     }
-    .mix-list
-    {
+    .mix-list {
         grid-template-columns: 1fr;
     }
-    .mix-art
-    {
+    .mix-art {
         flex-basis: 46px;
     }
-    .mix-card
-    {
+    .mix-card {
         padding: 7px;
     }
 }

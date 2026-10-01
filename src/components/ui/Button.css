@@ -7,19 +7,18 @@
     font: inherit;
     font-weight: 650;
     cursor: pointer;
-    transition: background-color 140ms ease, transform 140ms ease;
+    transition:
+        background-color 140ms ease,
+        transform 140ms ease;
 }
 
-.button:hover
-{
+.button:hover {
     background: #4053c1;
 }
-.button:active
-{
+.button:active {
     transform: translateY(1px);
 }
-.button:focus-visible
-{
+.button:focus-visible {
     outline: 3px solid #5267d855;
     outline-offset: 3px;
 }

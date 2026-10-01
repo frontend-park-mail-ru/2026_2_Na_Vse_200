@@ -1,8 +1,8 @@
-import { VanillaRouter } from '../shared/lib/VanillaRouter.js';
+import { VanillaRouter } from '../shared/lib/VanillaRouter.js'
 
 /**
- * Create the single History API router shared by all pages.
- * @returns {VanillaRouter} Router; mountApp starts listening after rendering.
+ * Один роутер на всё приложение, без хешей в URL.
+ * @returns {VanillaRouter} Роутер. Обработку событий запускает mountApp после отрисовки.
  */
 export function createAppRouter() {
     return new VanillaRouter({
@@ -13,5 +13,5 @@ export function createAppRouter() {
             '/login': 'login',
             '*': 'not-found',
         },
-    });
+    })
 }

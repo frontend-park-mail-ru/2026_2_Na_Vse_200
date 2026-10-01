@@ -1,12 +1,12 @@
 :root {
-    --color-background: #0D0E13;
-    --color-panel: #16181F;
-    --color-hover: #20232C;
+    --color-background: #0d0e13;
+    --color-panel: #16181f;
+    --color-hover: #20232c;
     --color-page-top: #212942;
-    --color-text: #F2F1EE;
-    --color-text-muted: #A1A6B8;
-    --font-body: "Onest", ui-sans-serif, system-ui, sans-serif;
-    --font-heading: "Geologica", ui-sans-serif, system-ui, sans-serif;
+    --color-text: #f2f1ee;
+    --color-text-muted: #a1a6b8;
+    --font-body: 'Onest', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Geologica', ui-sans-serif, system-ui, sans-serif;
 
     font-family: var(--font-body);
     color: var(--color-text);
@@ -102,7 +102,7 @@ input:focus-visible {
     color: #b9a1ff;
     font-size: 12px;
     font-weight: 750;
-    letter-spacing: .12em;
+    letter-spacing: 0.12em;
 }
 
 .not-found-page {
@@ -116,7 +116,7 @@ input:focus-visible {
     align-items: center;
     justify-content: flex-end;
     padding: 0 28px;
-    border-bottom: 1px solid rgba(255, 255, 255, .07);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.07);
 }
 
 .account-actions {
@@ -138,7 +138,7 @@ input:focus-visible {
 
 .logout-button {
     padding: 7px 12px;
-    border: 1px solid rgba(255, 255, 255, .16);
+    border: 1px solid rgba(255, 255, 255, 0.16);
     border-radius: 8px;
     background: var(--color-hover);
     color: var(--color-text);
@@ -147,7 +147,7 @@ input:focus-visible {
 
 .logout-button:disabled {
     cursor: wait;
-    opacity: .65;
+    opacity: 0.65;
 }
 
 .session-error {
