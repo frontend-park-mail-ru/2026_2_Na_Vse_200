@@ -4,13 +4,6 @@ import { createElement, useState } from '../../index.js'
 import { Icon } from '../components/ui/Icon.jsx'
 import './HomePage.css'
 
-const artists = [
-    { name: 'Mira Sol', style: 'Инди-поп', color: '#ef9b75' },
-    { name: 'The Weekenders', style: 'Альтернативный рок', color: '#8ca4ed' },
-    { name: 'Luna Park', style: 'Электроника', color: '#c78ce8' },
-    { name: 'Northbound', style: 'Инди-фолк', color: '#88c6ad' },
-]
-
 const mixes = [
     { name: 'Тихое утро', detail: 'Мягкий старт дня', color: '#62739e', icon: 'sun' },
     { name: 'На повторе', detail: 'Твои любимые треки', color: '#a36d78', icon: 'repeat' },
@@ -74,7 +67,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect }) {
                                     <small>{track.artist}</small>
                                 </span>
                                 <span className="track-album">{track.album}</span>
-                                <span className="track-duration">{formatDuration(178 + index * 23)}</span>
+                                <span className="track-duration">{formatDuration(track.durationSec || 0)}</span>
                                 <Icon name="more" size={20} className="track-more" />
                             </button>
                         </li>
@@ -85,7 +78,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect }) {
     )
 }
 
-function ArtistList() {
+function ArtistList({ artists = []}) {
     return (
         <section className="discovery-panel" aria-labelledby="artists-title">
             <div className="main-page__subsection-heading">
@@ -96,15 +89,11 @@ function ArtistList() {
             </div>
             <div className="artist-list">
                 {artists.map((artist, index) => (
-                    <article className="artist-card" key={artist.name}>
-                        <span
-                            className={`artist-avatar artist-avatar-${index + 1}`}
-                            style={{ backgroundColor: artist.color }}
-                        >
+                    <article className="artist-card" key={artist.id || artist.name}>
+                        <span className={`artist-avatar artist-avatar-${(index % 4) + 1}`}>
                             <Icon name="artist" size={25} />
                         </span>
                         <strong className="artist-name">{artist.name}</strong>
-                        <span className="artist-style">{artist.style}</span>
                     </article>
                 ))}
             </div>
@@ -144,17 +133,25 @@ function MixList({ activeMix, onMixSelect }) {
     )
 }
 
-export function HomePage({ tracks = [], activeTrack = tracks[0], onTrackSelect = () => {} }) {
+export function HomePage({
+    tracks = [],
+    artists = [],
+    activeTrack = tracks[0],
+    onTrackSelect = () => {},
+}) {
     const [activeMix, setActiveMix] = useState(0)
-
     return (
         <div className="home-page">
             <PageHeader />
             <div className="home-page-divider"></div>
-            <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
+            {tracks.length === 0 ? (
+                <p>Пока нет треков</p>
+            ) : (
+                <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
+            )}
             <section className="home-section discovery-section" aria-labelledby="discovery-title">
                 <div className="discovery-grid">
-                    <ArtistList />
+                    <ArtistList artists={artists} />
                     <MixList activeMix={activeMix} onMixSelect={setActiveMix} />
                 </div>
             </section>

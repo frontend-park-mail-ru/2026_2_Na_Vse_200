@@ -42,6 +42,7 @@ export function mountApp(container, router) {
         sessionError = ''
         notice = 'Вы вошли в аккаунт.'
         router.navigate('/')
+        loadCatalog()
     }
 
     const onLogout = async () => {
@@ -89,7 +90,7 @@ export function mountApp(container, router) {
     }
 
     function renderCurrent() {
-        const tracks = appStore.getState().tracks
+        const { tracks, artists } = appStore.getState()
         const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
         const route = router.getCurrentUrl().pathname
         const routeName = router.findRoute(route)?.value ?? 'not-found'
@@ -100,6 +101,28 @@ export function mountApp(container, router) {
             render(
                 <main className="session-loading" aria-live="polite">
                     Проверяем сессию…
+                </main>,
+                container,
+            )
+            return
+        }
+
+        if (routeName === 'home' && catalogState === 'loading') {
+            render(
+                <main className="session-loading" aria-live="polite">
+                    Загружаем каталог…
+                </main>,
+                container,
+            )
+            return
+        }
+        if (routeName === 'home' && catalogState === 'error') {
+            render(
+                <main className="session-loading" aria-live="polite">
+                    <p>{catalogError}</p>
+                    <button type="button" onClick={loadCatalog}>
+                        Повторить
+                    </button>
                 </main>,
                 container,
             )
@@ -118,6 +141,7 @@ export function mountApp(container, router) {
             >
                 <Page
                     tracks={tracks}
+                    artists={artists}
                     activeTrack={activeTrack}
                     onTrackSelect={onTrackSelect}
                     onRegistered={onRegistered}
@@ -150,6 +174,7 @@ export function mountApp(container, router) {
                 return
             }
             renderCurrent()
+            loadCatalog()
         })
         .catch(error => {
             sessionState = 'error'
