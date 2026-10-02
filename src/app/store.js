@@ -1,7 +1,5 @@
 'use strict'
 
-import tracks from '../features/music/tracks.json'
-
 export function createStore(initialState) {
     let state = initialState
     const listeners = new Set()
@@ -35,4 +33,4 @@ export function createStore(initialState) {
     }
 }
 
-export const appStore = createStore({ tracks })
+export const appStore = createStore({ tracks: [], artists: [], albums: [] })

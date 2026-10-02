@@ -8,6 +8,18 @@ export class CatalogError extends Error {
     }
 }
 
+/** Преобразует API-трек в вид для отображения. */
+export function mapTrack(track) {
+    return {
+        id: track.id,
+        title: track.title,
+        artist: (track.artists || []).map(a => a.name).join(', ') || 'Неизвестный',
+        album: '—',
+        durationSec: Math.round((track.duration_ms || 0) / 1000),
+        coverUrl: track.cover_url,
+    }
+}
+
 /** Данные главной: tracks, artists, albums */
 export async function getHome(request = fetch) {
     let response
