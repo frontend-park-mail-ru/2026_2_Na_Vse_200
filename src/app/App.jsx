@@ -6,6 +6,7 @@ import { HomePage } from '../pages/HomePage.jsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
 import { SignupPage } from '../pages/SignupPage.jsx'
 import { NotFoundPage } from '../pages/NotFoundPage.jsx'
+import { getHome, mapTrack } from '../features/music/api.js'
 
 const pages = {
     home: { component: HomePage, title: 'Главная' },
@@ -28,6 +29,8 @@ export function mountApp(container, router) {
     let sessionError = ''
     let authAction = false
     let activeTrackId = appStore.getState().tracks[0]?.id
+    let catalogState = 'loading' // loading | ready | error
+    let catalogError = ''
 
     const onRegistered = () => {
         notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
@@ -61,6 +64,27 @@ export function mountApp(container, router) {
 
     const onTrackSelect = track => {
         activeTrackId = track.id
+        renderCurrent()
+    }
+
+    async function loadCatalog() {
+        catalogState = 'loading'
+        catalogError = ''
+        renderCurrent()
+        try {
+            const home = await getHome()
+            const tracks = home.tracks.map(mapTrack)
+            appStore.setState({
+                tracks,
+                artists: home.artists,
+                albums: home.albums,
+            })
+            if (!activeTrackId && tracks[0]) activeTrackId = tracks[0].id
+            catalogState = 'ready'
+        } catch (error) {
+            catalogState = 'error'
+            catalogError = error.message
+        }
         renderCurrent()
     }
 
