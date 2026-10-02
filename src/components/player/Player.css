@@ -1,0 +1,248 @@
+.player {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    display: grid;
+    grid-template-columns: minmax(180px, 1fr) minmax(240px, 1.35fr) minmax(180px, 1fr);
+    align-items: center;
+    gap: 20px;
+    min-width: 0;
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 19px;
+    background: var(--color-panel);
+    color: #f4f4fa;
+    box-shadow: 0 -12px 35px #0002;
+}
+
+.player-track {
+    display: flex;
+    align-items: center;
+    gap: 11px;
+    min-width: 0;
+}
+
+.player-cover {
+    display: grid;
+    width: 48px;
+    height: 48px;
+    flex: 0 0 48px;
+    place-items: center;
+    border-radius: 11px;
+    background:
+        radial-gradient(circle at 65% 28%, #e9c496, transparent 25%),
+        linear-gradient(145deg, #67537b, #292f4d 60%, #c57969);
+    color: #fff9;
+}
+
+.player-track-copy {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+}
+
+.player-track-copy strong {
+    overflow: hidden;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.player-track-copy small {
+    color: #979bad;
+    font-size: 10px;
+}
+
+.player-like,
+.player-extra button {
+    display: grid;
+    place-items: center;
+    border: 0;
+    background: transparent;
+    color: #a9aabc;
+    cursor: pointer;
+    transition:
+        color 0.18s ease,
+        transform 0.18s ease;
+}
+
+.player-like {
+    margin-left: 4px;
+}
+
+.player-like:hover,
+.player-extra button:hover {
+    transform: scale(1.08);
+    background: var(--color-hover);
+    color: #fff;
+}
+
+.player-center {
+    display: grid;
+    gap: 7px;
+    width: min(100%, 400px);
+    justify-self: center;
+}
+
+.player-controls {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 17px;
+}
+
+.player-control {
+    display: grid;
+    place-items: center;
+    border: 0;
+    cursor: pointer;
+}
+
+.player__secondary-control {
+    padding: 5px;
+    background: transparent;
+    color: #c4c5d0;
+    transition: color 0.18s ease;
+}
+
+.player__secondary-control:hover {
+    background: var(--color-hover);
+    color: #fff;
+}
+
+.player__play-toggle {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    background: #f0eff5;
+    color: #292a33;
+    box-shadow: 0 3px 12px #0003;
+    transition:
+        transform 0.18s ease,
+        background 0.18s ease;
+}
+
+.player__play-toggle:hover {
+    transform: scale(1.06);
+    background: var(--color-hover);
+    color: #fff;
+}
+
+.player-timeline {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    color: #85899b;
+    font-size: 9px;
+    font-variant-numeric: tabular-nums;
+}
+
+.player-timeline input {
+    width: 100%;
+    height: 3px;
+    margin: 0;
+    appearance: none;
+    border-radius: 9px;
+    cursor: pointer;
+}
+
+.player-timeline input::-webkit-slider-thumb {
+    width: 9px;
+    height: 9px;
+    appearance: none;
+    border: 0;
+    border-radius: 50%;
+    background: #f5f2ff;
+    box-shadow: 0 0 0 3px #bba4ff22;
+}
+
+.player-timeline input::-moz-range-thumb {
+    width: 9px;
+    height: 9px;
+    border: 0;
+    border-radius: 50%;
+    background: #f5f2ff;
+}
+
+.player-extra {
+    display: flex;
+    align-items: center;
+    justify-content: end;
+    gap: 13px;
+    color: #a9aabc;
+}
+
+.volume-track {
+    width: min(95px, 45%);
+    height: 3px;
+    border-radius: 5px;
+    background: #4c4d59;
+}
+
+.volume-track i {
+    display: block;
+    width: 62%;
+    height: 100%;
+    border-radius: inherit;
+    background: #c3b2f5;
+}
+
+@media (max-width: 760px) {
+    .player {
+        grid-template-columns: minmax(120px, 1fr) minmax(200px, 1.4fr) auto;
+        gap: 10px;
+        padding: 9px 12px;
+    }
+
+    .player-cover {
+        width: 40px;
+        height: 40px;
+        flex-basis: 40px;
+    }
+
+    .player-extra {
+        gap: 8px;
+    }
+
+    .volume-track {
+        display: none;
+    }
+}
+
+@media (max-width: 520px) {
+    .player {
+        grid-template-columns: minmax(0, 1fr) minmax(150px, 1fr);
+        gap: 8px;
+        padding: 8px 12px;
+        border-radius: 0;
+    }
+
+    .player-cover {
+        width: 38px;
+        height: 38px;
+        flex-basis: 38px;
+    }
+
+    .player-like,
+    .player-extra {
+        display: none;
+    }
+
+    .player-center {
+        width: 100%;
+        gap: 5px;
+    }
+
+    .player-controls {
+        gap: 10px;
+    }
+
+    .player__play-toggle {
+        width: 31px;
+        height: 31px;
+    }
+
+    .player-timeline {
+        gap: 5px;
+        font-size: 8px;
+    }
+}
