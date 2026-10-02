@@ -8,7 +8,17 @@ import './AppLayout.css'
  * @param {object} props Текущий маршрут, действия с аккаунтом, выбранный трек и страница.
  * @returns {object} Виртуальное DOM-дерево.
  */
-export function AppLayout({ route, user, onLogout, onTrackSelect, activeTrack, sessionError, authAction, children }) {
+export function AppLayout({
+    route,
+    user,
+    onLogout,
+    onTrackSelect,
+    tracks,
+    activeTrack,
+    sessionError,
+    authAction,
+    children,
+}) {
     if (route === 'signup' || route === 'login') {
         return (
             <main id="main-content" tabIndex={-1}>
@@ -22,37 +32,18 @@ export function AppLayout({ route, user, onLogout, onTrackSelect, activeTrack, s
             <a className="skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar />
+            <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
             <div className="app-main-column">
-                <header className="account-bar">
-                    {user ? (
-                        <div className="account-actions">
-                            <span className="user-greeting">{user.display_name || user.email}</span>
-                            <button className="logout-button" type="button" onClick={onLogout} disabled={authAction}>
-                                Выйти
-                            </button>
-                        </div>
-                    ) : (
-                        <nav className="account-actions" aria-label="Аккаунт">
-                            <a href="/login" data-link>
-                                Вход
-                            </a>
-                            <a href="/signup" data-link>
-                                Регистрация
-                            </a>
-                        </nav>
-                    )}
-                </header>
+                <main className="app-content" id="main-content" tabIndex={-1}>
+                    {children}
+                </main>
                 {sessionError ? (
                     <p className="session-error" role="alert">
                         {sessionError}
                     </p>
                 ) : null}
-                <main className="app-content" id="main-content" tabIndex={-1}>
-                    {children}
-                </main>
             </div>
-            <Player track={activeTrack} onTrackSelect={onTrackSelect} />
+            <Player track={activeTrack} tracks={tracks} onTrackSelect={onTrackSelect} />
         </div>
     )
 }

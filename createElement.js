@@ -1,5 +1,3 @@
-'use strict'
-
 /**
  * JSX вызывает эту функцию вместо React.createElement.
  * @param {string|Function} type HTML-тег или компонент.

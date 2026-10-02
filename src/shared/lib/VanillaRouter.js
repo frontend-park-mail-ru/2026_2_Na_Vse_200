@@ -1,5 +1,3 @@
-'use strict'
-
 /** Роутер с режимами history и hash. Клики по ссылкам обрабатывает через document. */
 export class VanillaRouter {
     /** @param {{type?: string, routes?: Object<string, string>, root?: string}} options Настройки роутера. */

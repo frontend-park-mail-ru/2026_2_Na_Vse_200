@@ -15,7 +15,7 @@ export function FormField({
 }) {
     const id = `${idPrefix}-${name}`
     return (
-        <div className="signup-field">
+        <div className="auth-field">
             <label htmlFor={id}>{label}</label>
             <input
                 id={id}
@@ -31,7 +31,7 @@ export function FormField({
                 onBlur={onBlur}
             />
             {error ? (
-                <p className="signup-field-error" id={`${id}-error`}>
+                <p className="auth-field-error" id={`${id}-error`}>
                     {error}
                 </p>
             ) : null}
