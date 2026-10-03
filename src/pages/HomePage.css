@@ -1,0 +1,351 @@
+.home-page {
+    min-height: 100%;
+    padding: 24px 34px 28px 24px;
+    background: #0d0e13;
+    color: #f2f1f5;
+}
+
+.home-page h1,
+.home-page h2 {
+    font-family: var(--font-body);
+    font-weight: 700;
+}
+
+.home-header {
+    margin: 0 0 8px;
+}
+
+.home-header h1 {
+    margin: 0;
+    font-size: 34px;
+    line-height: 1.15;
+}
+
+.featured-playlist {
+    display: flex;
+    min-height: 198px;
+    align-items: center;
+    padding: 32px 42px;
+    border: 0;
+    border-radius: 26px;
+    background: #20222b;
+}
+
+.featured-playlist h2 {
+    margin: 0 0 12px;
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.featured-playlist p {
+    margin: 0 0 16px;
+    font-size: 12px;
+    line-height: 1.35;
+}
+
+.featured-playlist button {
+    display: inline-flex;
+    min-height: 36px;
+    align-items: center;
+    gap: 8px;
+    padding: 0 16px;
+    border: 0;
+    border-radius: 999px;
+    background: #ed8076;
+    color: #101116;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.featured-playlist button:disabled {
+    opacity: 0.55;
+    cursor: default;
+}
+
+.featured-playlist button svg {
+    fill: currentColor;
+    stroke-width: 0;
+}
+
+.popular-section {
+    margin-top: 20px;
+}
+
+.popular-section > h2,
+.collection-heading h2 {
+    margin: 0;
+    font-size: 28px;
+    line-height: 1.2;
+}
+
+.popular-section > h2 {
+    margin-bottom: 10px;
+}
+
+.track-list {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 12px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.track-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 20px 20px;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 43px;
+    padding: 3px 10px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: #20222b;
+    color: inherit;
+    text-align: left;
+    font: inherit;
+}
+
+.track-select {
+    display: grid;
+    grid-template-columns: 18px 34px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.track-row:hover,
+.track-row.is-active {
+    border-color: #3c3f4b;
+    background: #272a34;
+}
+
+.track-index,
+.track-duration {
+    color: #b1b0c1;
+    font-size: 11px;
+    text-align: center;
+    font-variant-numeric: tabular-nums;
+}
+
+.music-cover {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    overflow: hidden;
+    border-radius: 8px;
+    background: linear-gradient(140deg, #695c78, #30364b 65%, #d77f74);
+    color: #f2eaff;
+}
+
+.music-cover img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.track-meta {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+}
+
+.track-meta strong,
+.track-meta small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.track-meta strong {
+    font-size: 12px;
+    font-weight: 650;
+}
+
+.track-meta small {
+    color: #9698aa;
+    font-size: 10px;
+}
+
+.track-like {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #655f60;
+    cursor: pointer;
+}
+
+.track-like svg {
+    fill: currentColor;
+    stroke-width: 0;
+}
+
+.track-like[aria-pressed='true'] {
+    color: #ff8279;
+    fill: currentColor;
+}
+
+.track-more {
+    color: #c5c4cd;
+}
+
+.home-message {
+    display: flex;
+    min-height: 153px;
+    padding: 20px;
+    text-align: center;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    margin: 0;
+    border-radius: 12px;
+    background: #20222b;
+    color: #b8bac8;
+    font-size: 14px;
+}
+
+.home-message--error {
+    flex-direction: column;
+    color: #ffb0b0;
+}
+
+.home-message button {
+    border: 0;
+    background: transparent;
+    color: #b9a5ff;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.home-collections {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 28px;
+    margin-top: 32px;
+}
+
+.collection-heading {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.collection-heading button {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 0;
+    border: 0;
+    background: transparent;
+    color: #a5a2b6;
+    font: inherit;
+    font-size: 12px;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.collection-empty {
+    margin: 0;
+    color: #9698aa;
+    font-size: 12px;
+    line-height: 1.5;
+}
+
+.collection-list {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.collection-card {
+    display: grid;
+    min-width: 0;
+    justify-items: center;
+    gap: 7px;
+    text-align: center;
+}
+
+.collection-card .music-cover {
+    width: min(100%, 108px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 10px;
+}
+
+.collection-list--artist .music-cover {
+    width: min(100%, 85px);
+    border-radius: 50%;
+}
+
+.collection-list--artist {
+    padding-top: 14px;
+}
+
+.collection-card strong {
+    width: 100%;
+    font-size: 10px;
+    font-weight: 600;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+
+@media (max-width: 900px) {
+    .home-page {
+        padding: 20px 18px 26px;
+    }
+
+    .track-list {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+
+    .home-collections {
+        grid-template-columns: 1fr;
+        gap: 24px;
+    }
+}
+
+@media (max-width: 560px) {
+    .home-page {
+        padding: 17px 13px 22px;
+    }
+
+    .featured-playlist {
+        min-height: 170px;
+        padding: 24px;
+        border-radius: 22px;
+    }
+
+    .track-row {
+        grid-template-columns: minmax(0, 1fr) 18px;
+        gap: 7px;
+        padding: 4px 7px;
+    }
+
+    .track-select {
+        gap: 6px;
+    }
+
+    .track-row .track-more {
+        display: none;
+    }
+}
