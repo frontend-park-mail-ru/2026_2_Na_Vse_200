@@ -2,7 +2,7 @@ import { createElement, useState } from '../../index.js'
 import { FormField } from '../components/ui/FormField.jsx'
 import { validateSignup } from '../features/signup/validation.js'
 import { signup } from '../features/signup/api.js'
-import './SignupPage.css'
+import './AuthPage.css'
 
 /** @param {{onRegistered: () => void}} props Переход после регистрации. @returns {object} Экран регистрации. */
 export function SignupPage({ onRegistered }) {
@@ -51,27 +51,27 @@ export function SignupPage({ onRegistered }) {
         }
     }
     return (
-        <section className="signup-screen" aria-labelledby="signup-title">
-            <aside className="signup-art" aria-label="Музыка под настроение, каждый день">
+        <section className="auth-screen" aria-labelledby="signup-title">
+            <aside className="auth-art" aria-label="Музыка под настроение, каждый день">
                 <p>
-                    Музыка под
+                    Музыка
                     <br />
-                    настроение,
+                    под твое
                     <br />
-                    каждый день.
+                    настроение
                 </p>
             </aside>
-            <div className="signup-panel">
-                <div className="signup-content">
+            <div className="auth-panel">
+                <div className="auth-content">
                     <h1 id="signup-title" tabIndex={-1}>
                         Регистрация
                     </h1>
-                    <p className="signup-intro">Пара полей — и можно слушать.</p>
+                    <p className="auth-intro">Пара секунд — и можно слушать.</p>
                     <form noValidate onSubmit={submit} aria-busy={state.pending ? 'true' : 'false'}>
                         <FormField
                             name="display_name"
                             label="Имя"
-                            placeholder="name"
+                            placeholder="имя"
                             autoComplete="nickname"
                             error={state.errors.display_name}
                             onInput={clearError}
@@ -80,9 +80,9 @@ export function SignupPage({ onRegistered }) {
                         />
                         <FormField
                             name="email"
-                            label="Эл. почта"
+                            label="Электронная почта"
                             type="email"
-                            placeholder="e-mail"
+                            placeholder="электронная почта"
                             autoComplete="email"
                             error={state.errors.email}
                             onInput={clearError}
@@ -93,21 +93,21 @@ export function SignupPage({ onRegistered }) {
                             name="password"
                             label="Пароль"
                             type="password"
-                            placeholder="password"
+                            placeholder="пароль"
                             autoComplete="new-password"
                             error={state.errors.password}
                             onInput={clearError}
                             onBlur={validateField}
                             disabled={state.pending}
                         />
-                        <div className="signup-feedback" role="alert">
+                        <div className="auth-feedback" role="alert">
                             {state.message}
                         </div>
-                        <button className="signup-submit" type="submit" disabled={state.pending}>
+                        <button className="auth-submit" type="submit" disabled={state.pending}>
                             {state.pending ? 'Создаём аккаунт…' : 'Создать аккаунт'}
                         </button>
                     </form>
-                    <p className="signup-login">
+                    <p className="auth-switch">
                         Уже есть аккаунт?{' '}
                         <a href="/login" data-link>
                             Войти

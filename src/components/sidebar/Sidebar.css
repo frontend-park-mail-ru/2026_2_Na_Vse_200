@@ -1,10 +1,10 @@
 .sidebar {
     grid-column: 1;
-    grid-row: 1;
+    grid-row: 1 / -1;
     display: flex;
     min-height: 0;
     flex-direction: column;
-    padding: 25px 18px 18px;
+    padding: 12px 12px 12px;
     overflow: hidden;
     border: 1px solid rgba(255, 255, 255, 0.045);
     border-radius: 22px;
@@ -15,37 +15,44 @@
 .sidebar__brand {
     display: flex;
     align-items: center;
-    gap: 10px;
-    margin: 0 0 29px 3px;
+    gap: 0;
+    margin: 0 0 20px 7px;
     color: #f8f8fb;
     text-decoration: none;
-    font-size: 20px;
+    font-size: 30px;
     font-weight: 850;
-    letter-spacing: 0.055em;
-}
-
-.sidebar__sidebar__brand-mark {
-    display: grid;
-    width: 30px;
-    height: 30px;
-    place-items: center;
-    border-radius: 9px;
-    background: linear-gradient(140deg, #bea7ff, #8165d6);
-    color: #242033;
+    letter-spacing: 0;
 }
 
 .sidebar-nav,
 .playlist-links {
     display: grid;
-    gap: 5px;
+    gap: 3px;
+}
+
+.playlist-links {
+    gap: 11px;
+    flex: 1;
+    min-height: 0;
+    align-content: start;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.sidebar__brand,
+.sidebar-nav,
+.sidebar-divider,
+.playlist-heading,
+.sidebar-account {
+    flex-shrink: 0;
 }
 
 .sidebar__nav-link {
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: 39px;
-    padding: 0 11px;
+    min-height: 32px;
+    padding: 0 9px;
     border-radius: 10px;
     color: #a9adbd;
     text-decoration: none;
@@ -57,35 +64,35 @@
 }
 
 .sidebar__nav-link:hover,
-.sidebar__nav-link.is-active {
+.sidebar__nav-link--active {
     background: var(--color-hover);
     color: #fff;
 }
 
-.sidebar__nav-link.is-active {
-    box-shadow: inset 2px 0 #baa3ff;
+.sidebar__nav-link--active {
+    background: #20222b;
 }
 
 .nav-icon {
     flex: 0 0 auto;
-    color: #a99be0;
+    color: #dedde3;
 }
 
 .sidebar-divider {
     height: 1px;
-    margin: 24px 0 18px;
-    background: rgba(255, 255, 255, 0.12);
+    margin: 18px 4px 28px;
+    background: #a2a2a5;
 }
 
 .playlist-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 12px;
-    color: #858a9e;
-    font-size: 9px;
-    font-weight: 750;
-    letter-spacing: 0.13em;
+    margin-bottom: 32px;
+    padding-right: 12px;
+    color: #f0eff4;
+    font-size: 12px;
+    font-weight: 500;
 }
 
 .playlist-heading button {
@@ -111,9 +118,9 @@
 .playlist-links a {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 9px;
     min-width: 0;
-    padding: 7px 5px;
+    padding: 7px 6px;
     border-radius: 8px;
     color: #b1b4c1;
     text-decoration: none;
@@ -128,24 +135,49 @@
     color: #fff;
 }
 
-.playlist-links a > span:last-child {
+.playlist-copy {
+    display: grid;
+    min-width: 0;
+    gap: 3px;
+}
+
+.playlist-copy strong,
+.playlist-copy small {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
+.playlist-copy strong {
+    color: #f1f2f8;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.playlist-copy small {
+    color: #898b9b;
+    font-size: 9px;
+}
+
 .playlist-icon {
     display: grid;
-    width: 26px;
-    height: 26px;
-    flex: 0 0 26px;
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
     place-items: center;
-    border-radius: 7px;
+    border-radius: 9px;
     color: #fff;
 }
 
 .playlist-icon-rose {
-    background: linear-gradient(140deg, #b17086, #4c365d);
+    background: #e87f74;
+    color: #624777;
+}
+
+.playlist-icon-rose svg {
+    width: 36px;
+    height: 36px;
+    fill: currentColor;
 }
 .playlist-icon-teal {
     background: linear-gradient(140deg, #648c8b, #304354);
@@ -154,38 +186,76 @@
     background: linear-gradient(140deg, #c2925d, #5a4560);
 }
 
-.sidebar-bottom {
+.sidebar-account {
     display: flex;
+    min-width: 0;
     align-items: center;
     gap: 8px;
     margin-top: auto;
-    color: #73788a;
+    min-height: 61px;
+    padding: 9px 12px;
+    border-radius: 14px;
+    background: #20222b;
+}
+
+.sidebar-account-avatar {
+    display: grid;
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
+    place-items: center;
+    border-radius: 50%;
+    background: #a69acb;
+    color: #191821;
+    font-weight: 700;
+}
+
+.sidebar-account-copy {
+    display: grid;
+    min-width: 0;
+    gap: 2px;
+}
+
+.sidebar-account-copy strong,
+.sidebar-account-copy small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.sidebar-account-copy strong {
+    color: #f4f3f6;
+    font-size: 11px;
+}
+
+.sidebar-account-copy small {
+    color: #898b9b;
     font-size: 9px;
 }
 
-.online-indicator {
-    width: 6px;
-    height: 6px;
+.sidebar-account button {
+    display: grid;
+    width: 24px;
+    height: 24px;
+    flex: 0 0 24px;
+    place-items: center;
+    margin-left: auto;
+    border: 0;
     border-radius: 50%;
-    background: #88c9a6;
-    box-shadow: 0 0 9px #88c9a688;
+    background: #414351;
+    color: #d7d5df;
+    cursor: pointer;
+}
+
+.sidebar-account button:disabled {
+    opacity: 0.6;
+    cursor: wait;
 }
 
 @media (max-width: 760px) {
     .sidebar {
         align-items: center;
         padding: 19px 8px 14px;
-    }
-
-    .sidebar__brand {
-        justify-content: center;
-        margin: 0 0 26px;
-        font-size: 0;
-    }
-
-    .sidebar__sidebar__brand-mark {
-        width: 36px;
-        height: 36px;
     }
 
     .sidebar-nav {
@@ -199,16 +269,32 @@
         padding: 0;
     }
 
-    .sidebar__nav-link.is-active {
+    .sidebar__nav-link--active {
         box-shadow: inset 0 -2px #baa3ff;
     }
 
+    .sidebar__brand,
     .nav-label,
     .sidebar-divider,
     .playlist-heading,
-    .playlist-links,
-    .sidebar-bottom {
+    .playlist-links {
         display: none;
+    }
+
+    .sidebar-account {
+        display: grid;
+        justify-items: center;
+        gap: 4px;
+        padding: 4px;
+        background: transparent;
+    }
+
+    .sidebar-account-copy {
+        display: none;
+    }
+
+    .sidebar-account button {
+        margin: 0;
     }
 }
 

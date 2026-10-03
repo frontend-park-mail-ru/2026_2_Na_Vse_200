@@ -1,8 +1,7 @@
 import { createElement, useState } from '../../index.js'
 import { FormField } from '../components/ui/FormField.jsx'
 import { login } from '../features/auth/api.js'
-import './SignupPage.css'
-import './LoginPage.css'
+import './AuthPage.css'
 
 /** @param {{notice?: string, onAuthenticated?: (user: object) => void}} props Сообщение и обработчик успешного входа. @returns {object} Форма входа. */
 export function LoginPage({ notice, onAuthenticated } = {}) {
@@ -26,22 +25,25 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
             .catch(error => setState({ message: error.message, errors: error.fields || {}, pending: false }))
     }
     return (
-        <section className="signup-screen login-screen" aria-labelledby="login-title">
-            <aside className="signup-art login-art">
+        <section className="auth-screen" aria-labelledby="login-title">
+            <aside className="auth-art">
                 <p>
-                    Слушай.
+                    Слушай
                     <br />
-                    Сохраняй.
+                    Сохраняй
                     <br />
-                    Открывай новое.
+                    Открывай новое
                 </p>
             </aside>
-            <div className="signup-panel login-panel">
-                <div className="signup-content login-content">
+            <div className="auth-panel">
+                <div className="auth-content">
                     <h1 id="login-title" tabIndex={-1}>
                         Вход
                     </h1>
-                    <p className="signup-intro login-intro">С возвращением! Войдите, чтобы продолжить слушать.</p>
+                    <p className="auth-intro">
+                        С возвращением! <br />
+                        Войдите, чтобы продолжить слушать.
+                    </p>
                     {notice ? (
                         <p className="login-notice" role="status">
                             {notice}
@@ -51,9 +53,9 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
                         <FormField
                             idPrefix="login"
                             name="email"
-                            label="Эл. почта"
+                            label="Электронная почта"
                             type="email"
-                            placeholder="e-mail"
+                            placeholder="почта"
                             autoComplete="username"
                             error={state.errors.email}
                             disabled={state.pending}
@@ -63,49 +65,20 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
                             name="password"
                             label="Пароль"
                             type="password"
-                            placeholder="password"
+                            placeholder="пароль"
                             autoComplete="current-password"
                             error={state.errors.password}
                             disabled={state.pending}
                         />
-                        <div className="login-options">
-                            <label className="login-remember">
-                                <input type="checkbox" name="remember" checked />
-                                Запомнить меня
-                            </label>
-                            <button
-                                className="login-text-button"
-                                type="button"
-                                onClick={() =>
-                                    setState(previous => ({
-                                        ...previous,
-                                        message: 'Восстановление пароля пока недоступно.',
-                                    }))
-                                }
-                            >
-                                Забыли пароль?
-                            </button>
-                        </div>
-                        <button className="signup-submit login-submit" type="submit" disabled={state.pending}>
+                        <button className="auth-submit" type="submit" disabled={state.pending}>
                             {state.pending ? 'Входим…' : 'Войти'}
                         </button>
                     </form>
-                    <div className="login-divider">
-                        <span>или</span>
-                    </div>
-                    <button
-                        className="login-code-button"
-                        type="button"
-                        onClick={() =>
-                            setState(previous => ({ ...previous, message: 'Вход по коду из письма пока недоступен.' }))
-                        }
-                    >
-                        Войти по коду из письма
-                    </button>
-                    <p className="login-feedback" role="status">
+
+                    <p className="auth-feedback" role="status">
                         {state.message}
                     </p>
-                    <p className="signup-login login-signup">
+                    <p className="auth-switch">
                         Нет аккаунта?{' '}
                         <a href="/signup" data-link>
                             Зарегистрироваться

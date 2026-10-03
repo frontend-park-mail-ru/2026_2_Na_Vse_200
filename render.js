@@ -1,4 +1,4 @@
-'use strict'
+const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
 let rootElement = null
 let rootContainer = null
@@ -108,9 +108,14 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     const sameType = dom && previousElement && element.type === previousElement.type
 
     if (!dom || (!sameType && !(isText && previousIsText))) {
+        const isSvg =
+            element.type === 'svg' ||
+            (parentDom.namespaceURI === SVG_NAMESPACE && parentDom.localName !== 'foreignObject')
         const replacement = isText
             ? document.createTextNode(element.props.nodeValue)
-            : document.createElement(element.type)
+            : isSvg
+              ? document.createElementNS(SVG_NAMESPACE, element.type)
+              : document.createElement(element.type)
         if (dom) parentDom.replaceChild(replacement, dom)
         else parentDom.appendChild(replacement)
         clearPath(path)
@@ -212,6 +217,7 @@ function clearPath(path) {
  * @returns {void}
  */
 function updateProps(dom, previousProps, nextProps) {
+    const isSvg = dom.namespaceURI === SVG_NAMESPACE
     const names = new Set([...Object.keys(previousProps), ...Object.keys(nextProps)])
 
     for (const name of names) {
@@ -219,6 +225,7 @@ function updateProps(dom, previousProps, nextProps) {
 
         const previousValue = previousProps[name]
         const nextValue = nextProps[name]
+        const attributeName = name === 'className' ? 'class' : name
 
         if (previousValue === nextValue) continue
 
@@ -228,10 +235,10 @@ function updateProps(dom, previousProps, nextProps) {
 
         if (nextValue === null || nextValue === undefined || nextValue === false) {
             if (name === 'style') dom.removeAttribute('style')
-            else if (name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
+            else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
                 dom[name] = typeof dom[name] === 'boolean' ? false : ''
             } else {
-                dom.removeAttribute(name)
+                dom.removeAttribute(attributeName)
             }
             continue
         }
@@ -243,10 +250,10 @@ function updateProps(dom, previousProps, nextProps) {
                 if (!(styleName in nextValue)) dom.style[styleName] = ''
             }
             Object.assign(dom.style, nextValue)
-        } else if (name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
+        } else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
             dom[name] = nextValue
         } else {
-            dom.setAttribute(name, nextValue === true ? '' : nextValue)
+            dom.setAttribute(attributeName, nextValue === true ? '' : nextValue)
         }
     }
 }

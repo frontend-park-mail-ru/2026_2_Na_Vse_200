@@ -1,7 +1,6 @@
-'use strict'
-
 import { createElement, useState } from '../../index.js'
 import { Icon } from '../components/ui/Icon.jsx'
+import { getArtistName, getTrackCover } from '../features/music/presentation.js'
 import './HomePage.css'
 
 const mixes = [
@@ -19,25 +18,28 @@ function formatDuration(seconds) {
     return `${minutes}:${remainder}`
 }
 
-function PageHeader() {
+function Cover({ cover, className = '', icon = 'music' }) {
+    const [failedCover, setFailedCover] = useState('')
     return (
-        <header className="home-header">
-            <div>
-                <h1>Главная</h1>
-            </div>
-            <button className="profile-button" type="button" aria-label="Профиль">
-                А
-            </button>
-        </header>
+        <span className={`music-cover ${className}`}>
+            {cover && failedCover !== cover ? (
+                <img src={cover} alt="" loading="lazy" onError={() => setFailedCover(cover)} />
+            ) : (
+                <Icon name={icon} size={20} />
+            )}
+        </span>
     )
 }
 
-function TrackList({ tracks, activeTrack, onTrackSelect }) {
-    return (
-        <section className="home-section" aria-labelledby="popular-title">
-            <ol className="track-list" aria-label="Популярные треки">
-                {tracks.slice(0, 5).map((track, index) => {
-                    const isActive = activeTrack.id === track.id
+function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksError, onTracksRetry }) {
+    const [likedTracks, setLikedTracks] = useState({})
+    if (tracksStatus === 'loading') {
+        return (
+            <p className="home-message" aria-live="polite">
+                Загружаем треки…
+            </p>
+        )
+    }
 
                     return (
                         <li className="track-list-item" key={track.id}>
@@ -80,12 +82,14 @@ function TrackList({ tracks, activeTrack, onTrackSelect }) {
 
 function ArtistList({ artists = []}) {
     return (
-        <section className="discovery-panel" aria-labelledby="artists-title">
-            <div className="main-page__subsection-heading">
-                <h3 id="artists-title">Артисты</h3>
-                <button className="main-page__text-button" type="button">
-                    Все{' '}
-                </button>
+        <section className="collection-section" aria-label={title}>
+            <div className="collection-heading">
+                <h2>{title}</h2>
+                {items.length > 0 && (
+                    <button type="button">
+                        Смотреть все <Icon name="chevronRight" size={16} />
+                    </button>
+                )}
             </div>
             <div className="artist-list">
                 {artists.map((artist, index) => (
@@ -101,31 +105,36 @@ function ArtistList({ artists = []}) {
     )
 }
 
-function MixList({ activeMix, onMixSelect }) {
+export function HomePage({
+    tracks = [],
+    artists = [],
+    albums = [],
+    activeTrack,
+    onTrackSelect = () => {},
+    tracksStatus = 'ready',
+    tracksError = '',
+    onTracksRetry = () => {},
+}) {
     return (
-        <section className="discovery-panel" aria-labelledby="mixes-title">
-            <div className="main-page__subsection-heading">
-                <h3 id="mixes-title">Подборки</h3>
-                <button className="main-page__text-button" type="button">
-                    Все{' '}
-                </button>
-            </div>
-            <div className="mix-list">
-                {mixes.map((mix, index) => (
+        <div className="home-page">
+            <header className="home-header">
+                <h1>Главная</h1>
+            </header>
+
+            <section className="featured-playlist" aria-labelledby="featured-title">
+                <div>
+                    <h2 id="featured-title">Плейлист для тебя</h2>
+                    <p>
+                        Треки, которые всегда с тобой.
+                        <br />
+                        Собрано на основе твоих прослушиваний.
+                    </p>
                     <button
-                        className={`mix-card${activeMix === index ? ' is-selected' : ''}`}
                         type="button"
-                        key={mix.name}
-                        onClick={() => onMixSelect(index)}
+                        onClick={() => tracks[0] && onTrackSelect(tracks[0])}
+                        disabled={!tracks.length}
                     >
-                        <span className={`mix-art mix-art-${index + 1}`} style={{ backgroundColor: mix.color }}>
-                            <Icon name={mix.icon} size={25} />
-                        </span>
-                        <span className="mix-copy">
-                            <strong>{mix.name}</strong>
-                            <small>{mix.detail}</small>
-                        </span>
-                        <Icon name="play" size={13} className="mix-play" />
+                        <Icon name="play" size={16} /> Слушать
                     </button>
                 ))}
             </div>
@@ -155,6 +164,23 @@ export function HomePage({
                     <MixList activeMix={activeMix} onMixSelect={setActiveMix} />
                 </div>
             </section>
+
+            <section className="popular-section" aria-labelledby="popular-title">
+                <h2 id="popular-title">Популярные треки</h2>
+                <TrackList
+                    tracks={tracks}
+                    activeTrack={activeTrack}
+                    onTrackSelect={onTrackSelect}
+                    tracksStatus={tracksStatus}
+                    tracksError={tracksError}
+                    onTracksRetry={onTracksRetry}
+                />
+            </section>
+
+            <div className="home-collections">
+                <CollectionSection title="Исполнители" items={artists} type="artist" tracksStatus={tracksStatus} />
+                <CollectionSection title="Альбомы" items={albums} type="album" tracksStatus={tracksStatus} />
+            </div>
         </div>
     )
 }

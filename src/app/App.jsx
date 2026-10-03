@@ -1,6 +1,7 @@
 import { createElement, render } from '../../index.js'
 import { appStore } from './store.js'
 import { getCurrentUser, logout } from '../features/auth/api.js'
+import { getHomeData } from '../features/music/api.js'
 import { AppLayout } from '../components/layout/AppLayout.jsx'
 import { HomePage } from '../pages/HomePage.jsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
@@ -28,19 +29,22 @@ export function mountApp(container, router) {
     let sessionState = 'loading'
     let sessionError = ''
     let authAction = false
+    let tracksStatus = 'loading'
+    let tracksError = ''
     let activeTrackId = appStore.getState().tracks[0]?.id
     let catalogState = 'loading' // loading | ready | error
     let catalogError = ''
 
     const onRegistered = () => {
         notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
-        router.navigate('/login')
+        router.navigate('/')
     }
 
     const onAuthenticated = nextUser => {
         user = nextUser
         sessionError = ''
-        notice = 'Вы вошли в аккаунт.'
+        tracksStatus = 'loading'
+        tracksError = ''
         router.navigate('/')
         loadCatalog()
     }
@@ -54,8 +58,7 @@ export function mountApp(container, router) {
             user = null
             sessionError = ''
             authAction = false
-            notice = 'Вы вышли из аккаунта.'
-            router.navigate('/')
+            router.navigate('/login')
         } catch (error) {
             sessionError = error.message
             authAction = false
@@ -131,6 +134,7 @@ export function mountApp(container, router) {
 
         render(
             <AppLayout
+                tracks={tracks}
                 route={routeName}
                 user={user}
                 onLogout={onLogout}
@@ -171,7 +175,6 @@ export function mountApp(container, router) {
             const currentRoute = router.findRoute(currentPath)?.value
             if (!user && currentRoute === 'home') {
                 router.navigate('/signup', { replace: true })
-                return
             }
             renderCurrent()
             loadCatalog()
@@ -179,7 +182,7 @@ export function mountApp(container, router) {
         .catch(error => {
             sessionState = 'error'
             sessionError = error.message
-            renderCurrent()
+            loadCatalog()
         })
 
     return () => router.off('route', handleRoute).destroy()
