@@ -7,6 +7,7 @@ import { HomePage } from '../pages/HomePage.jsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
 import { SignupPage } from '../pages/SignupPage.jsx'
 import { NotFoundPage } from '../pages/NotFoundPage.jsx'
+import { getHome, mapTrack } from '../features/music/api.js'
 
 const pages = {
     home: { component: HomePage, title: 'Главная' },
@@ -31,6 +32,8 @@ export function mountApp(container, router) {
     let tracksStatus = 'loading'
     let tracksError = ''
     let activeTrackId = appStore.getState().tracks[0]?.id
+    let catalogState = 'loading' // loading | ready | error
+    let catalogError = ''
 
     const onRegistered = () => {
         notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
@@ -69,24 +72,28 @@ export function mountApp(container, router) {
     }
 
     async function loadCatalog() {
-        tracksStatus = 'loading'
-        tracksError = ''
+        catalogState = 'loading'
+        catalogError = ''
         renderCurrent()
         try {
-            const catalog = await getHomeData()
-            const { tracks } = catalog
-            appStore.setState(catalog)
-            if (!tracks.some(track => track.id === activeTrackId)) activeTrackId = tracks[0]?.id
-            tracksStatus = 'ready'
+            const home = await getHome()
+            const tracks = home.tracks.map(mapTrack)
+            appStore.setState({
+                tracks,
+                artists: home.artists,
+                albums: home.albums,
+            })
+            if (!activeTrackId && tracks[0]) activeTrackId = tracks[0].id
+            catalogState = 'ready'
         } catch (error) {
-            tracksStatus = 'error'
-            tracksError = error.message
+            catalogState = 'error'
+            catalogError = error.message
         }
         renderCurrent()
     }
 
     function renderCurrent() {
-        const { tracks, artists, albums } = appStore.getState()
+        const { tracks, artists } = appStore.getState()
         const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
         const route = router.getCurrentUrl().pathname
         const routeName = router.findRoute(route)?.value ?? 'not-found'
@@ -97,6 +104,28 @@ export function mountApp(container, router) {
             render(
                 <main className="session-loading" aria-live="polite">
                     Проверяем сессию…
+                </main>,
+                container,
+            )
+            return
+        }
+
+        if (routeName === 'home' && catalogState === 'loading') {
+            render(
+                <main className="session-loading" aria-live="polite">
+                    Загружаем каталог…
+                </main>,
+                container,
+            )
+            return
+        }
+        if (routeName === 'home' && catalogState === 'error') {
+            render(
+                <main className="session-loading" aria-live="polite">
+                    <p>{catalogError}</p>
+                    <button type="button" onClick={loadCatalog}>
+                        Повторить
+                    </button>
                 </main>,
                 container,
             )
@@ -117,10 +146,6 @@ export function mountApp(container, router) {
                 <Page
                     tracks={tracks}
                     artists={artists}
-                    albums={albums}
-                    tracksStatus={tracksStatus}
-                    tracksError={tracksError}
-                    onTracksRetry={loadCatalog}
                     activeTrack={activeTrack}
                     onTrackSelect={onTrackSelect}
                     onRegistered={onRegistered}
@@ -151,6 +176,7 @@ export function mountApp(container, router) {
             if (!user && currentRoute === 'home') {
                 router.navigate('/signup', { replace: true })
             }
+            renderCurrent()
             loadCatalog()
         })
         .catch(error => {

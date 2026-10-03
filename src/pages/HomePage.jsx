@@ -3,11 +3,19 @@ import { Icon } from '../components/ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.js'
 import './HomePage.css'
 
-function formatDuration(duration) {
-    if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
-    const seconds = Number(duration?.seconds ?? duration?.duration_seconds ?? duration ?? 0)
-    if (!Number.isFinite(seconds) || seconds <= 0) return '—:——'
-    return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
+const mixes = [
+    { name: 'Тихое утро', detail: 'Мягкий старт дня', color: '#62739e', icon: 'sun' },
+    { name: 'На повторе', detail: 'Твои любимые треки', color: '#a36d78', icon: 'repeat' },
+    { name: 'Ночная смена', detail: 'Звуки после заката', color: '#685a9d', icon: 'moon' },
+    { name: 'Новый ритм', detail: 'Свежие находки недели', color: '#568b82', icon: 'sparkle' },
+]
+
+const coverIcons = ['music', 'sun', 'sparkle', 'moon', 'artist']
+
+function formatDuration(seconds) {
+    const minutes = Math.floor(seconds / 60)
+    const remainder = String(seconds % 60).padStart(2, '0')
+    return `${minutes}:${remainder}`
 }
 
 function Cover({ cover, className = '', icon = 'music' }) {
@@ -33,63 +41,46 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
         )
     }
 
-    if (tracksStatus === 'error') {
-        return (
-            <div className="home-message home-message--error" role="alert">
-                <span>{tracksError}</span>
-                <button type="button" onClick={onTracksRetry}>
-                    Попробовать ещё раз
-                </button>
-            </div>
-        )
-    }
-
-    if (!tracks.length) return <p className="home-message">Пока нет треков.</p>
-
-    return (
-        <ol className="track-list" aria-label="Популярные треки">
-            {tracks.slice(0, 6).map((track, index) => {
-                const isActive = activeTrack?.id === track.id
-                const isLiked = likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)
-                return (
-                    <li
-                        className={`track-row${isActive ? ' is-active' : ''}`}
-                        key={track.id ?? `${track.title}-${index}`}
-                    >
-                        <button
-                            className="track-select"
-                            type="button"
-                            onClick={() => onTrackSelect(track)}
-                            aria-current={isActive ? 'true' : undefined}
-                        >
-                            <span className="track-index">{index + 1}</span>
-                            <Cover cover={getTrackCover(track)} />
-                            <span className="track-meta">
-                                <strong>{track.title || 'Без названия'}</strong>
-                                <small>{getArtistName(track)}</small>
-                            </span>
-                            <span className="track-duration">
-                                {formatDuration(track.duration ?? track.duration_seconds ?? track.duration_ms / 1000)}
-                            </span>
-                        </button>
-                        <button
-                            className="track-like"
-                            type="button"
-                            aria-label={`${isLiked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
-                            aria-pressed={isLiked ? 'true' : 'false'}
-                            onClick={() => setLikedTracks(previous => ({ ...previous, [track.id]: !isLiked }))}
-                        >
-                            <Icon name="heart" size={19} />
-                        </button>
-                        <Icon name="more" size={20} className="track-more" />
-                    </li>
-                )
-            })}
-        </ol>
+                    return (
+                        <li className="track-list-item" key={track.id}>
+                            <button
+                                className={`track-row${isActive ? ' is-active' : ''}`}
+                                type="button"
+                                onClick={() => onTrackSelect(track)}
+                                aria-current={isActive ? 'true' : undefined}
+                            >
+                                <span className="track-index">
+                                    {isActive ? (
+                                        <Icon
+                                            name="music"
+                                            size={17}
+                                            className="track-playing-icon"
+                                            label="Сейчас выбрано"
+                                        />
+                                    ) : (
+                                        String(index + 1).padStart(2, '0')
+                                    )}
+                                </span>
+                                <span className={`track-cover cover-tone-${index + 1}`}>
+                                    <Icon name={coverIcons[index]} size={22} />
+                                </span>
+                                <span className="track-meta">
+                                    <strong>{track.title}</strong>
+                                    <small>{track.artist}</small>
+                                </span>
+                                <span className="track-album">{track.album}</span>
+                                <span className="track-duration">{formatDuration(track.durationSec || 0)}</span>
+                                <Icon name="more" size={20} className="track-more" />
+                            </button>
+                        </li>
+                    )
+                })}
+            </ol>
+        </section>
     )
 }
 
-function CollectionSection({ title, items, type, tracksStatus }) {
+function ArtistList({ artists = []}) {
     return (
         <section className="collection-section" aria-label={title}>
             <div className="collection-heading">
@@ -100,25 +91,13 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                     </button>
                 )}
             </div>
-            {items.length === 0 && (
-                <p className="collection-empty">
-                    {tracksStatus === 'loading'
-                        ? 'Загружаем…'
-                        : tracksStatus === 'error'
-                          ? 'Не удалось загрузить данные.'
-                          : type === 'artist'
-                            ? 'Пока нет исполнителей.'
-                            : 'Пока нет альбомов.'}
-                </p>
-            )}
-            <div className={`collection-list collection-list--${type}`}>
-                {items.slice(0, 4).map(item => (
-                    <article className="collection-card" key={item.id}>
-                        <Cover
-                            cover={type === 'artist' ? item.image_url : item.cover_url}
-                            icon={type === 'artist' ? 'artist' : 'music'}
-                        />
-                        <strong>{type === 'artist' ? item.name : item.title}</strong>
+            <div className="artist-list">
+                {artists.map((artist, index) => (
+                    <article className="artist-card" key={artist.id || artist.name}>
+                        <span className={`artist-avatar artist-avatar-${(index % 4) + 1}`}>
+                            <Icon name="artist" size={25} />
+                        </span>
+                        <strong className="artist-name">{artist.name}</strong>
                     </article>
                 ))}
             </div>
@@ -157,6 +136,32 @@ export function HomePage({
                     >
                         <Icon name="play" size={16} /> Слушать
                     </button>
+                ))}
+            </div>
+        </section>
+    )
+}
+
+export function HomePage({
+    tracks = [],
+    artists = [],
+    activeTrack = tracks[0],
+    onTrackSelect = () => {},
+}) {
+    const [activeMix, setActiveMix] = useState(0)
+    return (
+        <div className="home-page">
+            <PageHeader />
+            <div className="home-page-divider"></div>
+            {tracks.length === 0 ? (
+                <p>Пока нет треков</p>
+            ) : (
+                <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
+            )}
+            <section className="home-section discovery-section" aria-labelledby="discovery-title">
+                <div className="discovery-grid">
+                    <ArtistList artists={artists} />
+                    <MixList activeMix={activeMix} onMixSelect={setActiveMix} />
                 </div>
             </section>
 
