@@ -1,40 +1,25 @@
 import { requestJson } from '../../shared/api/request.js'
 
-export class CatalogError extends Error {
-    constructor(message, code = '') {
-        super(message)
-        this.name = 'CatalogError'
-        this.code = code
-    }
-}
-
-/** Преобразует API-трек в вид для отображения. */
-export function mapTrack(track) {
-    return {
-        id: track.id,
-        title: track.title,
-        artist: (track.artists || []).map(a => a.name).join(', ') || 'Неизвестный',
-        album: '—',
-        durationSec: Math.round((track.duration_ms || 0) / 1000),
-        coverUrl: track.cover_url,
-    }
-}
-
-/** Данные главной: tracks, artists, albums */
-export async function getHome(request = fetch) {
-    let response
-    let body
+/** Данные главной: треки, исполнители и альбомы. */
+export async function getHomeData(request = fetch) {
+    let result
     try {
-        ;({ response, body } = await requestJson('/home', { method: 'GET' }, request))
+        result = await requestJson('/home', { method: 'GET' }, request)
     } catch {
-        throw new CatalogError('Не удалось загрузить главную. Проверьте соединение.', 'network_error')
+        throw new Error('Не удалось подключиться к серверу. Попробуйте ещё раз.')
     }
-    if (response.status === 200) {
-        return {
-            tracks: body.tracks ?? [],
-            artists: body.artists ?? [],
-            albums: body.albums ?? [],
+    const { response, body } = result
+
+    if (!response.ok) {
+        if (response.status === 404) {
+            throw new Error('Каталог музыки пока недоступен.')
         }
+        throw new Error(body?.error?.message || 'Не удалось загрузить треки.')
     }
-    throw new CatalogError('Не удалось загрузить главную. Попробуйте ещё раз.', body?.error?.code || 'home_error')
+
+    if (!['tracks', 'artists', 'albums'].every(key => Array.isArray(body?.[key]))) {
+        throw new Error('Сервер вернул данные главной в неизвестном формате.')
+    }
+
+    return { tracks: body.tracks, artists: body.artists, albums: body.albums }
 }
