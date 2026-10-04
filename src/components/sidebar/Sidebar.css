@@ -7,7 +7,7 @@
     padding: 10px 6px;
     overflow: hidden;
     border: 0;
-    border-radius: 0;
+    border-radius: 20px;
     background: var(--color-panel);
     color: #f1f2f8;
 }
