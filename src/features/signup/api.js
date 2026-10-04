@@ -13,22 +13,17 @@ export class SignupError extends Error {
 /**
  * Регистрация без автоматического входа. Логин и пароль локально не сохраняем.
  * @param {{display_name: string, email: string, password: string}} data Данные после валидации.
- * @param {typeof fetch} request fetch или его замена в тестах.
  * @returns {Promise<void>} Успех только при статусе 201.
  */
-export async function signup(data, request = fetch) {
+export async function signup(data) {
     let response
     let body
 
     try {
-        ;({ response, body } = await requestJson(
-            '/auth/signup',
-            {
-                method: 'POST',
-                body: JSON.stringify(data),
-            },
-            request,
-        ))
+        ;({ response, body } = await requestJson('/auth/signup', {
+            method: 'POST',
+            body: JSON.stringify(data),
+        }))
     } catch {
         throw new SignupError('Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.')
     }

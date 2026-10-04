@@ -1,4 +1,4 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../shared/lib/my-react/index.js'
 import { Icon } from '../ui/Icon.jsx'
 import './Sidebar.css'
 

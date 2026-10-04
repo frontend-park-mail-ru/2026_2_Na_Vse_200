@@ -1,4 +1,4 @@
-import { createElement, render } from '../../index.js'
+import { createElement, render } from '../shared/lib/my-react/index.js'
 import { appStore } from './store.js'
 import { getCurrentUser, logout } from '../features/auth/api.js'
 import { getHomeData } from '../features/music/api.js'

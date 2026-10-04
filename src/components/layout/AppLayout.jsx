@@ -1,4 +1,4 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../shared/lib/my-react/index.js'
 import { Sidebar } from '../sidebar/Sidebar.jsx'
 import { Player } from '../player/Player.jsx'
 import './AppLayout.css'

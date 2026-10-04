@@ -1,4 +1,4 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../shared/lib/my-react/index.js'
 
 /** @param {object} props Настройки поля, подпись, ошибка и обработчики. @returns {object} Поле с подписью и сообщением об ошибке. */
 export function FormField({

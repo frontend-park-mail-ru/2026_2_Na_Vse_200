@@ -1,7 +1,8 @@
 import { API_URL, API_REQUEST_OPTIONS } from '../../config.js'
 
-export async function requestJson(path, options = {}, request = fetch) {
-    const response = await request(`${API_URL}${path}`, {
+
+export async function requestJson(path, options = {}) {
+    const response = await fetch(`${API_URL}${path}`, {
         ...API_REQUEST_OPTIONS,
         ...options,
         headers: {
