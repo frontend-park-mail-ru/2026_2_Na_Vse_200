@@ -23,13 +23,16 @@ const pages = {
  */
 export function mountApp(container, router) {
     let initial = true
+    let previousRouteName = null
     let notice = ''
     let user = null
     let sessionState = 'loading'
     let sessionError = ''
+    let sessionRequested = false
     let authAction = false
     let tracksStatus = 'loading'
     let tracksError = ''
+    let catalogRequested = false
     let activeTrackId = appStore.getState().tracks[0]?.id
 
     const onRegistered = () => {
@@ -39,11 +42,12 @@ export function mountApp(container, router) {
 
     const onAuthenticated = nextUser => {
         user = nextUser
+        sessionState = 'ready'
         sessionError = ''
         tracksStatus = 'loading'
         tracksError = ''
         router.navigate('/')
-        loadCatalog()
+        loadCatalogForHome()
     }
 
     const onLogout = async () => {
@@ -53,6 +57,8 @@ export function mountApp(container, router) {
         try {
             await logout()
             user = null
+            sessionRequested = false
+            sessionState = 'loading'
             sessionError = ''
             authAction = false
             router.navigate('/login')
@@ -132,32 +138,57 @@ export function mountApp(container, router) {
         )
 
         notice = ''
-        if (!initial) {
+        if (!initial && previousRouteName !== routeName) {
             container.querySelector('h1')?.focus()
             window.scrollTo(0, 0)
         }
+        previousRouteName = routeName
         initial = false
     }
 
-    const handleRoute = () => renderCurrent()
+    const handleRoute = () => {
+        renderCurrent()
+        loadSessionForHome()
+        loadCatalogForHome()
+    }
     router.on('route', handleRoute).listen()
 
-    getCurrentUser()
-        .then(nextUser => {
-            user = nextUser
-            sessionState = 'ready'
-            const currentPath = router.getCurrentUrl().pathname
-            const currentRoute = router.findRoute(currentPath)?.value
-            if (!user && currentRoute === 'home') {
-                router.navigate('/signup', { replace: true })
-            }
-            loadCatalog()
-        })
-        .catch(error => {
-            sessionState = 'error'
-            sessionError = error.message
-            loadCatalog()
-        })
+    function loadSessionForHome() {
+        if (sessionRequested) return
+        const currentPath = router.getCurrentUrl().pathname
+        const currentRoute = router.findRoute(currentPath)?.value
+        if (currentRoute !== 'home') return
+
+        sessionRequested = true
+        getCurrentUser()
+            .then(nextUser => {
+                user = nextUser
+                sessionState = 'ready'
+                const path = router.getCurrentUrl().pathname
+                const routeName = router.findRoute(path)?.value
+                if (!user && routeName === 'home') {
+                    router.navigate('/signup', { replace: true })
+                }
+                loadCatalogForHome()
+            })
+            .catch(error => {
+                sessionState = 'error'
+                sessionError = error.message
+                loadCatalogForHome()
+            })
+    }
+
+    function loadCatalogForHome() {
+        if (sessionState === 'loading' || catalogRequested) return
+        const currentPath = router.getCurrentUrl().pathname
+        const currentRoute = router.findRoute(currentPath)?.value
+        if (currentRoute !== 'home') return
+        catalogRequested = true
+        loadCatalog()
+    }
+
+    loadSessionForHome()
+    loadCatalogForHome()
 
     return () => router.off('route', handleRoute).destroy()
 }

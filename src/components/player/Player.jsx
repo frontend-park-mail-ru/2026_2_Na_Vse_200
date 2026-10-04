@@ -20,25 +20,25 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
 
     return (
         <footer className="player" aria-label="Музыкальный плеер">
-            <div className="player-track">
-                <span className="player-cover">
+            <div className="player__track">
+                <span className="player__cover">
                     {cover && failedCover !== cover ? (
                         <img src={cover} alt="" onError={() => setFailedCover(cover)} />
                     ) : (
                         <Icon name="music" size={22} />
                     )}
                 </span>
-                <span className="player-track-copy">
+                <span className="player__track-copy">
                     <strong>{track?.title || 'Выберите трек'}</strong>
                     <small>{track ? getArtistName(track) : 'Популярные треки'}</small>
                 </span>
             </div>
 
-            <div className="player-center">
-                <div className="player-controls">
+            <div className="player__center">
+                <div className="player__controls">
                     <button
                         type="button"
-                        className="player-control player__secondary-control"
+                        className="player__control player__control--secondary"
                         aria-label="Предыдущий трек"
                         disabled={!track}
                         onClick={() => selectAdjacent(-1)}
@@ -47,7 +47,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                     </button>
                     <button
                         type="button"
-                        className="player-control player__play-toggle"
+                        className="player__control player__control--play"
                         aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
                         disabled={!track}
                         onClick={() => setIsPlaying(!isPlaying)}
@@ -56,7 +56,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                     </button>
                     <button
                         type="button"
-                        className="player-control player__secondary-control"
+                        className="player__control player__control--secondary"
                         aria-label="Следующий трек"
                         disabled={!track}
                         onClick={() => selectAdjacent(1)}
@@ -65,7 +65,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                     </button>
                 </div>
 
-                <div className="player-timeline">
+                <div className="player__timeline">
                     <input
                         type="range"
                         min="0"
@@ -79,13 +79,13 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                 </div>
             </div>
 
-            <div className="player-extra">
+            <div className="player__extra">
                 <button type="button" aria-label="Открыть очередь">
                     <Icon name="queue" size={24} />
                 </button>
                 <Icon name="volume" size={22} />
                 <input
-                    className="player-volume"
+                    className="player__volume"
                     type="range"
                     min="0"
                     max="100"

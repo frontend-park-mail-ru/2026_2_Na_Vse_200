@@ -66,6 +66,7 @@ export function useState(initialValue) {
  * @returns {Node|null} Обновлённый DOM-узел или null после удаления.
  */
 function reconcile(element, dom, path, previousElement, parentDom) {
+    // Если элемента больше нет, удаляем его DOM-узел и сохранённые данные.
     if (element === null || element === undefined) {
         if (dom) parentDom.removeChild(dom)
         clearPath(path)
@@ -80,6 +81,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     }
 
     if (typeof element.type === 'function') {
+        // Вызываем компонент и отдельно сверяем DOM с тем, что он вернул.
         const previousPath = currentPath
         const previousHookIndex = currentHookIndex
         currentPath = path
@@ -107,6 +109,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     const previousIsText = previousElement?.type === 'TEXT_ELEMENT'
     const sameType = dom && previousElement && element.type === previousElement.type
 
+    // Создаём узел заново, если его ещё нет или изменился его тип.
     if (!dom || (!sameType && !(isText && previousIsText))) {
         const isSvg =
             element.type === 'svg' ||
@@ -132,6 +135,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         return dom
     }
 
+    // Обновляем свойства элемента; его дочерние узлы сверяем ниже.
     updateProps(dom, previousElement?.props ?? {}, element.props)
 
     const oldChildren = previousElement?.props.children ?? []
@@ -143,6 +147,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         nextChildPaths.add(getChildPath(path, newChildren[index], index))
     }
 
+    // Удаляем прежних детей, которых больше нет в новом дереве.
     for (let index = 0; index < oldChildren.length; index++) {
         const oldChildPath = getChildPath(path, oldChildren[index], index)
         if (!nextChildPaths.has(oldChildPath)) {
@@ -150,6 +155,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         }
     }
 
+    // Обновляем новых детей и расставляем DOM-узлы в нужном порядке.
     for (let index = 0; index < newChildren.length; index++) {
         const newChild = newChildren[index] ?? null
         const childPath = getChildPath(path, newChild, index)

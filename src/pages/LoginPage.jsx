@@ -1,33 +1,61 @@
 import { createElement, useState } from '../shared/lib/my-react/index.js'
 import { FormField } from '../components/ui/FormField.jsx'
 import { login } from '../features/auth/api.js'
+import { validateLogin } from '../features/auth/validation.js'
+import logo from '../assets/2une-dark-transparent.png'
 import './AuthPage.css'
 
 /** @param {{notice?: string, onAuthenticated?: (user: object) => void}} props Сообщение и обработчик успешного входа. @returns {object} Форма входа. */
 export function LoginPage({ notice, onAuthenticated } = {}) {
     const [state, setState] = useState({ message: '', errors: {}, pending: false })
-    // Отменяем отправку формы браузером, чтобы email и пароль не попали в URL.
-    function submit(event) {
+    function readValues(form) {
+        return {
+            email: form.elements.namedItem('email').value,
+            password: form.elements.namedItem('password').value,
+        }
+    }
+
+    function clearError(event) {
+        const name = event.target.name
+        if (state.errors[name] || state.message) {
+            setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
+        }
+    }
+
+    function validateField(event) {
+        const { name, form } = event.target
+        if (form.dataset.submitting === 'true') return
+        const { errors } = validateLogin(readValues(form))
+        setState(previous => ({ ...previous, errors: { ...previous.errors, [name]: errors[name] || '' } }))
+    }
+
+    async function submit(event) {
         event.preventDefault()
         const form = event.currentTarget
-        const email = form.elements.namedItem('email').value.trim().toLowerCase()
-        const password = form.elements.namedItem('password').value
-        const errors = {}
-        if (!email) errors.email = 'Введите email'
-        if (!password) errors.password = 'Введите пароль'
+        if (form.dataset.submitting === 'true') return
+        const { data, errors } = validateLogin(readValues(form))
         if (Object.keys(errors).length) {
-            setState({ message: '', errors, pending: false })
+            setState({ message: 'Неверный email или пароль', errors, pending: false })
+            form.elements.namedItem(Object.keys(errors)[0]).focus()
             return
         }
+        form.dataset.submitting = 'true'
         setState({ message: '', errors: {}, pending: true })
-        login({ email, password })
-            .then(user => onAuthenticated?.(user))
-            .catch(error => setState({ message: error.message, errors: error.fields || {}, pending: false }))
+        try {
+            const user = await login(data)
+            if (form.isConnected) onAuthenticated?.(user)
+        } catch (error) {
+            if (form.isConnected) setState({ message: error.message, errors: error.fields || {}, pending: false })
+        } finally {
+            form.dataset.submitting = 'false'
+        }
     }
+
     return (
-        <section className="auth-screen" aria-labelledby="login-title">
-            <aside className="auth-art">
-                <p>
+        <section className="auth-page" aria-labelledby="login-title">
+            <aside className="auth-page__art">
+                <img className="auth-page__logo" src={logo} alt="2une tune" />
+                <p className="auth-page__slogan">
                     Слушай
                     <br />
                     Сохраняй
@@ -35,21 +63,29 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
                     Открывай новое
                 </p>
             </aside>
-            <div className="auth-panel">
-                <div className="auth-content">
-                    <h1 id="login-title" tabIndex={-1}>
+            <div className="auth-page__panel">
+                <div className="auth-page__content">
+                    <h1 className="auth-page__title" id="login-title" tabIndex={-1}>
                         Вход
                     </h1>
-                    <p className="auth-intro">
+                    <p className="auth-page__intro">
                         С возвращением! <br />
                         Войдите, чтобы продолжить слушать.
                     </p>
                     {notice ? (
-                        <p className="login-notice" role="status">
+                        <p className="auth-page__notice" role="status">
                             {notice}
                         </p>
                     ) : null}
-                    <form onSubmit={submit}>
+                    <form
+                        className="auth-page__form auth-page__form--login"
+                        noValidate
+                        onSubmit={submit}
+                        aria-busy={state.pending ? 'true' : 'false'}
+                    >
+                        <p className="auth-page__feedback" role="alert">
+                            {state.message}
+                        </p>
                         <FormField
                             idPrefix="login"
                             name="email"
@@ -58,6 +94,8 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
                             placeholder="почта"
                             autoComplete="username"
                             error={state.errors.email}
+                            onInput={clearError}
+                            onBlur={validateField}
                             disabled={state.pending}
                         />
                         <FormField
@@ -68,17 +106,16 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
                             placeholder="пароль"
                             autoComplete="current-password"
                             error={state.errors.password}
+                            onInput={clearError}
+                            onBlur={validateField}
                             disabled={state.pending}
                         />
-                        <button className="auth-submit" type="submit" disabled={state.pending}>
+                        <button className="auth-page__submit" type="submit" disabled={state.pending}>
                             {state.pending ? 'Входим…' : 'Войти'}
                         </button>
                     </form>
 
-                    <p className="auth-feedback" role="status">
-                        {state.message}
-                    </p>
-                    <p className="auth-switch">
+                    <p className="auth-page__switch">
                         Нет аккаунта?{' '}
                         <a href="/signup" data-link>
                             Зарегистрироваться

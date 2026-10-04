@@ -2,6 +2,7 @@ import { createElement, useState } from '../shared/lib/my-react/index.js'
 import { FormField } from '../components/ui/FormField.jsx'
 import { validateSignup } from '../features/signup/validation.js'
 import { signup } from '../features/signup/api.js'
+import logo from '../assets/2une-dark-transparent.png'
 import './AuthPage.css'
 
 /** @param {{onRegistered: () => void}} props Переход после регистрации. @returns {object} Экран регистрации. */
@@ -51,9 +52,10 @@ export function SignupPage({ onRegistered }) {
         }
     }
     return (
-        <section className="auth-screen" aria-labelledby="signup-title">
-            <aside className="auth-art" aria-label="Музыка под настроение, каждый день">
-                <p>
+        <section className="auth-page" aria-labelledby="signup-title">
+            <aside className="auth-page__art" aria-label="Музыка под настроение, каждый день">
+                <img className="auth-page__logo" src={logo} alt="2une tune" />
+                <p className="auth-page__slogan">
                     Музыка
                     <br />
                     под твое
@@ -61,13 +63,18 @@ export function SignupPage({ onRegistered }) {
                     настроение
                 </p>
             </aside>
-            <div className="auth-panel">
-                <div className="auth-content">
-                    <h1 id="signup-title" tabIndex={-1}>
+            <div className="auth-page__panel">
+                <div className="auth-page__content">
+                    <h1 className="auth-page__title" id="signup-title" tabIndex={-1}>
                         Регистрация
                     </h1>
-                    <p className="auth-intro">Пара секунд — и можно слушать.</p>
-                    <form noValidate onSubmit={submit} aria-busy={state.pending ? 'true' : 'false'}>
+                    <p className="auth-page__intro">Пара секунд — и можно слушать.</p>
+                    <form
+                        className="auth-page__form"
+                        noValidate
+                        onSubmit={submit}
+                        aria-busy={state.pending ? 'true' : 'false'}
+                    >
                         <FormField
                             name="display_name"
                             label="Имя"
@@ -100,14 +107,14 @@ export function SignupPage({ onRegistered }) {
                             onBlur={validateField}
                             disabled={state.pending}
                         />
-                        <div className="auth-feedback" role="alert">
+                        <div className="auth-page__feedback" role="alert">
                             {state.message}
                         </div>
-                        <button className="auth-submit" type="submit" disabled={state.pending}>
+                        <button className="auth-page__submit" type="submit" disabled={state.pending}>
                             {state.pending ? 'Создаём аккаунт…' : 'Создать аккаунт'}
                         </button>
                     </form>
-                    <p className="auth-switch">
+                    <p className="auth-page__switch">
                         Уже есть аккаунт?{' '}
                         <a href="/login" data-link>
                             Войти
