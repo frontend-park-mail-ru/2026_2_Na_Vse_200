@@ -11,9 +11,9 @@ export class AuthError extends Error {
     }
 }
 
-async function requestAuth(path, options, request) {
+async function requestAuth(path, options) {
     try {
-        return await requestJson(path, options, request)
+        return await requestJson(path, options)
     } catch {
         throw new AuthError(
             'Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.',
@@ -23,9 +23,9 @@ async function requestAuth(path, options, request) {
     }
 }
 
-/** Текущий пользователь по сессии. При 401 пользователь не вошёл — возвращаем null. */
-export async function getCurrentUser(request = fetch) {
-    const { response, body } = await requestAuth('/auth/me', { method: 'GET' }, request)
+/** Текущий пользователь по сессии. Нет cookie / 401 — гость, возвращаем null без ошибки. */
+export async function getCurrentUser() {
+    const { response, body } = await requestAuth('/auth/me', { method: 'GET' })
     if (response.status === 200) return body
     if (response.status === 401) return null
     throw new AuthError(
@@ -36,8 +36,11 @@ export async function getCurrentUser(request = fetch) {
 }
 
 /** Вход в аккаунт. Cookie сессии с флагом HttpOnly устанавливает сервер. */
-export async function login(data, request = fetch) {
-    const { response, body } = await requestAuth('/auth/login', { method: 'POST', body: JSON.stringify(data) }, request)
+export async function login(data) {
+    const { response, body } = await requestAuth('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify(data),
+    })
     if (response.status === 200) return body
     if (response.status === 400 && body?.error?.code === 'validation_failed') {
         throw new AuthError('', body.error.fields || {}, body.error.code)
@@ -49,8 +52,8 @@ export async function login(data, request = fetch) {
 }
 
 /** Выход из аккаунта. Ждём статус 204. */
-export async function logout(request = fetch) {
-    const { response, body } = await requestAuth('/auth/logout', { method: 'POST' }, request)
+export async function logout() {
+    const { response, body } = await requestAuth('/auth/logout', { method: 'POST' })
     if (response.status === 204) return
     throw new AuthError('Не удалось выйти из аккаунта. Попробуйте ещё раз.', {}, body?.error?.code || 'logout_error')
 }

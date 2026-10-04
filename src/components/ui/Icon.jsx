@@ -1,4 +1,4 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../shared/lib/my-react/index.js'
 
 const glyphs = {
     home: ['M3 10.8 12 3l9 7.8', 'M5.5 9.5v10h13v-10', 'M9.5 19.5v-6h5v6'],

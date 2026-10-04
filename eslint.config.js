@@ -36,7 +36,7 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx}', 'createElement.js', 'render.js', 'index.js'],
+        files: ['src/**/*.{js,jsx}'],
         languageOptions: { globals: globals.browser },
     },
     {

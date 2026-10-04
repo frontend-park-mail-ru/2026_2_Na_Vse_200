@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../index.js'
+import { createElement, useState } from '../shared/lib/my-react/index.js'
 import { FormField } from '../components/ui/FormField.jsx'
 import { login } from '../features/auth/api.js'
 import './AuthPage.css'
