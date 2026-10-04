@@ -25,7 +25,15 @@ async function requestAuth(path, options) {
 
 /** Текущий пользователь по сессии. Нет cookie / 401 — гость, возвращаем null без ошибки. */
 export async function getCurrentUser() {
-    const { response, body } = await requestAuth('/auth/me', { method: 'GET' })
+    let result
+    try {
+        result = await requestJson('/auth/me', { method: 'GET' })
+    } catch {
+        // Session lookup is optional: a missing API or network connection means guest mode.
+        return null
+    }
+
+    const { response, body } = result
     if (response.status === 200) return body
     if (response.status === 401) return null
     throw new AuthError(

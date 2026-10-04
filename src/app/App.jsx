@@ -15,13 +15,17 @@ const pages = {
     'not-found': { component: NotFoundPage, title: 'Страница не найдена' },
 }
 
-// Старт один раз: у нас нет useEffect, поэтому флаг снаружи компонента.
+// Старт один раз: у нас нет useEffect, поэтому флаги снаружи компонента.
 let bootstrapped = false
 let handleRoute = null
+let sessionRequested = false
+let catalogRequested = false
+let sessionReady = false
 
 /**
  * Корень SPA: сессия, каталог, активный трек и какая страница по URL.
  * Состояние через useState — setState сам перерисовывает дерево.
+ * getMe и каталог запрашиваем только на главной (как в MUSIC-10).
  * @param {{ router: import('../shared/lib/VanillaRouter.js').VanillaRouter }} props Роутер приложения.
  * @returns {object} Разметка текущей страницы.
  */
@@ -34,7 +38,7 @@ function App({ router }) {
     const [tracksStatus, setTracksStatus] = useState('loading')
     const [tracksError, setTracksError] = useState('')
     const [activeTrackId, setActiveTrackId] = useState(appStore.getState().tracks[0]?.id)
-    const [routeTick, setRouteTick] = useState(0)  // для перерисовки при смене url
+    const [routeTick, setRouteTick] = useState(0) // для перерисовки при смене url
 
     const onRegistered = () => {
         setNotice('Аккаунт создан. Войдите, используя свою почту и пароль.')
@@ -43,11 +47,13 @@ function App({ router }) {
 
     const onAuthenticated = nextUser => {
         setUser(nextUser)
+        setSessionState('ready')
         setSessionError('')
         setTracksStatus('loading')
         setTracksError('')
+        catalogRequested = false
         router.navigate('/')
-        loadCatalog()
+        loadCatalogForHome()
     }
 
     const onLogout = async () => {
@@ -56,6 +62,10 @@ function App({ router }) {
         try {
             await logout()
             setUser(null)
+            sessionRequested = false
+            catalogRequested = false
+            sessionReady = false
+            setSessionState('loading')
             setSessionError('')
             setAuthAction(false)
             router.navigate('/login')
@@ -86,26 +96,55 @@ function App({ router }) {
         }
     }
 
-    if (!bootstrapped) {
-        bootstrapped = true
-        handleRoute = () => setRouteTick(tick => tick + 1)
-        router.on('route', handleRoute).listen()
+    function loadSessionForHome() {
+        if (sessionRequested) return
+        const currentPath = router.getCurrentUrl().pathname
+        const currentRoute = router.findRoute(currentPath)?.value
+        if (currentRoute !== 'home') return
+
+        sessionRequested = true
         getCurrentUser()
             .then(nextUser => {
                 setUser(nextUser)
+                sessionReady = true
                 setSessionState('ready')
-                const currentPath = router.getCurrentUrl().pathname
-                const currentRoute = router.findRoute(currentPath)?.value
-                if (!nextUser && currentRoute === 'home') {
+                const path = router.getCurrentUrl().pathname
+                const routeName = router.findRoute(path)?.value
+                if (!nextUser && routeName === 'home') {
                     router.navigate('/signup', { replace: true })
                 }
-                loadCatalog()
+                loadCatalogForHome()
             })
             .catch(error => {
+                sessionReady = true
                 setSessionState('error')
                 setSessionError(error.message)
-                loadCatalog()
+                loadCatalogForHome()
             })
+    }
+
+    function loadCatalogForHome() {
+        if (!sessionReady || catalogRequested) return
+        const currentPath = router.getCurrentUrl().pathname
+        const currentRoute = router.findRoute(currentPath)?.value
+        if (currentRoute !== 'home') return
+        catalogRequested = true
+        loadCatalog()
+    }
+
+    if (!bootstrapped) {
+        bootstrapped = true
+        handleRoute = () => {
+            setRouteTick(tick => tick + 1)
+            // после смены URL снова проверяем, нужна ли сессия/каталог на главной
+            queueMicrotask(() => {
+                loadSessionForHome()
+                loadCatalogForHome()
+            })
+        }
+        router.on('route', handleRoute).listen()
+        loadSessionForHome()
+        loadCatalogForHome()
     }
 
     void routeTick
@@ -165,5 +204,7 @@ export function mountApp(container, router) {
         if (handleRoute) router.off('route', handleRoute)
         router.destroy()
         bootstrapped = false
+        sessionRequested = false
+        catalogRequested = false
     }
 }

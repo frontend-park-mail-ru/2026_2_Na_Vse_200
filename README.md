@@ -51,6 +51,8 @@ Preview проверяет готовую сборку локально (обы�
 ### Внешние ссылки
 
 - [Бэкенд проекта](https://github.com/go-park-mail-ru/2026_2_Na_Vse_200)
+- [Figma](https://www.figma.com/design/a6FEt86x6uF36jjA64WcW8/MUSIC?node-id=0-1&t=Yrg1OBQLQ2NnfmIr-0)
+- [Деплой](http://176.57.214.167/)
 
 ### Правила оформления Pull Requests
 

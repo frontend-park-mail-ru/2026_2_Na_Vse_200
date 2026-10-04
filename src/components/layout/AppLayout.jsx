@@ -19,7 +19,7 @@ export function AppLayout({
     authAction,
     children,
 }) {
-    if (route === 'signup' || route === 'login') {
+    if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
             <main id="main-content" tabIndex={-1}>
                 {children}
@@ -29,16 +29,16 @@ export function AppLayout({
 
     return (
         <div className="app-shell">
-            <a className="skip-link" href="#main-content">
+            <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
             <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
-            <div className="app-main-column">
-                <main className="app-content" id="main-content" tabIndex={-1}>
+            <div className="app-shell__main-column">
+                <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
                 </main>
                 {sessionError ? (
-                    <p className="session-error" role="alert">
+                    <p className="app-shell__session-error" role="alert">
                         {sessionError}
                     </p>
                 ) : null}

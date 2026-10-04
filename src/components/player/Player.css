@@ -7,7 +7,7 @@
     gap: 20px;
     width: 100%;
     min-width: 0;
-    padding: 10px 20px;
+    padding: 10px 16px;
     border: 0;
     border-radius: 32px;
     background: #20222b;
@@ -15,18 +15,18 @@
     box-shadow: 0 -12px 35px #0002;
 }
 
-.player-track {
+.player__track {
     display: flex;
     align-items: center;
     gap: 11px;
     min-width: 0;
 }
 
-.player-cover {
+.player__cover {
     display: grid;
-    width: 60px;
-    height: 60px;
-    flex: 0 0 60px;
+    width: clamp(48px, 4.9vw, 60px);
+    height: clamp(48px, 4.9vw, 60px);
+    flex: 0 0 clamp(48px, 4.9vw, 60px);
     overflow: hidden;
     place-items: center;
     border-radius: 11px;
@@ -36,26 +36,26 @@
     color: #fff9;
 }
 
-.player-cover img {
+.player__cover img {
     width: 100%;
     height: 100%;
     object-fit: cover;
 }
 
-.player-track-copy {
+.player__track-copy {
     display: grid;
     gap: 5px;
     min-width: 0;
 }
 
-.player-track-copy strong {
+.player__track-copy strong {
     overflow: hidden;
-    font-size: 14px;
+    font-size: clamp(12px, 1.14vw, 14px);
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.player-track-copy small {
+.player__track-copy small {
     color: #979bad;
     font-size: 11px;
     overflow: hidden;
@@ -63,7 +63,7 @@
     white-space: nowrap;
 }
 
-.player-extra button {
+.player__extra button {
     display: grid;
     place-items: center;
     width: 32px;
@@ -79,27 +79,27 @@
         transform 0.18s ease;
 }
 
-.player-extra button:hover {
+.player__extra button:hover {
     transform: scale(1.08);
     background: var(--color-hover);
     color: #fff;
 }
 
-.player-center {
+.player__center {
     display: grid;
-    gap: 14px;
+    gap: clamp(10px, 1.1vw, 14px);
     width: min(100%, 425px);
     justify-self: center;
 }
 
-.player-controls {
+.player__controls {
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 14px;
 }
 
-.player-control {
+.player__control {
     display: grid;
     place-items: center;
     flex-shrink: 0;
@@ -107,11 +107,11 @@
     cursor: pointer;
 }
 
-.player-control svg {
+.player__control svg {
     display: block;
 }
 
-.player__secondary-control {
+.player__control--secondary {
     width: 30px;
     height: 36px;
     padding: 0;
@@ -120,14 +120,14 @@
     transition: color 0.18s ease;
 }
 
-.player__secondary-control:hover:not(:disabled) {
+.player__control--secondary:hover:not(:disabled) {
     background: var(--color-hover);
     color: #fff;
 }
 
-.player__play-toggle {
-    width: 42px;
-    height: 42px;
+.player__control--play {
+    width: clamp(34px, 3.4vw, 42px);
+    height: clamp(34px, 3.4vw, 42px);
     padding: 0;
     border-radius: 50%;
     background: #f0eff5;
@@ -138,28 +138,28 @@
         background 0.18s ease;
 }
 
-.player__play-toggle svg {
+.player__control--play svg {
     fill: currentColor;
     stroke-width: 0;
 }
 
-.player-control:disabled {
+.player__control:disabled {
     opacity: 0.5;
     cursor: default;
 }
 
-.player__play-toggle:hover:not(:disabled) {
+.player__control--play:hover:not(:disabled) {
     transform: scale(1.06);
     background: var(--color-hover);
     color: #fff;
 }
 
-.player-timeline {
+.player__timeline {
     display: flex;
     align-items: center;
 }
 
-.player-timeline input {
+.player__timeline input {
     width: 100%;
     height: 3px;
     margin: 0;
@@ -168,7 +168,7 @@
     cursor: pointer;
 }
 
-.player-timeline input::-webkit-slider-thumb {
+.player__timeline input::-webkit-slider-thumb {
     width: 12px;
     height: 12px;
     appearance: none;
@@ -178,7 +178,7 @@
     box-shadow: 0 0 0 3px #bba4ff22;
 }
 
-.player-timeline input::-moz-range-thumb {
+.player__timeline input::-moz-range-thumb {
     width: 12px;
     height: 12px;
     border: 0;
@@ -186,7 +186,7 @@
     background: #f5f2ff;
 }
 
-.player-extra {
+.player__extra {
     display: flex;
     align-items: center;
     justify-content: end;
@@ -195,12 +195,12 @@
     min-width: 0;
 }
 
-.player-extra > svg {
+.player__extra > svg {
     flex-shrink: 0;
 }
 
-.player-volume {
-    width: 114px;
+.player__volume {
+    width: clamp(80px, 9vw, 114px);
     min-width: 0;
     height: 3px;
     margin: 0;
@@ -209,14 +209,14 @@
     cursor: pointer;
 }
 
-.player-volume::-webkit-slider-thumb {
+.player__volume::-webkit-slider-thumb {
     width: 8px;
     height: 8px;
     appearance: none;
     background: transparent;
 }
 
-.player-volume::-moz-range-thumb {
+.player__volume::-moz-range-thumb {
     width: 8px;
     height: 8px;
     border: 0;
@@ -228,10 +228,6 @@
         grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr);
         gap: 12px;
     }
-
-    .player-volume {
-        display: none;
-    }
 }
 
 @media (max-width: 900px) {
@@ -241,13 +237,13 @@
         padding: 9px 12px;
     }
 
-    .player-cover {
+    .player__cover {
         width: 40px;
         height: 40px;
         flex-basis: 40px;
     }
 
-    .player-extra {
+    .player__extra {
         display: none;
     }
 }
@@ -261,22 +257,22 @@
         border-radius: 0;
     }
 
-    .player-cover {
+    .player__cover {
         width: 38px;
         height: 38px;
         flex-basis: 38px;
     }
 
-    .player-center {
+    .player__center {
         width: 100%;
         gap: 5px;
     }
 
-    .player-controls {
+    .player__controls {
         gap: 8px;
     }
 
-    .player__play-toggle {
+    .player__control--play {
         width: 31px;
         height: 31px;
     }

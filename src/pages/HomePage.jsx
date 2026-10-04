@@ -27,7 +27,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
     const [likedTracks, setLikedTracks] = useState({})
     if (tracksStatus === 'loading') {
         return (
-            <p className="home-message" aria-live="polite">
+            <p className="home-page__message" aria-live="polite">
                 Загружаем треки…
             </p>
         )
@@ -35,7 +35,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
 
     if (tracksStatus === 'error') {
         return (
-            <div className="home-message home-message--error" role="alert">
+            <div className="home-page__message home-page__message--error" role="alert">
                 <span>{tracksError}</span>
                 <button type="button" onClick={onTracksRetry}>
                     Попробовать ещё раз
@@ -44,7 +44,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
         )
     }
 
-    if (!tracks.length) return <p className="home-message">Пока нет треков.</p>
+    if (!tracks.length) return <p className="home-page__message">Пока нет треков.</p>
 
     return (
         <ol className="track-list" aria-label="Популярные треки">
@@ -53,27 +53,27 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
                 const isLiked = likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)
                 return (
                     <li
-                        className={`track-row${isActive ? ' is-active' : ''}`}
+                        className={`track-list__item${isActive ? ' track-list__item--active' : ''}`}
                         key={track.id ?? `${track.title}-${index}`}
                     >
                         <button
-                            className="track-select"
+                            className="track-list__select"
                             type="button"
                             onClick={() => onTrackSelect(track)}
                             aria-current={isActive ? 'true' : undefined}
                         >
-                            <span className="track-index">{index + 1}</span>
+                            <span className="track-list__index">{index + 1}</span>
                             <Cover cover={getTrackCover(track)} />
-                            <span className="track-meta">
+                            <span className="track-list__meta">
                                 <strong>{track.title || 'Без названия'}</strong>
                                 <small>{getArtistName(track)}</small>
                             </span>
-                            <span className="track-duration">
+                            <span className="track-list__duration">
                                 {formatDuration(track.duration ?? track.duration_seconds ?? track.duration_ms / 1000)}
                             </span>
                         </button>
                         <button
-                            className="track-like"
+                            className="track-list__like"
                             type="button"
                             aria-label={`${isLiked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
                             aria-pressed={isLiked ? 'true' : 'false'}
@@ -81,7 +81,7 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
                         >
                             <Icon name="heart" size={19} />
                         </button>
-                        <Icon name="more" size={20} className="track-more" />
+                        <Icon name="more" size={20} className="track-list__more" />
                     </li>
                 )
             })}
@@ -91,8 +91,8 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
 
 function CollectionSection({ title, items, type, tracksStatus }) {
     return (
-        <section className="collection-section" aria-label={title}>
-            <div className="collection-heading">
+        <section className="music-collection" aria-label={title}>
+            <div className="music-collection__heading">
                 <h2>{title}</h2>
                 {items.length > 0 && (
                     <button type="button">
@@ -101,7 +101,7 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                 )}
             </div>
             {items.length === 0 && (
-                <p className="collection-empty">
+                <p className="music-collection__empty">
                     {tracksStatus === 'loading'
                         ? 'Загружаем…'
                         : tracksStatus === 'error'
@@ -111,9 +111,9 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                             : 'Пока нет альбомов.'}
                 </p>
             )}
-            <div className={`collection-list collection-list--${type}`}>
+            <div className={`music-collection__list music-collection__list--${type}`}>
                 {items.slice(0, 4).map(item => (
-                    <article className="collection-card" key={item.id}>
+                    <article className="music-collection__card" key={item.id}>
                         <Cover
                             cover={type === 'artist' ? item.image_url : item.cover_url}
                             icon={type === 'artist' ? 'artist' : 'music'}
@@ -138,7 +138,7 @@ export function HomePage({
 }) {
     return (
         <div className="home-page">
-            <header className="home-header">
+            <header className="home-page__header">
                 <h1>Главная</h1>
             </header>
 
@@ -160,7 +160,7 @@ export function HomePage({
                 </div>
             </section>
 
-            <section className="popular-section" aria-labelledby="popular-title">
+            <section className="home-page__popular" aria-labelledby="popular-title">
                 <h2 id="popular-title">Популярные треки</h2>
                 <TrackList
                     tracks={tracks}
@@ -172,7 +172,7 @@ export function HomePage({
                 />
             </section>
 
-            <div className="home-collections">
+            <div className="home-page__collections">
                 <CollectionSection title="Исполнители" items={artists} type="artist" tracksStatus={tracksStatus} />
                 <CollectionSection title="Альбомы" items={albums} type="album" tracksStatus={tracksStatus} />
             </div>
