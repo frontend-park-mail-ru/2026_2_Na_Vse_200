@@ -66,12 +66,14 @@ export function useState(initialValue) {
  * @returns {Node|null} Обновлённый DOM-узел или null после удаления.
  */
 function reconcile(element, dom, path, previousElement, parentDom) {
+    // удаление узла
     if (element === null || element === undefined) {
         if (dom) parentDom.removeChild(dom)
         clearPath(path)
         return null
     }
 
+    // после смены компонента сбасываем DOM и его состояние
     if (typeof element.type === 'function' && previousElement && previousElement.type !== element.type) {
         if (dom) parentDom.removeChild(dom)
         clearPath(path)
@@ -79,6 +81,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         previousElement = null
     }
 
+    // 
     if (typeof element.type === 'function') {
         const previousPath = currentPath
         const previousHookIndex = currentHookIndex
@@ -107,6 +110,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     const previousIsText = previousElement?.type === 'TEXT_ELEMENT'
     const sameType = dom && previousElement && element.type === previousElement.type
 
+    // создать / заменить DOM-узел
     if (!dom || (!sameType && !(isText && previousIsText))) {
         const isSvg =
             element.type === 'svg' ||
@@ -125,6 +129,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
 
     domByPath.set(path, dom)
 
+    // текстовый узел
     if (isText) {
         if (dom.nodeValue !== element.props.nodeValue) {
             dom.nodeValue = element.props.nodeValue
