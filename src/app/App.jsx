@@ -1,4 +1,4 @@
-import { createElement, render } from '../shared/lib/my-react/index.js'
+import { createElement, render, useState } from '../shared/lib/my-react/index.js'
 import { appStore } from './store.js'
 import { getCurrentUser, logout } from '../features/auth/api.js'
 import { getHomeData } from '../features/music/api.js'
@@ -15,143 +15,86 @@ const pages = {
     'not-found': { component: NotFoundPage, title: 'Страница не найдена' },
 }
 
+// Старт один раз: у нас нет useEffect, поэтому флаги снаружи компонента.
+let bootstrapped = false
+let handleRoute = null
+let sessionRequested = false
+let catalogRequested = false
+let sessionReady = false
+
 /**
- * Запускает приложение и переключает страницы по маршруту.
- * @param {HTMLElement} container Корневой контейнер приложения.
- * @param {import('../shared/lib/VanillaRouter.js').VanillaRouter} router Клиентский роутер.
- * @returns {() => void} Очистка при горячей перезагрузке.
+ * Корень SPA: сессия, каталог, активный трек и какая страница по URL.
+ * Состояние через useState — setState сам перерисовывает дерево.
+ * getMe и каталог запрашиваем только на главной (как в MUSIC-10).
+ * @param {{ router: import('../shared/lib/VanillaRouter.js').VanillaRouter }} props Роутер приложения.
+ * @returns {object} Разметка текущей страницы.
  */
-export function mountApp(container, router) {
-    let initial = true
-    let previousRouteName = null
-    let notice = ''
-    let user = null
-    let sessionState = 'loading'
-    let sessionError = ''
-    let sessionRequested = false
-    let authAction = false
-    let tracksStatus = 'loading'
-    let tracksError = ''
-    let catalogRequested = false
-    let activeTrackId = appStore.getState().tracks[0]?.id
+function App({ router }) {
+    const [notice, setNotice] = useState('')
+    const [user, setUser] = useState(null)
+    const [sessionState, setSessionState] = useState('loading')
+    const [sessionError, setSessionError] = useState('')
+    const [authAction, setAuthAction] = useState(false)
+    const [tracksStatus, setTracksStatus] = useState('loading')
+    const [tracksError, setTracksError] = useState('')
+    const [activeTrackId, setActiveTrackId] = useState(appStore.getState().tracks[0]?.id)
+    const [routeTick, setRouteTick] = useState(0) // для перерисовки при смене url
 
     const onRegistered = () => {
-        notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
-        router.navigate('/')
+        setNotice('Аккаунт создан. Войдите, используя свою почту и пароль.')
+        router.navigate('/login')
     }
 
     const onAuthenticated = nextUser => {
-        user = nextUser
-        sessionState = 'ready'
-        sessionError = ''
-        tracksStatus = 'loading'
-        tracksError = ''
+        setUser(nextUser)
+        setSessionState('ready')
+        setSessionError('')
+        setTracksStatus('loading')
+        setTracksError('')
+        catalogRequested = false
         router.navigate('/')
         loadCatalogForHome()
     }
 
     const onLogout = async () => {
         if (authAction) return
-        authAction = true
-        renderCurrent()
+        setAuthAction(true)
         try {
             await logout()
-            user = null
+            setUser(null)
             sessionRequested = false
-            sessionState = 'loading'
-            sessionError = ''
-            authAction = false
+            catalogRequested = false
+            sessionReady = false
+            setSessionState('loading')
+            setSessionError('')
+            setAuthAction(false)
             router.navigate('/login')
         } catch (error) {
-            sessionError = error.message
-            authAction = false
-            renderCurrent()
+            setSessionError(error.message)
+            setAuthAction(false)
         }
     }
 
     const onTrackSelect = track => {
-        activeTrackId = track.id
-        renderCurrent()
+        setActiveTrackId(track.id)
     }
 
     async function loadCatalog() {
-        tracksStatus = 'loading'
-        tracksError = ''
-        renderCurrent()
+        setTracksStatus('loading')
+        setTracksError('')
         try {
             const catalog = await getHomeData()
             const { tracks } = catalog
             appStore.setState(catalog)
-            if (!tracks.some(track => track.id === activeTrackId)) activeTrackId = tracks[0]?.id
-            tracksStatus = 'ready'
+            if (!tracks.some(track => track.id === activeTrackId)) {
+                setActiveTrackId(tracks[0]?.id)
+            }
+            setTracksStatus('ready')
         } catch (error) {
-            tracksStatus = 'error'
-            tracksError = error.message
+            setTracksStatus('error')
+            setTracksError(error.message)
         }
-        renderCurrent()
     }
-
-    function renderCurrent() {
-        const { tracks, artists, albums } = appStore.getState()
-        const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
-        const route = router.getCurrentUrl().pathname
-        const routeName = router.findRoute(route)?.value ?? 'not-found'
-        const { component: Page, title } = pages[routeName] ?? pages['not-found']
-        document.title = `${title} — На все 200`
-
-        if (sessionState === 'loading' && routeName === 'home') {
-            render(
-                <main className="session-loading" aria-live="polite">
-                    Проверяем сессию…
-                </main>,
-                container,
-            )
-            return
-        }
-
-        render(
-            <AppLayout
-                tracks={tracks}
-                route={routeName}
-                user={user}
-                onLogout={onLogout}
-                onTrackSelect={onTrackSelect}
-                activeTrack={activeTrack}
-                sessionError={sessionError}
-                authAction={authAction}
-            >
-                <Page
-                    tracks={tracks}
-                    artists={artists}
-                    albums={albums}
-                    tracksStatus={tracksStatus}
-                    tracksError={tracksError}
-                    onTracksRetry={loadCatalog}
-                    activeTrack={activeTrack}
-                    onTrackSelect={onTrackSelect}
-                    onRegistered={onRegistered}
-                    onAuthenticated={onAuthenticated}
-                    notice={notice}
-                />
-            </AppLayout>,
-            container,
-        )
-
-        notice = ''
-        if (!initial && previousRouteName !== routeName) {
-            container.querySelector('h1')?.focus()
-            window.scrollTo(0, 0)
-        }
-        previousRouteName = routeName
-        initial = false
-    }
-
-    const handleRoute = () => {
-        renderCurrent()
-        loadSessionForHome()
-        loadCatalogForHome()
-    }
-    router.on('route', handleRoute).listen()
 
     function loadSessionForHome() {
         if (sessionRequested) return
@@ -162,24 +105,26 @@ export function mountApp(container, router) {
         sessionRequested = true
         getCurrentUser()
             .then(nextUser => {
-                user = nextUser
-                sessionState = 'ready'
+                setUser(nextUser)
+                sessionReady = true
+                setSessionState('ready')
                 const path = router.getCurrentUrl().pathname
                 const routeName = router.findRoute(path)?.value
-                if (!user && routeName === 'home') {
+                if (!nextUser && routeName === 'home') {
                     router.navigate('/signup', { replace: true })
                 }
                 loadCatalogForHome()
             })
             .catch(error => {
-                sessionState = 'error'
-                sessionError = error.message
+                sessionReady = true
+                setSessionState('error')
+                setSessionError(error.message)
                 loadCatalogForHome()
             })
     }
 
     function loadCatalogForHome() {
-        if (sessionState === 'loading' || catalogRequested) return
+        if (!sessionReady || catalogRequested) return
         const currentPath = router.getCurrentUrl().pathname
         const currentRoute = router.findRoute(currentPath)?.value
         if (currentRoute !== 'home') return
@@ -187,8 +132,79 @@ export function mountApp(container, router) {
         loadCatalog()
     }
 
-    loadSessionForHome()
-    loadCatalogForHome()
+    if (!bootstrapped) {
+        bootstrapped = true
+        handleRoute = () => {
+            setRouteTick(tick => tick + 1)
+            // после смены URL снова проверяем, нужна ли сессия/каталог на главной
+            queueMicrotask(() => {
+                loadSessionForHome()
+                loadCatalogForHome()
+            })
+        }
+        router.on('route', handleRoute).listen()
+        loadSessionForHome()
+        loadCatalogForHome()
+    }
 
-    return () => router.off('route', handleRoute).destroy()
+    void routeTick
+
+    const { tracks, artists, albums } = appStore.getState()
+    const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
+    const route = router.getCurrentUrl().pathname
+    const routeName = router.findRoute(route)?.value ?? 'not-found'
+    const { component: Page, title } = pages[routeName] ?? pages['not-found']
+    document.title = `${title} — На все 200`
+
+    if (sessionState === 'loading' && routeName === 'home') {
+        return (
+            <main className="session-loading" aria-live="polite">
+                Проверяем сессию…
+            </main>
+        )
+    }
+
+    return (
+        <AppLayout
+            tracks={tracks}
+            route={routeName}
+            user={user}
+            onLogout={onLogout}
+            onTrackSelect={onTrackSelect}
+            activeTrack={activeTrack}
+            sessionError={sessionError}
+            authAction={authAction}
+        >
+            <Page
+                tracks={tracks}
+                artists={artists}
+                albums={albums}
+                tracksStatus={tracksStatus}
+                tracksError={tracksError}
+                onTracksRetry={loadCatalog}
+                activeTrack={activeTrack}
+                onTrackSelect={onTrackSelect}
+                onRegistered={onRegistered}
+                onAuthenticated={onAuthenticated}
+                notice={notice}
+            />
+        </AppLayout>
+    )
+}
+
+/**
+ * Один раз монтирует App в #root. Дальше UI обновляет setState внутри App.
+ * @param {HTMLElement} container Корневой контейнер приложения.
+ * @param {import('../shared/lib/VanillaRouter.js').VanillaRouter} router Клиентский роутер.
+ * @returns {() => void} Очистка при горячей перезагрузке.
+ */
+export function mountApp(container, router) {
+    render(<App router={router} />, container)
+    return () => {
+        if (handleRoute) router.off('route', handleRoute)
+        router.destroy()
+        bootstrapped = false
+        sessionRequested = false
+        catalogRequested = false
+    }
 }
