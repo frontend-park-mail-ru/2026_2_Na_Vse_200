@@ -1,4 +1,17 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../../index.ts'
+
+export interface FormFieldProps {
+    name: string
+    label: string
+    type?: 'text' | 'email' | 'password'
+    placeholder?: string
+    autoComplete?: string
+    error?: string
+    onInput?: (event: Event) => void
+    onBlur?: (event: FocusEvent) => void
+    disabled?: boolean
+    idPrefix?: string
+}
 
 /** @param {object} props Настройки поля, подпись, ошибка и обработчики. @returns {object} Поле с подписью и сообщением об ошибке. */
 export function FormField({
@@ -12,7 +25,7 @@ export function FormField({
     onBlur,
     disabled,
     idPrefix = 'signup',
-}) {
+}: FormFieldProps) {
     const id = `${idPrefix}-${name}`
     return (
         <div className="auth-field">

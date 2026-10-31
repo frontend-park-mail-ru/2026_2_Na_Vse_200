@@ -1,3 +1,5 @@
+import { getHomeData } from '../features/music/api.js'
+
 export function createStore(initialState) {
     let state = initialState
     const listeners = new Set()
@@ -31,4 +33,41 @@ export function createStore(initialState) {
     }
 }
 
-export const appStore = createStore({ tracks: [], artists: [], albums: [] })
+const store = createStore({
+    tracks: [],
+    artists: [],
+    albums: [],
+    catalogStatus: 'idle',
+    catalogError: '',
+})
+
+let catalogRequest = null
+
+async function loadCatalog() {
+    if (catalogRequest) return catalogRequest
+
+    store.setState({ catalogStatus: 'loading', catalogError: '' })
+    catalogRequest = getHomeData()
+        .then(catalog => {
+            store.setState({
+                ...catalog,
+                catalogStatus: 'ready',
+                catalogError: '',
+            })
+            return catalog
+        })
+        .catch(error => {
+            store.setState({ catalogStatus: 'error', catalogError: error.message })
+            return null
+        })
+        .finally(() => {
+            catalogRequest = null
+        })
+
+    return catalogRequest
+}
+
+export const appStore = {
+    ...store,
+    loadCatalog,
+}

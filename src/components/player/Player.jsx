@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../../index.js'
+import { createElement, useState } from '../../../index.ts'
 import { Icon } from '../ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../../features/music/presentation.js'
 import './Player.css'

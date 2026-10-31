@@ -1,4 +1,4 @@
-import { createElement } from '../../../index.js'
+import { createElement } from '../../../index.ts'
 import { Icon } from '../ui/Icon.jsx'
 import './Sidebar.css'
 

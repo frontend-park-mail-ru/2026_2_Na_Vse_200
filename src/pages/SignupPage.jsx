@@ -1,6 +1,6 @@
-import { createElement, useState } from '../../index.js'
-import { FormField } from '../components/ui/FormField.jsx'
-import { validateSignup } from '../features/signup/validation.js'
+import { createElement, useState } from '../../index.ts'
+import { FormField } from '../components/ui/FormField.tsx'
+import { validateSignup } from '../features/signup/validation.ts'
 import { signup } from '../features/signup/api.js'
 import './AuthPage.css'
 

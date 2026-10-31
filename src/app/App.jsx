@@ -1,7 +1,6 @@
-import { createElement, render } from '../../index.js'
+import { createElement, render } from '../../index.ts'
 import { appStore } from './store.js'
 import { getCurrentUser, logout } from '../features/auth/api.js'
-import { getHomeData } from '../features/music/api.js'
 import { AppLayout } from '../components/layout/AppLayout.jsx'
 import { HomePage } from '../pages/HomePage.jsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
@@ -28,8 +27,6 @@ export function mountApp(container, router) {
     let sessionState = 'loading'
     let sessionError = ''
     let authAction = false
-    let tracksStatus = 'loading'
-    let tracksError = ''
     let activeTrackId = appStore.getState().tracks[0]?.id
 
     const onRegistered = () => {
@@ -40,10 +37,8 @@ export function mountApp(container, router) {
     const onAuthenticated = nextUser => {
         user = nextUser
         sessionError = ''
-        tracksStatus = 'loading'
-        tracksError = ''
         router.navigate('/')
-        loadCatalog()
+        appStore.loadCatalog()
     }
 
     const onLogout = async () => {
@@ -68,25 +63,8 @@ export function mountApp(container, router) {
         renderCurrent()
     }
 
-    async function loadCatalog() {
-        tracksStatus = 'loading'
-        tracksError = ''
-        renderCurrent()
-        try {
-            const catalog = await getHomeData()
-            const { tracks } = catalog
-            appStore.setState(catalog)
-            if (!tracks.some(track => track.id === activeTrackId)) activeTrackId = tracks[0]?.id
-            tracksStatus = 'ready'
-        } catch (error) {
-            tracksStatus = 'error'
-            tracksError = error.message
-        }
-        renderCurrent()
-    }
-
     function renderCurrent() {
-        const { tracks, artists, albums } = appStore.getState()
+        const { tracks, artists, albums, catalogStatus, catalogError } = appStore.getState()
         const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
         const route = router.getCurrentUrl().pathname
         const routeName = router.findRoute(route)?.value ?? 'not-found'
@@ -118,9 +96,9 @@ export function mountApp(container, router) {
                     tracks={tracks}
                     artists={artists}
                     albums={albums}
-                    tracksStatus={tracksStatus}
-                    tracksError={tracksError}
-                    onTracksRetry={loadCatalog}
+                    tracksStatus={catalogStatus === 'idle' ? 'loading' : catalogStatus}
+                    tracksError={catalogError}
+                    onTracksRetry={appStore.loadCatalog}
                     activeTrack={activeTrack}
                     onTrackSelect={onTrackSelect}
                     onRegistered={onRegistered}
@@ -140,6 +118,11 @@ export function mountApp(container, router) {
     }
 
     const handleRoute = () => renderCurrent()
+    const unsubscribeStore = appStore.subscribe(() => {
+        const { tracks } = appStore.getState()
+        if (!tracks.some(track => track.id === activeTrackId)) activeTrackId = tracks[0]?.id
+        renderCurrent()
+    })
     router.on('route', handleRoute).listen()
 
     getCurrentUser()
@@ -151,13 +134,16 @@ export function mountApp(container, router) {
             if (!user && currentRoute === 'home') {
                 router.navigate('/signup', { replace: true })
             }
-            loadCatalog()
+            appStore.loadCatalog()
         })
         .catch(error => {
             sessionState = 'error'
             sessionError = error.message
-            loadCatalog()
+            appStore.loadCatalog()
         })
 
-    return () => router.off('route', handleRoute).destroy()
+    return () => {
+        unsubscribeStore()
+        router.off('route', handleRoute).destroy()
+    }
 }

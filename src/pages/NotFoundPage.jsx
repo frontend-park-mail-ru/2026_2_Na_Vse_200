@@ -1,4 +1,4 @@
-import { createElement } from '../../index.js'
+import { createElement } from '../../index.ts'
 
 export function NotFoundPage() {
     return (

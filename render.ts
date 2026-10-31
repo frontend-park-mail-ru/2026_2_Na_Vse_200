@@ -1,10 +1,12 @@
+import type { Props, StateSetter, StateUpdate, VNode } from './types.ts'
+
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
-let rootElement = null
-let rootContainer = null
-let hooksByPath = new Map()
-let componentOutputByPath = new Map()
-let domByPath = new Map()
+let rootElement: VNode | null = null
+let rootContainer: HTMLElement | null = null
+const hooksByPath = new Map<string, unknown[]>()
+const componentOutputByPath = new Map<string, VNode | null>()
+const domByPath = new Map<string, Node>()
 let currentPath = ''
 let currentHookIndex = 0
 
@@ -15,7 +17,7 @@ let currentHookIndex = 0
  * @param {HTMLElement} container Корневой контейнер приложения.
  * @returns {void}
  */
-export function render(element, container) {
+export function render(element: VNode | null, container: HTMLElement): void {
     const previousRootElement = rootElement
     rootElement = element
     rootContainer = container
@@ -29,7 +31,7 @@ export function render(element, container) {
  * @param {*} initialValue Начальное состояние компонента.
  * @returns {[*, function(*): void]} Значение и setState, который сразу обновляет всё дерево.
  */
-export function useState(initialValue) {
+export function useState<S>(initialValue: S): [S, StateSetter<S>] {
     const path = currentPath
     const hookIndex = currentHookIndex++
     const hooks = hooksByPath.get(path) ?? []
@@ -44,15 +46,17 @@ export function useState(initialValue) {
      * @param {*} nextValue Новое значение или функция от предыдущего значения.
      * @returns {void}
      */
-    const setState = nextValue => {
+    const setState: StateSetter<S> = (nextValue: StateUpdate<S>) => {
         const latestHooks = hooksByPath.get(path)
-        const previousValue = latestHooks[hookIndex]
-        latestHooks[hookIndex] = typeof nextValue === 'function' ? nextValue(previousValue) : nextValue
+        if (!latestHooks || !rootContainer) return
+        const previousValue = latestHooks[hookIndex] as S
+        latestHooks[hookIndex] =
+            typeof nextValue === 'function' ? (nextValue as (previous: S) => S)(previousValue) : nextValue
 
         render(rootElement, rootContainer)
     }
 
-    return [hooks[hookIndex], setState]
+    return [hooks[hookIndex] as S, setState]
 }
 
 /**
@@ -65,7 +69,13 @@ export function useState(initialValue) {
  * @param {Node} parentDom Родитель для вставки, замены и удаления узла.
  * @returns {Node|null} Обновлённый DOM-узел или null после удаления.
  */
-function reconcile(element, dom, path, previousElement, parentDom) {
+function reconcile(
+    element: VNode | null | undefined,
+    dom: Node | null | undefined,
+    path: string,
+    previousElement: VNode | null | undefined,
+    parentDom: Node,
+): Node | null {
     if (element === null || element === undefined) {
         if (dom) parentDom.removeChild(dom)
         clearPath(path)
@@ -110,9 +120,11 @@ function reconcile(element, dom, path, previousElement, parentDom) {
     if (!dom || (!sameType && !(isText && previousIsText))) {
         const isSvg =
             element.type === 'svg' ||
-            (parentDom.namespaceURI === SVG_NAMESPACE && parentDom.localName !== 'foreignObject')
+            (parentDom instanceof Element &&
+                parentDom.namespaceURI === SVG_NAMESPACE &&
+                parentDom.localName !== 'foreignObject')
         const replacement = isText
-            ? document.createTextNode(element.props.nodeValue)
+            ? document.createTextNode(String(element.props.nodeValue))
             : isSvg
               ? document.createElementNS(SVG_NAMESPACE, element.type)
               : document.createElement(element.type)
@@ -127,17 +139,20 @@ function reconcile(element, dom, path, previousElement, parentDom) {
 
     if (isText) {
         if (dom.nodeValue !== element.props.nodeValue) {
-            dom.nodeValue = element.props.nodeValue
+            dom.nodeValue = String(element.props.nodeValue)
         }
         return dom
     }
 
+    if (!(dom instanceof HTMLElement || dom instanceof SVGElement)) {
+        throw new TypeError('Expected an HTML or SVG element')
+    }
     updateProps(dom, previousElement?.props ?? {}, element.props)
 
     const oldChildren = previousElement?.props.children ?? []
     const newChildren = element.props.children ?? []
-    const nextDomChildren = []
-    const nextChildPaths = new Set()
+    const nextDomChildren: Node[] = []
+    const nextChildPaths = new Set<string>()
 
     for (let index = 0; index < newChildren.length; index++) {
         nextChildPaths.add(getChildPath(path, newChildren[index], index))
@@ -182,7 +197,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
  * @param {number} index Позиция в массиве детей.
  * @returns {string} Путь дочернего элемента.
  */
-function getChildPath(parentPath, child, index) {
+function getChildPath(parentPath: string, child: VNode | null | undefined, index: number): string {
     if (child?.key !== null && child?.key !== undefined) {
         return `${parentPath}.key:${encodeURIComponent(String(child.key))}`
     }
@@ -195,7 +210,7 @@ function getChildPath(parentPath, child, index) {
  * @param {string} path Путь удаляемой или заменяемой ветки.
  * @returns {void}
  */
-function clearPath(path) {
+function clearPath(path: string): void {
     const prefix = `${path}.`
     for (const key of domByPath.keys()) {
         if (key === path || key.startsWith(prefix)) domByPath.delete(key)
@@ -216,7 +231,7 @@ function clearPath(path) {
  * @param {object} nextProps Новые свойства.
  * @returns {void}
  */
-function updateProps(dom, previousProps, nextProps) {
+function updateProps(dom: HTMLElement | SVGElement, previousProps: Props, nextProps: Props): void {
     const isSvg = dom.namespaceURI === SVG_NAMESPACE
     const names = new Set([...Object.keys(previousProps), ...Object.keys(nextProps)])
 
@@ -230,13 +245,13 @@ function updateProps(dom, previousProps, nextProps) {
         if (previousValue === nextValue) continue
 
         if (name.startsWith('on') && typeof previousValue === 'function') {
-            dom.removeEventListener(name.slice(2).toLowerCase(), previousValue)
+            dom.removeEventListener(name.slice(2).toLowerCase(), previousValue as EventListener)
         }
 
         if (nextValue === null || nextValue === undefined || nextValue === false) {
             if (name === 'style') dom.removeAttribute('style')
             else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
-                dom[name] = typeof dom[name] === 'boolean' ? false : ''
+                Reflect.set(dom, name, typeof Reflect.get(dom, name) === 'boolean' ? false : '')
             } else {
                 dom.removeAttribute(attributeName)
             }
@@ -244,16 +259,16 @@ function updateProps(dom, previousProps, nextProps) {
         }
 
         if (name.startsWith('on') && typeof nextValue === 'function') {
-            dom.addEventListener(name.slice(2).toLowerCase(), nextValue)
+            dom.addEventListener(name.slice(2).toLowerCase(), nextValue as EventListener)
         } else if (name === 'style' && typeof nextValue === 'object') {
             for (const styleName of Object.keys(previousValue ?? {})) {
-                if (!(styleName in nextValue)) dom.style[styleName] = ''
+                if (!(styleName in nextValue)) Reflect.set(dom.style, styleName, '')
             }
             Object.assign(dom.style, nextValue)
         } else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
-            dom[name] = nextValue
+            Reflect.set(dom, name, nextValue)
         } else {
-            dom.setAttribute(attributeName, nextValue === true ? '' : nextValue)
+            dom.setAttribute(attributeName, nextValue === true ? '' : String(nextValue))
         }
     }
 }
