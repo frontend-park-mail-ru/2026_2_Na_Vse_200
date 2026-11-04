@@ -1,6 +1,18 @@
+type SVGTag = 'path' | 'circle' | 'ellipse' | 'rect' | 'line' | 'polyline' | 'polygon'
+export interface IconDefinition {
+    viewBox?: string
+    transform?: string
+    elements: { tag: SVGTag; attributes?: Record<string, string | number> }[]
+}
+export interface IconProps {
+    name: string
+    size?: number
+    className?: string
+    label?: string
+}
 import { createElement } from '../../../index.ts'
 
-const glyphs = {
+const glyphs: Record<string, string[]> = {
     home: ['M3 10.8 12 3l9 7.8', 'M5.5 9.5v10h13v-10', 'M9.5 19.5v-6h5v6'],
     search: ['M10.8 18a7.2 7.2 0 1 0 0-14.4 7.2 7.2 0 0 0 0 14.4Z', 'm16 16 5 5'],
     library: ['M8 3h13v14H8z', 'M4 7v14h13', 'M13 12V6l5-1v6', 'M13 12a2 2 0 1 1-2-2c1.1 0 2 .6 2 2Z'],
@@ -22,7 +34,7 @@ const glyphs = {
     volume: ['M4 10v4h4l5 4V6l-5 4H4Z', 'M17 9a5 5 0 0 1 0 6', 'M19 5a10 10 0 0 1 0 14'],
 }
 
-const customGlyphs = new Map()
+const customGlyphs = new Map<string, IconDefinition>()
 const allowedElements = new Set(['path', 'circle', 'ellipse', 'rect', 'line', 'polyline', 'polygon'])
 
 /**
@@ -34,7 +46,7 @@ const allowedElements = new Set(['path', 'circle', 'ellipse', 'rect', 'line', 'p
  *     elements: [{ tag: "path", attributes: { d: "M4 4h16v16H4z", fill: "currentColor", stroke: "none" } }]
  * })
  */
-export function registerIcon(name, definition) {
+export function registerIcon(name: string, definition: IconDefinition) {
     if (typeof name !== 'string' || !name.trim()) {
         throw new TypeError('An icon name must be a non-empty string.')
     }
@@ -63,7 +75,7 @@ export function registerIcon(name, definition) {
     })
 }
 
-function getIconDefinition(name) {
+function getIconDefinition(name: string): IconDefinition {
     const customDefinition = customGlyphs.get(name)
     if (customDefinition) return customDefinition
 
@@ -129,7 +141,7 @@ registerIcon('trackNext', {
         },
     ],
 })
-export function Icon({ name, size = 20, className = '', label }) {
+export function Icon({ name, size = 20, className = '', label }: IconProps) {
     const definition = getIconDefinition(name)
 
     return (

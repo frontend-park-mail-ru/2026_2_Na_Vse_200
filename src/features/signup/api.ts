@@ -1,9 +1,12 @@
-import { requestJson } from '../../shared/api/request.js'
+import type { FieldErrors } from '../../types/domain.ts'
+import type { SignupValues } from './validation.ts'
+import { readApiError, requestJson } from '../../shared/api/request.ts'
 
 /** Ошибка регистрации: общее сообщение и ошибки отдельных полей. */
 export class SignupError extends Error {
     /** @param {string} message Текст ошибки. @param {object} fields Ошибки полей. */
-    constructor(message, fields = {}) {
+    fields: FieldErrors
+    constructor(message: string, fields: FieldErrors = {}) {
         super(message)
         this.name = 'SignupError'
         this.fields = fields
@@ -16,7 +19,7 @@ export class SignupError extends Error {
  * @param {typeof fetch} request fetch или его замена в тестах.
  * @returns {Promise<void>} Успех только при статусе 201.
  */
-export async function signup(data, request = fetch) {
+export async function signup(data: SignupValues, request = fetch) {
     let response
     let body
 
@@ -35,13 +38,13 @@ export async function signup(data, request = fetch) {
 
     if (response.status === 201) return
 
-    if (response.status === 409 && body?.error?.code === 'email_taken') {
+    if (response.status === 409 && readApiError(body).code === 'email_taken') {
         throw new SignupError('', { email: 'Пользователь с таким email уже существует' })
     }
-    if (response.status === 400 && body?.error?.code === 'validation_failed') {
-        const fields = {}
+    if (response.status === 400 && readApiError(body).code === 'validation_failed') {
+        const fields: FieldErrors = {}
         for (const key of ['display_name', 'email', 'password']) {
-            const message = body.error.fields?.[key]
+            const message = readApiError(body).fields?.[key]
             if (typeof message === 'string' && message.trim()) fields[key] = message
         }
         throw new SignupError(Object.keys(fields).length ? '' : 'Проверьте правильность заполнения полей.', fields)

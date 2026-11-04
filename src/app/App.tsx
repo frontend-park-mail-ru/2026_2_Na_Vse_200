@@ -1,11 +1,14 @@
+import type { User, Track } from '../types/domain.ts'
+import type { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
+import { errorMessage } from '../shared/lib/forms.ts'
 import { createElement, render } from '../../index.ts'
-import { appStore } from './store.js'
-import { getCurrentUser, logout } from '../features/auth/api.js'
-import { AppLayout } from '../components/layout/AppLayout.jsx'
-import { HomePage } from '../pages/HomePage.jsx'
-import { LoginPage } from '../pages/LoginPage.jsx'
-import { SignupPage } from '../pages/SignupPage.jsx'
-import { NotFoundPage } from '../pages/NotFoundPage.jsx'
+import { appStore } from './store.ts'
+import { getCurrentUser, logout } from '../features/auth/api.ts'
+import { AppLayout } from '../components/layout/AppLayout.tsx'
+import { HomePage } from '../pages/HomePage.tsx'
+import { LoginPage } from '../pages/LoginPage.tsx'
+import { SignupPage } from '../pages/SignupPage.tsx'
+import { NotFoundPage } from '../pages/NotFoundPage.tsx'
 
 const pages = {
     home: { component: HomePage, title: 'Главная' },
@@ -17,13 +20,13 @@ const pages = {
 /**
  * Запускает приложение и переключает страницы по маршруту.
  * @param {HTMLElement} container Корневой контейнер приложения.
- * @param {import('../shared/lib/VanillaRouter.js').VanillaRouter} router Клиентский роутер.
+ * @param {import('../shared/lib/VanillaRouter.ts').VanillaRouter} router Клиентский роутер.
  * @returns {() => void} Очистка при горячей перезагрузке.
  */
-export function mountApp(container, router) {
+export function mountApp(container: HTMLElement, router: VanillaRouter) {
     let initial = true
     let notice = ''
-    let user = null
+    let user: User | null = null
     let sessionState = 'loading'
     let sessionError = ''
     let authAction = false
@@ -34,7 +37,7 @@ export function mountApp(container, router) {
         router.navigate('/')
     }
 
-    const onAuthenticated = nextUser => {
+    const onAuthenticated = (nextUser: User) => {
         user = nextUser
         sessionError = ''
         router.navigate('/')
@@ -52,13 +55,13 @@ export function mountApp(container, router) {
             authAction = false
             router.navigate('/login')
         } catch (error) {
-            sessionError = error.message
+            sessionError = errorMessage(error)
             authAction = false
             renderCurrent()
         }
     }
 
-    const onTrackSelect = track => {
+    const onTrackSelect = (track: Track) => {
         activeTrackId = track.id
         renderCurrent()
     }
@@ -68,7 +71,7 @@ export function mountApp(container, router) {
         const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
         const route = router.getCurrentUrl().pathname
         const routeName = router.findRoute(route)?.value ?? 'not-found'
-        const { component: Page, title } = pages[routeName] ?? pages['not-found']
+        const { component: Page, title } = pages[routeName as keyof typeof pages] ?? pages['not-found']
         document.title = `${title} — На все 200`
 
         if (sessionState === 'loading' && routeName === 'home') {
@@ -138,7 +141,7 @@ export function mountApp(container, router) {
         })
         .catch(error => {
             sessionState = 'error'
-            sessionError = error.message
+            sessionError = errorMessage(error)
             appStore.loadCatalog()
         })
 

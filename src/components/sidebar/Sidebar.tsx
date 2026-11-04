@@ -1,5 +1,6 @@
+import type { AccountProps } from '../../types/domain.ts'
 import { createElement } from '../../../index.ts'
-import { Icon } from '../ui/Icon.jsx'
+import { Icon } from '../ui/Icon.tsx'
 import './Sidebar.css'
 
 const navigation = [
@@ -14,7 +15,7 @@ const playlists = [
     { name: 'Вечер', detail: 'Плейлист · 58 треков', icon: 'moon', color: 'amber' },
 ]
 
-export function Sidebar({ user, onLogout, authAction }) {
+export function Sidebar({ user, onLogout, authAction }: AccountProps) {
     return (
         <aside className="sidebar">
             <a className="sidebar__brand" href="/" data-link aria-label="MUSIC — на главную">

@@ -1,16 +1,19 @@
+import type { Track, HomePageProps, CollectionItem, CatalogStatus } from '../types/domain.ts'
 import { createElement, useState } from '../../index.ts'
-import { Icon } from '../components/ui/Icon.jsx'
-import { getArtistName, getTrackCover } from '../features/music/presentation.js'
+import { Icon } from '../components/ui/Icon.tsx'
+import { getArtistName, getTrackCover } from '../features/music/presentation.ts'
 import './HomePage.css'
 
-function formatDuration(duration) {
+function formatDuration(duration: Track['duration']) {
     if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
-    const seconds = Number(duration?.seconds ?? duration?.duration_seconds ?? duration ?? 0)
+    const seconds = Number(
+        (typeof duration === 'object' ? (duration.seconds ?? duration.duration_seconds) : duration) ?? 0,
+    )
     if (!Number.isFinite(seconds) || seconds <= 0) return '—:——'
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 }
 
-function Cover({ cover, className = '', icon = 'music' }) {
+function Cover({ cover, className = '', icon = 'music' }: { cover?: string; className?: string; icon?: string }) {
     const [failedCover, setFailedCover] = useState('')
     return (
         <span className={`music-cover ${className}`}>
@@ -23,8 +26,16 @@ function Cover({ cover, className = '', icon = 'music' }) {
     )
 }
 
-function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksError, onTracksRetry }) {
-    const [likedTracks, setLikedTracks] = useState({})
+function TrackList({
+    tracks,
+    activeTrack,
+    onTrackSelect,
+    tracksStatus,
+    tracksError,
+    onTracksRetry,
+}: Required<Pick<HomePageProps, 'tracks' | 'onTrackSelect' | 'tracksStatus' | 'tracksError' | 'onTracksRetry'>> &
+    Pick<HomePageProps, 'activeTrack'>) {
+    const [likedTracks, setLikedTracks] = useState<Record<string, boolean>>({})
     if (tracksStatus === 'loading') {
         return (
             <p className="home-message" aria-live="polite">
@@ -69,7 +80,9 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
                                 <small>{getArtistName(track)}</small>
                             </span>
                             <span className="track-duration">
-                                {formatDuration(track.duration ?? track.duration_seconds ?? track.duration_ms / 1000)}
+                                {formatDuration(
+                                    track.duration ?? track.duration_seconds ?? (track.duration_ms ?? 0) / 1000,
+                                )}
                             </span>
                         </button>
                         <button
@@ -89,7 +102,17 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
     )
 }
 
-function CollectionSection({ title, items, type, tracksStatus }) {
+function CollectionSection({
+    title,
+    items,
+    type,
+    tracksStatus,
+}: {
+    title: string
+    items: CollectionItem[]
+    type: 'artist' | 'album'
+    tracksStatus: CatalogStatus
+}) {
     return (
         <section className="collection-section" aria-label={title}>
             <div className="collection-heading">
@@ -135,7 +158,7 @@ export function HomePage({
     tracksStatus = 'ready',
     tracksError = '',
     onTracksRetry = () => {},
-}) {
+}: HomePageProps) {
     return (
         <div className="home-page">
             <header className="home-header">

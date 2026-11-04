@@ -96,12 +96,12 @@ createElement('button', { className: 'counter' }, 'Нажми')
 
 Примеры:
 
-| `props` | `key` | `elementProps` |
-|---|---|---|
-| `null` | `null` | `{}` |
-| `{}` | `null` | `{}` |
+| `props`                             | `key`       | `elementProps`      |
+| ----------------------------------- | ----------- | ------------------- |
+| `null`                              | `null`      | `{}`                |
+| `{}`                                | `null`      | `{}`                |
 | `{ key: 'track-1', title: 'Трек' }` | `'track-1'` | `{ title: 'Трек' }` |
-| `{ key: null, title: 'Трек' }` | `null` | `{ title: 'Трек' }` |
+| `{ key: null, title: 'Трек' }`      | `null`      | `{ title: 'Трек' }` |
 
 `key` нужен renderer для идентификации элементов среди соседей при сравнении списков. Он хранится отдельно и не передаётся как обычный атрибут DOM. `...elementProps` — rest-синтаксис: он собирает оставшиеся собственные перечисляемые свойства объекта. `??` не заменяет `0`, `false` или пустую строку; он реагирует только на `null` и `undefined`.
 
@@ -110,7 +110,7 @@ createElement('button', { className: 'counter' }, 'Нажми')
 `children.flat(Infinity)` рекурсивно расплющивает вложенные массивы. Например:
 
 ```js
-[<span />, [0, false, null]]
+;[<span />, [0, false, null]]
 ```
 
 после `flat(Infinity)` концептуально становится массивом из четырёх позиций: `[spanElement, 0, false, null]`. Длина здесь остаётся 4: `flat` убирает уровни вложенности массивов, но не удаляет `false`, `null` или `undefined` как значения.
@@ -413,7 +413,9 @@ Dispatch нормализует путь, ищет подходящий марш
 ## Пример D: условный элемент исчезает
 
 ```jsx
-{isLoading ? <span>Загрузка…</span> : null}
+{
+    isLoading ? <span>Загрузка…</span> : null
+}
 ```
 
 Когда `isLoading` был `true`, по пути ребёнка существовал `span`. После изменения на `false` `createElement` нормализует `null` как пустое значение. `reconcile` получает отсутствие нового элемента, удаляет прежний DOM из правильного родителя, очищает path cache и возвращает `null`. Браузер больше не содержит этот `span`.
@@ -424,10 +426,10 @@ Dispatch нормализует путь, ищет подходящий марш
 
 ```jsx
 function Greeting({ name }) {
-  return <p>Привет, {name}</p>
+    return <p>Привет, {name}</p>
 }
 
-<Greeting name="Аня" />
+;<Greeting name="Аня" />
 ```
 
 1. `reconcile` замечает, что `type` — функция, а не строка DOM-тега.
@@ -461,11 +463,11 @@ function Greeting({ name }) {
 
 ## Что хранит renderer между проходами
 
-* `rootElement` и `rootContainer` — последнее корневое описание и DOM-контейнер.
-* `hooksByPath` — состояние хуков для каждого component path.
-* `componentOutputByPath` — последнее виртуальное дерево, возвращённое функцией-компонентом.
-* `domByPath` — DOM-узел, соответствующий пути.
-* `currentPath` и `currentHookIndex` — временный контекст, пока вызывается компонент.
+- `rootElement` и `rootContainer` — последнее корневое описание и DOM-контейнер.
+- `hooksByPath` — состояние хуков для каждого component path.
+- `componentOutputByPath` — последнее виртуальное дерево, возвращённое функцией-компонентом.
+- `domByPath` — DOM-узел, соответствующий пути.
+- `currentPath` и `currentHookIndex` — временный контекст, пока вызывается компонент.
 
 При удалении/замене subtree `clearPath` очищает записи этого пути и потомков. Иначе таблицы удерживали бы старое состояние и ссылки на уже удалённые DOM-узлы.
 

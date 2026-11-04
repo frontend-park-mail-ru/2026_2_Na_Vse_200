@@ -1,4 +1,4 @@
-import { VanillaRouter } from '../shared/lib/VanillaRouter.js'
+import { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
 
 /**
  * Один роутер на всё приложение, без хешей в URL.

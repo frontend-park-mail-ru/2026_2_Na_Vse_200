@@ -1,19 +1,21 @@
-import { getHomeData } from '../features/music/api.js'
+import type { Catalog, CatalogStatus } from '../types/domain.ts'
+import { errorMessage } from '../shared/lib/forms.ts'
+import { getHomeData } from '../features/music/api.ts'
 
-export function createStore(initialState) {
+export function createStore<S extends object>(initialState: S) {
     let state = initialState
-    const listeners = new Set()
+    const listeners = new Set<(state: S) => void>()
 
     return {
         getState() {
             return state
         },
 
-        setState(update) {
+        setState(update: Partial<S> | ((state: S) => Partial<S>)) {
             const changes = typeof update === 'function' ? update(state) : update
             const nextState = { ...state, ...changes }
 
-            if (Object.keys(nextState).every(key => Object.is(nextState[key], state[key]))) {
+            if ((Object.keys(nextState) as (keyof S)[]).every(key => Object.is(nextState[key], state[key]))) {
                 return state
             }
 
@@ -22,7 +24,7 @@ export function createStore(initialState) {
             return state
         },
 
-        subscribe(listener) {
+        subscribe(listener: (state: S) => void) {
             if (typeof listener !== 'function') {
                 throw new TypeError('A store subscriber must be a function.')
             }
@@ -33,7 +35,11 @@ export function createStore(initialState) {
     }
 }
 
-const store = createStore({
+interface AppState extends Catalog {
+    catalogStatus: CatalogStatus
+    catalogError: string
+}
+const store = createStore<AppState>({
     tracks: [],
     artists: [],
     albums: [],
@@ -41,7 +47,7 @@ const store = createStore({
     catalogError: '',
 })
 
-let catalogRequest = null
+let catalogRequest: Promise<Catalog | null> | null = null
 
 async function loadCatalog() {
     if (catalogRequest) return catalogRequest
@@ -57,7 +63,7 @@ async function loadCatalog() {
             return catalog
         })
         .catch(error => {
-            store.setState({ catalogStatus: 'error', catalogError: error.message })
+            store.setState({ catalogStatus: 'error', catalogError: errorMessage(error) })
             return null
         })
         .finally(() => {

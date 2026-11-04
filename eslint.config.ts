@@ -1,15 +1,20 @@
+import type { Rule } from 'eslint'
+type JSXName =
+    | { type: 'JSXMemberExpression'; object: JSXName }
+    | { type: 'JSXIdentifier'; name: string }
+    | { type: 'JSXNamespacedName' }
 import js from '@eslint/js'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
 // JSX неявно использует createElement и компоненты.
 // Помечаем их как используемые, чтобы no-unused-vars не ругался.
-const jsxReferences = {
+const jsxReferences: Rule.RuleModule = {
     meta: { schema: [] },
     create(context) {
         const sourceCode = context.sourceCode
         return {
-            JSXOpeningElement(node) {
+            JSXOpeningElement(node: Rule.Node & { name: JSXName }) {
                 sourceCode.markVariableAsUsed('createElement', node)
                 let name = node.name
                 while (name.type === 'JSXMemberExpression') name = name.object
@@ -38,11 +43,11 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx,ts,tsx}', 'createElement.js', 'render.js', 'index.js'],
+        files: ['src/**/*.{js,jsx,ts,tsx}', 'createElement.ts', 'render.ts', 'index.ts'],
         languageOptions: { globals: globals.browser },
     },
     {
-        files: ['tests/**/*.js', 'scripts/**/*.js', '*.config.js'],
+        files: ['tests/**/*.ts', 'scripts/**/*.ts', '*.config.ts'],
         languageOptions: { globals: globals.node },
     },
     {

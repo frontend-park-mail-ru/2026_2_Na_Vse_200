@@ -4,4 +4,4 @@ export const API_ORIGIN = import.meta.env?.VITE_API_ORIGIN || ''
 export const API_URL = `${API_ORIGIN}/api/v1`
 
 /** Отправляем cookie сессии вместе с запросами к бэкенду. */
-export const API_REQUEST_OPTIONS = Object.freeze({ credentials: 'include' })
+export const API_REQUEST_OPTIONS = Object.freeze({ credentials: 'include' } satisfies RequestInit)

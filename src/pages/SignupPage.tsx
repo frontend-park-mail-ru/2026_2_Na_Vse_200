@@ -1,37 +1,50 @@
+import type { FormState } from '../types/domain.ts'
+import type { SignupValues } from '../features/signup/validation.ts'
+import { SignupError } from '../features/signup/api.ts'
+import { getInput, errorMessage } from '../shared/lib/forms.ts'
 import { createElement, useState } from '../../index.ts'
 import { FormField } from '../components/ui/FormField.tsx'
 import { validateSignup } from '../features/signup/validation.ts'
-import { signup } from '../features/signup/api.js'
+import { signup } from '../features/signup/api.ts'
 import './AuthPage.css'
 
 /** @param {{onRegistered: () => void}} props Переход после регистрации. @returns {object} Экран регистрации. */
-export function SignupPage({ onRegistered }) {
-    const [state, setState] = useState({ errors: {}, message: '', pending: false })
+export function SignupPage({ onRegistered }: { onRegistered: () => void }) {
+    const [state, setState] = useState<FormState>({ errors: {}, message: '', pending: false })
 
-    function readValues(form) {
-        return Object.fromEntries(
-            ['display_name', 'email', 'password'].map(name => [name, form.elements.namedItem(name).value]),
-        )
+    function readValues(form: HTMLFormElement): SignupValues {
+        return {
+            display_name: getInput(form, 'display_name').value,
+            email: getInput(form, 'email').value,
+            password: getInput(form, 'password').value,
+        }
     }
-    function clearError(event) {
-        const name = event.target.name
+    function clearError(event: Event) {
+        if (!(event.currentTarget instanceof HTMLInputElement)) return
+        const name = event.currentTarget.name
         if (state.errors[name] || state.message)
             setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
     }
-    function validateField(event) {
-        const { name, form } = event.target
+    function validateField(event: FocusEvent) {
+        if (!(event.currentTarget instanceof HTMLInputElement)) return
+        const { name, form } = event.currentTarget
+        if (!form) return
         if (form.dataset.submitting === 'true') return
         const { errors } = validateSignup(readValues(form))
-        setState(previous => ({ ...previous, errors: { ...previous.errors, [name]: errors[name] || '' } }))
+        setState(previous => ({
+            ...previous,
+            errors: { ...previous.errors, [name]: errors[name as keyof SignupValues] || '' },
+        }))
     }
-    async function submit(event) {
+    async function submit(event: SubmitEvent) {
         event.preventDefault()
         const form = event.currentTarget
+        if (!(form instanceof HTMLFormElement)) return
         if (form.dataset.submitting === 'true') return
         const { data, errors } = validateSignup(readValues(form))
         if (Object.keys(errors).length) {
             setState({ errors, message: '', pending: false })
-            form.elements.namedItem(Object.keys(errors)[0]).focus()
+            getInput(form, Object.keys(errors)[0]).focus()
             return
         }
         form.dataset.submitting = 'true'
@@ -39,13 +52,15 @@ export function SignupPage({ onRegistered }) {
         try {
             await signup(data)
             if (!form.isConnected) return
-            form.elements.namedItem('password').value = ''
+            getInput(form, 'password').value = ''
             onRegistered()
         } catch (error) {
             if (!form.isConnected) return
-            setState({ errors: error.fields || {}, message: error.message, pending: false })
-            const firstField = Object.keys(error.fields || {})[0]
-            if (firstField) form.elements.namedItem(firstField).focus()
+            const fields = error instanceof SignupError ? error.fields : {}
+            setState({ errors: fields, message: errorMessage(error), pending: false })
+            const firstField = Object.keys(fields)[0]
+            const input = firstField ? form.elements.namedItem(firstField) : null
+            if (input instanceof HTMLInputElement) input.focus()
         } finally {
             form.dataset.submitting = 'false'
         }

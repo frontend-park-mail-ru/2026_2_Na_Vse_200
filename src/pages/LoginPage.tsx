@@ -1,18 +1,25 @@
+import type { FormState, FieldErrors, User } from '../types/domain.ts'
+import { getInput, errorMessage } from '../shared/lib/forms.ts'
+import { AuthError } from '../features/auth/api.ts'
 import { createElement, useState } from '../../index.ts'
 import { FormField } from '../components/ui/FormField.tsx'
-import { login } from '../features/auth/api.js'
+import { login } from '../features/auth/api.ts'
 import './AuthPage.css'
 
 /** @param {{notice?: string, onAuthenticated?: (user: object) => void}} props Сообщение и обработчик успешного входа. @returns {object} Форма входа. */
-export function LoginPage({ notice, onAuthenticated } = {}) {
-    const [state, setState] = useState({ message: '', errors: {}, pending: false })
+export function LoginPage({
+    notice,
+    onAuthenticated,
+}: { notice?: string; onAuthenticated?: (user: User) => void } = {}) {
+    const [state, setState] = useState<FormState>({ message: '', errors: {}, pending: false })
     // Отменяем отправку формы браузером, чтобы email и пароль не попали в URL.
-    function submit(event) {
+    function submit(event: SubmitEvent) {
         event.preventDefault()
         const form = event.currentTarget
-        const email = form.elements.namedItem('email').value.trim().toLowerCase()
-        const password = form.elements.namedItem('password').value
-        const errors = {}
+        if (!(form instanceof HTMLFormElement)) return
+        const email = getInput(form, 'email').value.trim().toLowerCase()
+        const password = getInput(form, 'password').value
+        const errors: FieldErrors = {}
         if (!email) errors.email = 'Введите email'
         if (!password) errors.password = 'Введите пароль'
         if (Object.keys(errors).length) {
@@ -22,7 +29,13 @@ export function LoginPage({ notice, onAuthenticated } = {}) {
         setState({ message: '', errors: {}, pending: true })
         login({ email, password })
             .then(user => onAuthenticated?.(user))
-            .catch(error => setState({ message: error.message, errors: error.fields || {}, pending: false }))
+            .catch((error: unknown) =>
+                setState({
+                    message: errorMessage(error),
+                    errors: error instanceof AuthError ? error.fields : {},
+                    pending: false,
+                }),
+            )
     }
     return (
         <section className="auth-screen" aria-labelledby="login-title">

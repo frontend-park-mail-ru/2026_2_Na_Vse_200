@@ -1,15 +1,21 @@
+import type { Track } from '../../types/domain.ts'
+interface PlayerProps {
+    track?: Track
+    tracks?: Track[]
+    onTrackSelect?: (track: Track) => void
+}
 import { createElement, useState } from '../../../index.ts'
-import { Icon } from '../ui/Icon.jsx'
-import { getArtistName, getTrackCover } from '../../features/music/presentation.js'
+import { Icon } from '../ui/Icon.tsx'
+import { getArtistName, getTrackCover } from '../../features/music/presentation.ts'
 import './Player.css'
 
-export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
+export function Player({ track, tracks = [], onTrackSelect = () => {} }: PlayerProps) {
     const [isPlaying, setIsPlaying] = useState(false)
     const [progress, setProgress] = useState(32)
     const [volume, setVolume] = useState(62)
     const [failedCover, setFailedCover] = useState('')
     const cover = getTrackCover(track)
-    const selectAdjacent = offset => {
+    const selectAdjacent = (offset: number) => {
         if (!tracks.length) return
         const index = tracks.findIndex(item => item.id === track?.id)
         onTrackSelect(tracks[(Math.max(0, index) + offset + tracks.length) % tracks.length])
@@ -74,7 +80,11 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                         disabled={!track}
                         style={timelineStyle}
                         aria-label="Позиция воспроизведения"
-                        onInput={event => setProgress(Number(event.target.value))}
+                        onInput={event =>
+                            setProgress(
+                                Number(event.currentTarget instanceof HTMLInputElement ? event.currentTarget.value : 0),
+                            )
+                        }
                     />
                 </div>
             </div>
@@ -91,7 +101,11 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                     max="100"
                     value={volume}
                     aria-label="Громкость"
-                    onInput={event => setVolume(Number(event.target.value))}
+                    onInput={event =>
+                        setVolume(
+                            Number(event.currentTarget instanceof HTMLInputElement ? event.currentTarget.value : 0),
+                        )
+                    }
                     style={{ background: `linear-gradient(to right, #afa3ca ${volume}%, #f1eff5 ${volume}%)` }}
                 />
             </div>

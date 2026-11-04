@@ -1,6 +1,16 @@
+import type { Child } from '../../../types.ts'
+import type { AccountProps, Track } from '../../types/domain.ts'
+interface AppLayoutProps extends AccountProps {
+    route: string
+    tracks: Track[]
+    activeTrack?: Track
+    onTrackSelect: (track: Track) => void
+    sessionError: string
+    children?: Child
+}
 import { createElement } from '../../../index.ts'
-import { Sidebar } from '../sidebar/Sidebar.jsx'
-import { Player } from '../player/Player.jsx'
+import { Sidebar } from '../sidebar/Sidebar.tsx'
+import { Player } from '../player/Player.tsx'
 import './AppLayout.css'
 
 /**
@@ -18,7 +28,7 @@ export function AppLayout({
     sessionError,
     authAction,
     children,
-}) {
+}: AppLayoutProps) {
     if (route === 'signup' || route === 'login') {
         return (
             <main id="main-content" tabIndex={-1}>

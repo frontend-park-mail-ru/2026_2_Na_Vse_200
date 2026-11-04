@@ -1,7 +1,19 @@
 /** Роутер с режимами history и hash. Клики по ссылкам обрабатывает через document. */
+interface RouterOptions {
+    type?: 'history' | 'hash'
+    routes?: Record<string, string>
+    root?: string
+}
 export class VanillaRouter {
+    type: 'history' | 'hash'
+    routes: Record<string, string>
+    root: string
+    events: DocumentFragment
+    started: boolean
+    handleLocationChange: () => void
+    handleLinkClick: (event: MouseEvent) => void
     /** @param {{type?: string, routes?: Object<string, string>, root?: string}} options Настройки роутера. */
-    constructor({ type = 'history', routes = {}, root = '/' } = {}) {
+    constructor({ type = 'history', routes = {}, root = '/' }: RouterOptions = {}) {
         if (!['history', 'hash'].includes(type)) {
             throw new Error(`Unsupported router type: ${type}`)
         }
@@ -28,19 +40,19 @@ export class VanillaRouter {
     }
 
     /** @param {string} eventName Имя события. @param {EventListener} listener Обработчик события. @returns {VanillaRouter} */
-    on(eventName, listener) {
+    on(eventName: string, listener: EventListener) {
         this.events.addEventListener(eventName, listener)
         return this
     }
 
     /** @param {string} eventName Имя события. @param {EventListener} listener Обработчик события. @returns {VanillaRouter} */
-    off(eventName, listener) {
+    off(eventName: string, listener: EventListener) {
         this.events.removeEventListener(eventName, listener)
         return this
     }
 
     /** @param {string} to URL перехода. @param {{replace?: boolean}} options Заменить текущую запись истории или добавить новую. @returns {VanillaRouter} */
-    navigate(to, { replace = false } = {}) {
+    navigate(to: string, { replace = false }: { replace?: boolean } = {}) {
         const target = new URL(to, window.location.origin)
         if (target.origin !== window.location.origin) {
             window.location.assign(target.href)
@@ -99,7 +111,7 @@ export class VanillaRouter {
         return new URL(hashPath.startsWith('/') ? hashPath : `/${hashPath}`, window.location.origin)
     }
 
-    findRoute(pathname) {
+    findRoute(pathname: string) {
         const path = normalizePath(pathname)
 
         for (const [pattern, value] of Object.entries(this.routes)) {
@@ -110,7 +122,7 @@ export class VanillaRouter {
         return null
     }
 
-    onLinkClick(event) {
+    onLinkClick(event: MouseEvent) {
         if (
             event.defaultPrevented ||
             event.button !== 0 ||
@@ -122,7 +134,7 @@ export class VanillaRouter {
             return
         }
 
-        const link = event.target?.closest?.('a[data-link]')
+        const link = event.target instanceof Element ? event.target.closest<HTMLAnchorElement>('a[data-link]') : null
         if (!link || link.target || link.hasAttribute('download')) return
 
         const target = new URL(link.href, window.location.href)
@@ -133,17 +145,17 @@ export class VanillaRouter {
     }
 }
 
-function normalizePath(path) {
+function normalizePath(path: string) {
     if (path === '/') return '/'
     return `/${path.split('/').filter(Boolean).join('/')}`
 }
 
-function matchPath(pattern, pathname) {
+function matchPath(pattern: string, pathname: string) {
     if (pattern === '*') return {}
 
     const patternParts = normalizePath(pattern).split('/').filter(Boolean)
     const pathParts = pathname.split('/').filter(Boolean)
-    const params = {}
+    const params: Record<string, string> = {}
 
     if (patternParts.length !== pathParts.length) return null
 
