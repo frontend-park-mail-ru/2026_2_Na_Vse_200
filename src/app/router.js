@@ -9,6 +9,7 @@ export function createAppRouter() {
         type: 'history',
         routes: {
             '/': 'home',
+            '/profile': 'profile',
             '/signup': 'signup',
             '/login': 'login',
             '*': 'not-found',

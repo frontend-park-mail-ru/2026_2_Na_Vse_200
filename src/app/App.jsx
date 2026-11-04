@@ -4,12 +4,14 @@ import { getCurrentUser, logout } from '../features/auth/api.js'
 import { getHomeData } from '../features/music/api.js'
 import { AppLayout } from '../components/layout/AppLayout.jsx'
 import { HomePage } from '../pages/HomePage.jsx'
+import { ProfilePage } from '../pages/ProfilePage.tsx'
 import { LoginPage } from '../pages/LoginPage.jsx'
 import { SignupPage } from '../pages/SignupPage.jsx'
 import { NotFoundPage } from '../pages/NotFoundPage.jsx'
 
 const pages = {
     home: { component: HomePage, title: 'Главная' },
+    profile: { component: ProfilePage, title: 'Профиль' },
     login: { component: LoginPage, title: 'Вход' },
     signup: { component: SignupPage, title: 'Регистрация' },
     'not-found': { component: NotFoundPage, title: 'Страница не найдена' },
@@ -21,11 +23,12 @@ let handleRoute = null
 let sessionRequested = false
 let catalogRequested = false
 let sessionReady = false
+let sessionId = 0
 
 /**
  * Корень SPA: сессия, каталог, активный трек и какая страница по URL.
  * Состояние через useState — setState сам перерисовывает дерево.
- * getMe и каталог запрашиваем только на главной (как в MUSIC-10).
+ * Сессию проверяем на главной и в профиле, каталог загружаем на главной.
  * @param {{ router: import('../shared/lib/VanillaRouter.js').VanillaRouter }} props Роутер приложения.
  * @returns {object} Разметка текущей страницы.
  */
@@ -46,14 +49,28 @@ function App({ router }) {
     }
 
     const onAuthenticated = nextUser => {
+        sessionId++
+        sessionRequested = true
+        sessionReady = true
         setUser(nextUser)
         setSessionState('ready')
         setSessionError('')
         setTracksStatus('loading')
         setTracksError('')
         catalogRequested = false
-        router.navigate('/')
+        const next = router.getCurrentUrl().searchParams.get('next')
+        router.navigate(next === '/profile' ? next : '/')
         loadCatalogForHome()
+    }
+
+    const onSessionExpired = () => {
+        sessionId++
+        sessionRequested = false
+        sessionReady = false
+        catalogRequested = false
+        setUser(null)
+        setNotice('Сессия истекла. Войдите снова.')
+        router.navigate('/login?next=/profile', { replace: true })
     }
 
     const onLogout = async () => {
@@ -61,6 +78,7 @@ function App({ router }) {
         setAuthAction(true)
         try {
             await logout()
+            sessionId++
             setUser(null)
             sessionRequested = false
             catalogRequested = false
@@ -80,10 +98,12 @@ function App({ router }) {
     }
 
     async function loadCatalog() {
+        const id = sessionId
         setTracksStatus('loading')
         setTracksError('')
         try {
             const catalog = await getHomeData()
+            if (id !== sessionId) return
             const { tracks } = catalog
             appStore.setState(catalog)
             if (!tracks.some(track => track.id === activeTrackId)) {
@@ -91,36 +111,48 @@ function App({ router }) {
             }
             setTracksStatus('ready')
         } catch (error) {
+            if (id !== sessionId) return
             setTracksStatus('error')
             setTracksError(error.message)
         }
     }
 
-    function loadSessionForHome() {
+    function loadSession() {
         if (sessionRequested) return
         const currentPath = router.getCurrentUrl().pathname
         const currentRoute = router.findRoute(currentPath)?.value
-        if (currentRoute !== 'home') return
+        if (currentRoute !== 'home' && currentRoute !== 'profile') return
 
         sessionRequested = true
+        const id = ++sessionId
+        setSessionState('loading')
+        setSessionError('')
         getCurrentUser()
             .then(nextUser => {
+                if (id !== sessionId) return
                 setUser(nextUser)
                 sessionReady = true
                 setSessionState('ready')
                 const path = router.getCurrentUrl().pathname
                 const routeName = router.findRoute(path)?.value
-                if (!nextUser && routeName === 'home') {
-                    router.navigate('/signup', { replace: true })
+                if (!nextUser) {
+                    sessionRequested = false
+                    if (routeName === 'profile') router.navigate('/login?next=/profile', { replace: true })
+                    if (routeName === 'home') router.navigate('/signup', { replace: true })
                 }
                 loadCatalogForHome()
             })
             .catch(error => {
-                sessionReady = true
+                if (id !== sessionId) return
+                sessionReady = false
                 setSessionState('error')
                 setSessionError(error.message)
-                loadCatalogForHome()
             })
+    }
+
+    function retrySession() {
+        sessionRequested = false
+        loadSession()
     }
 
     function loadCatalogForHome() {
@@ -136,14 +168,15 @@ function App({ router }) {
         bootstrapped = true
         handleRoute = () => {
             setRouteTick(tick => tick + 1)
-            // после смены URL снова проверяем, нужна ли сессия/каталог на главной
+            // Запросы запускаем после смены страницы.
             queueMicrotask(() => {
-                loadSessionForHome()
+                if (!router.started) return
+                loadSession()
                 loadCatalogForHome()
             })
         }
         router.on('route', handleRoute).listen()
-        loadSessionForHome()
+        loadSession()
         loadCatalogForHome()
     }
 
@@ -156,7 +189,19 @@ function App({ router }) {
     const { component: Page, title } = pages[routeName] ?? pages['not-found']
     document.title = `${title} — На все 200`
 
-    if (sessionState === 'loading' && routeName === 'home') {
+    const needsSession = routeName === 'home' || routeName === 'profile'
+    if (needsSession && sessionState === 'error') {
+        return (
+            <main className="session-loading session-loading--error">
+                <p role="alert">{sessionError}</p>
+                <button type="button" onClick={retrySession}>
+                    Попробовать ещё раз
+                </button>
+            </main>
+        )
+    }
+
+    if (needsSession && (sessionState === 'loading' || !user)) {
         return (
             <main className="session-loading" aria-live="polite">
                 Проверяем сессию…
@@ -187,6 +232,11 @@ function App({ router }) {
                 onRegistered={onRegistered}
                 onAuthenticated={onAuthenticated}
                 notice={notice}
+                user={user}
+                onUserUpdated={setUser}
+                onSessionExpired={onSessionExpired}
+                onLogout={onLogout}
+                authAction={authAction}
             />
         </AppLayout>
     )
@@ -203,8 +253,12 @@ export function mountApp(container, router) {
     return () => {
         if (handleRoute) router.off('route', handleRoute)
         router.destroy()
+        sessionId++
         bootstrapped = false
         sessionRequested = false
         catalogRequested = false
+        sessionReady = false
+        handleRoute = null
+        render(null, container)
     }
 }
