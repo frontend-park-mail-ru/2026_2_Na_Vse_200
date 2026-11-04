@@ -1,6 +1,6 @@
-import { createElement } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '../../shared/lib/my-react/index.js'
 import { Sidebar } from '../sidebar/Sidebar.jsx'
-import { Player } from '../player/Player.jsx'
+import { Player } from '../player/Player.tsx'
 import './AppLayout.css'
 
 /**
@@ -8,17 +8,8 @@ import './AppLayout.css'
  * @param {object} props Текущий маршрут, действия с аккаунтом, выбранный трек и страница.
  * @returns {object} Виртуальное DOM-дерево.
  */
-export function AppLayout({
-    route,
-    user,
-    onLogout,
-    onTrackSelect,
-    tracks,
-    activeTrack,
-    sessionError,
-    authAction,
-    children,
-}) {
+export function AppLayout({ route, user, onTrackSelect, tracks, activeTrack, sessionError, children }) {
+    const [queueOpen, setQueueOpen] = useState(false)
     if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
             <main id="main-content" tabIndex={-1}>
@@ -28,11 +19,19 @@ export function AppLayout({
     }
 
     return (
-        <div className="app-shell">
+        <div
+            className="app-shell"
+            onClick={event => {
+                if (!event.target.closest('.player__queue-panel, .player__queue-button')) setQueueOpen(false)
+            }}
+            onKeyDown={event => {
+                if (event.key === 'Escape') setQueueOpen(false)
+            }}
+        >
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
+            <Sidebar className="app-shell__sidebar" user={user} />
             <div className="app-shell__main-column">
                 <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
@@ -43,7 +42,15 @@ export function AppLayout({
                     </p>
                 ) : null}
             </div>
-            <Player track={activeTrack} tracks={tracks} onTrackSelect={onTrackSelect} />
+            <Player
+                className="app-shell__player"
+                track={activeTrack}
+                tracks={tracks}
+                onTrackSelect={onTrackSelect}
+                queueOpen={queueOpen}
+                onQueueToggle={() => setQueueOpen(!queueOpen)}
+                onQueueClose={() => setQueueOpen(false)}
+            />
         </div>
     )
 }

@@ -1,5 +1,6 @@
 import js from '@eslint/js'
 import globals from 'globals'
+import ts from 'typescript-eslint'
 
 // JSX неявно использует createElement и компоненты.
 // Помечаем их как используемые, чтобы no-unused-vars не ругался.
@@ -26,6 +27,7 @@ const jsxReferences = {
 export default [
     { ignores: ['dist/**', 'node_modules/**'] },
     js.configs.recommended,
+    ...ts.configs.recommended.map(config => ({ ...config, files: ['**/*.{ts,tsx}'] })),
     {
         files: ['**/*.{js,jsx}'],
         languageOptions: {
@@ -36,7 +38,7 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx}'],
+        files: ['src/**/*.{js,jsx,ts,tsx}'],
         languageOptions: { globals: globals.browser },
     },
     {
@@ -44,7 +46,7 @@ export default [
         languageOptions: { globals: globals.node },
     },
     {
-        files: ['**/*.jsx'],
+        files: ['**/*.{jsx,tsx}'],
         plugins: { templates: { rules: { 'jsx-references': jsxReferences } } },
         rules: { 'templates/jsx-references': 'error' },
     },

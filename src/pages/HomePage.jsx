@@ -118,7 +118,15 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                             cover={type === 'artist' ? item.image_url : item.cover_url}
                             icon={type === 'artist' ? 'artist' : 'music'}
                         />
-                        <strong>{type === 'artist' ? item.name : item.title}</strong>
+                        <strong>
+                            {type === 'artist' ? (
+                                <a href={`/artists/${encodeURIComponent(item.id)}`} data-link>
+                                    {item.name}
+                                </a>
+                            ) : (
+                                item.title
+                            )}
+                        </strong>
                     </article>
                 ))}
             </div>

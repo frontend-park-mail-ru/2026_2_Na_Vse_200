@@ -1,3 +1,5 @@
+import { ArtistPage } from '../pages/ArtistPage.tsx'
+import { findArtist } from '../features/artist/catalog.ts'
 import { createElement, render, useState } from '../shared/lib/my-react/index.js'
 import { appStore } from './store.js'
 import { getCurrentUser, logout } from '../features/auth/api.js'
@@ -13,6 +15,7 @@ const pages = {
     login: { component: LoginPage, title: 'Вход' },
     signup: { component: SignupPage, title: 'Регистрация' },
     'not-found': { component: NotFoundPage, title: 'Страница не найдена' },
+    artist: { component: ArtistPage, title: 'Исполнитель' },
 }
 
 // Старт один раз: у нас нет useEffect, поэтому флаги снаружи компонента.
@@ -21,6 +24,7 @@ let handleRoute = null
 let sessionRequested = false
 let catalogRequested = false
 let sessionReady = false
+let appVersion = 0
 
 /**
  * Корень SPA: сессия, каталог, активный трек и какая страница по URL.
@@ -30,6 +34,7 @@ let sessionReady = false
  * @returns {object} Разметка текущей страницы.
  */
 function App({ router }) {
+    const version = appVersion
     const [notice, setNotice] = useState('')
     const [user, setUser] = useState(null)
     const [sessionState, setSessionState] = useState('loading')
@@ -84,6 +89,7 @@ function App({ router }) {
         setTracksError('')
         try {
             const catalog = await getHomeData()
+            if (version !== appVersion) return
             const { tracks } = catalog
             appStore.setState(catalog)
             if (!tracks.some(track => track.id === activeTrackId)) {
@@ -91,6 +97,7 @@ function App({ router }) {
             }
             setTracksStatus('ready')
         } catch (error) {
+            if (version !== appVersion) return
             setTracksStatus('error')
             setTracksError(error.message)
         }
@@ -100,11 +107,12 @@ function App({ router }) {
         if (sessionRequested) return
         const currentPath = router.getCurrentUrl().pathname
         const currentRoute = router.findRoute(currentPath)?.value
-        if (currentRoute !== 'home') return
+        if (currentRoute !== 'home' && currentRoute !== 'artist') return
 
         sessionRequested = true
         getCurrentUser()
             .then(nextUser => {
+                if (version !== appVersion) return
                 setUser(nextUser)
                 sessionReady = true
                 setSessionState('ready')
@@ -116,6 +124,7 @@ function App({ router }) {
                 loadCatalogForHome()
             })
             .catch(error => {
+                if (version !== appVersion) return
                 sessionReady = true
                 setSessionState('error')
                 setSessionError(error.message)
@@ -124,10 +133,11 @@ function App({ router }) {
     }
 
     function loadCatalogForHome() {
-        if (!sessionReady || catalogRequested) return
+        if (catalogRequested) return
         const currentPath = router.getCurrentUrl().pathname
         const currentRoute = router.findRoute(currentPath)?.value
-        if (currentRoute !== 'home') return
+        if (currentRoute !== 'home' && currentRoute !== 'artist') return
+        if (currentRoute === 'home' && !sessionReady) return
         catalogRequested = true
         loadCatalog()
     }
@@ -138,21 +148,27 @@ function App({ router }) {
             setRouteTick(tick => tick + 1)
             // после смены URL снова проверяем, нужна ли сессия/каталог на главной
             queueMicrotask(() => {
+                if (version !== appVersion) return
                 loadSessionForHome()
                 loadCatalogForHome()
             })
         }
         router.on('route', handleRoute).listen()
-        loadSessionForHome()
-        loadCatalogForHome()
+        queueMicrotask(() => {
+            if (version !== appVersion) return
+            loadSessionForHome()
+            loadCatalogForHome()
+        })
     }
 
     void routeTick
 
     const { tracks, artists, albums } = appStore.getState()
-    const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
     const route = router.getCurrentUrl().pathname
     const routeName = router.findRoute(route)?.value ?? 'not-found'
+    const artist = findArtist({ tracks, artists, albums }, router.findRoute(route)?.params.id)
+    const playbackTracks = routeName === 'artist' ? (artist?.tracks ?? []) : tracks
+    const activeTrack = playbackTracks.find(track => track.id === activeTrackId) ?? playbackTracks[0]
     const { component: Page, title } = pages[routeName] ?? pages['not-found']
     document.title = `${title} — На все 200`
 
@@ -166,7 +182,7 @@ function App({ router }) {
 
     return (
         <AppLayout
-            tracks={tracks}
+            tracks={playbackTracks}
             route={routeName}
             user={user}
             onLogout={onLogout}
@@ -176,6 +192,8 @@ function App({ router }) {
             authAction={authAction}
         >
             <Page
+                artist={artist}
+                artistId={router.findRoute(route)?.params.id}
                 tracks={tracks}
                 artists={artists}
                 albums={albums}
@@ -199,10 +217,13 @@ function App({ router }) {
  * @returns {() => void} Очистка при горячей перезагрузке.
  */
 export function mountApp(container, router) {
+    appVersion++
     render(<App router={router} />, container)
     return () => {
         if (handleRoute) router.off('route', handleRoute)
         router.destroy()
+        appVersion++
+        sessionReady = false
         bootstrapped = false
         sessionRequested = false
         catalogRequested = false
