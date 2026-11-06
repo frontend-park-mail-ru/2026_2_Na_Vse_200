@@ -1,6 +1,7 @@
 import { createElement } from '../../shared/lib/my-react/index.js'
 import { Sidebar } from '../sidebar/Sidebar.jsx'
 import { Player } from '../player/Player.jsx'
+import { UserAvatar } from '../profile/UserAvatar.tsx'
 import './AppLayout.css'
 
 /**
@@ -32,8 +33,21 @@ export function AppLayout({
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
+            <Sidebar route={route} user={user} onLogout={onLogout} authAction={authAction} />
             <div className="app-shell__main-column">
+                <nav className="app-shell__mobile-nav" aria-label="Навигация">
+                    <a href="/" data-link>
+                        Главная
+                    </a>
+                    <a
+                        href="/profile"
+                        data-link
+                        aria-label="Открыть профиль"
+                        aria-current={route === 'profile' ? 'page' : undefined}
+                    >
+                        <UserAvatar src={user?.avatar_url} />
+                    </a>
+                </nav>
                 <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
                 </main>

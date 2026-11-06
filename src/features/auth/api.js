@@ -1,8 +1,6 @@
 import { requestJson } from '../../shared/api/request.js'
 
-/** Ошибка запроса аутентификации. */
 export class AuthError extends Error {
-    /** @param {string} message Сообщение для пользователя. @param {object} fields Ошибки полей. @param {string} code Код ошибки API. */
     constructor(message, fields = {}, code = '') {
         super(message)
         this.name = 'AuthError'
@@ -10,8 +8,7 @@ export class AuthError extends Error {
         this.code = code
     }
 }
-
-async function requestAuth(path, options) {
+const requestAuth = async (path, options) => {
     try {
         return await requestJson(path, options)
     } catch {
@@ -22,46 +19,30 @@ async function requestAuth(path, options) {
         )
     }
 }
-
-/** Текущий пользователь по сессии. Нет cookie / 401 — гость, возвращаем null без ошибки. */
-export async function getCurrentUser() {
-    let result
-    try {
-        result = await requestJson('/auth/me', { method: 'GET' })
-    } catch {
-        // Session lookup is optional: a missing API or network connection means guest mode.
-        return null
-    }
-
-    const { response, body } = result
+export const getCurrentUser = async signal => {
+    const { response, body } = await requestAuth('/auth/me', { method: 'GET', signal })
     if (response.status === 200) return body
     if (response.status === 401) return null
+    const error = body?.error
     throw new AuthError(
         'Не удалось проверить сессию. Попробуйте обновить страницу.',
         {},
-        body?.error?.code || 'session_error',
+        error?.code || 'session_error',
     )
 }
-
-/** Вход в аккаунт. Cookie сессии с флагом HttpOnly устанавливает сервер. */
-export async function login(data) {
-    const { response, body } = await requestAuth('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify(data),
-    })
+export const login = async data => {
+    const { response, body } = await requestAuth('/auth/login', { method: 'POST', body: JSON.stringify(data) })
     if (response.status === 200) return body
-    if (response.status === 400 && body?.error?.code === 'validation_failed') {
-        throw new AuthError('', body.error.fields || {}, body.error.code)
-    }
-    if (response.status === 401 && body?.error?.code === 'invalid_credentials') {
-        throw new AuthError('Неверный email или пароль', {}, body.error.code)
-    }
-    throw new AuthError('Не удалось выполнить вход. Попробуйте ещё раз.', {}, body?.error?.code || 'login_error')
+    const error = body?.error
+    if (response.status === 400 && error?.code === 'validation_failed')
+        throw new AuthError('', error.fields || {}, error.code)
+    if (response.status === 401 && error?.code === 'invalid_credentials')
+        throw new AuthError('Неверный email или пароль', {}, error.code)
+    throw new AuthError('Не удалось выполнить вход. Попробуйте ещё раз.', {}, error?.code || 'login_error')
 }
-
-/** Выход из аккаунта. Ждём статус 204. */
-export async function logout() {
-    const { response, body } = await requestAuth('/auth/logout', { method: 'POST' })
+export const logout = async signal => {
+    const { response, body } = await requestAuth('/auth/logout', { method: 'POST', signal })
     if (response.status === 204) return
-    throw new AuthError('Не удалось выйти из аккаунта. Попробуйте ещё раз.', {}, body?.error?.code || 'logout_error')
+    const error = body?.error
+    throw new AuthError('Не удалось выйти из аккаунта. Попробуйте ещё раз.', {}, error?.code || 'logout_error')
 }

@@ -32,6 +32,10 @@
     scrollbar-width: thin;
 }
 
+.app-shell__mobile-nav {
+    display: none;
+}
+
 @media (max-width: 760px) {
     .app-shell {
         grid-template-columns: 72px minmax(0, 1fr);
@@ -42,6 +46,25 @@
 }
 
 @media (max-width: 520px) {
+    .app-shell__mobile-nav {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px 14px;
+        background: var(--color-panel);
+    }
+
+    .app-shell__mobile-nav a {
+        color: var(--color-text);
+        font-weight: 600;
+        text-decoration: none;
+    }
+
+    .app-shell__mobile-nav .user-avatar {
+        width: 34px;
+        height: 34px;
+    }
+
     .app-shell {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr) 76px;

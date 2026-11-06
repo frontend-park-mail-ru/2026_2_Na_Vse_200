@@ -1,71 +1,35 @@
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
-
 let rootElement = null
 let rootContainer = null
-let hooksByPath = new Map()
-let componentOutputByPath = new Map()
-let domByPath = new Map()
+const hooksByPath = new Map()
+const componentOutputByPath = new Map()
+const domByPath = new Map()
+const refsByPath = new Map()
 let currentPath = ''
 let currentHookIndex = 0
-
-/**
- * Обновляет DOM по новому дереву, по возможности сохраняя существующие узлы.
- * Движок хранит один корень: его же обновляет setState.
- * @param {object|null} element Виртуальное дерево; null очищает его.
- * @param {HTMLElement} container Корневой контейнер приложения.
- * @returns {void}
- */
-export function render(element, container) {
+export const render = (element, container) => {
     const previousRootElement = rootElement
     rootElement = element
     rootContainer = container
     reconcile(element, domByPath.get('0') ?? container.firstChild, '0', previousRootElement, container)
 }
-
-/**
- * Хранит состояние по пути компонента и порядку вызова хука.
- * Вызывается внутри компонента, каждый раз в одном и том же порядке, без условий.
- * Начальное значение сохраняется как есть; функция-инициализатор не поддерживается.
- * @param {*} initialValue Начальное состояние компонента.
- * @returns {[*, function(*): void]} Значение и setState, который сразу обновляет всё дерево.
- */
-export function useState(initialValue) {
+export const useState = initialValue => {
     const path = currentPath
     const hookIndex = currentHookIndex++
     const hooks = hooksByPath.get(path) ?? []
-
     if (!(hookIndex in hooks)) {
         hooks[hookIndex] = initialValue
         hooksByPath.set(path, hooks)
     }
-
-    /**
-     * Меняет состояние и запускает отрисовку. Вызывать только пока компонент в дереве.
-     * @param {*} nextValue Новое значение или функция от предыдущего значения.
-     * @returns {void}
-     */
     const setState = nextValue => {
         const latestHooks = hooksByPath.get(path)
         const previousValue = latestHooks[hookIndex]
         latestHooks[hookIndex] = typeof nextValue === 'function' ? nextValue(previousValue) : nextValue
-
         render(rootElement, rootContainer)
     }
-
     return [hooks[hookIndex], setState]
 }
-
-/**
- * Сравнивает старый и новый элементы: обновляет, заменяет или удаляет DOM-узел.
- * Для компонента сначала получает его дерево, затем рекурсивно обновляет потомков.
- * @param {object|null|undefined} element Новый виртуальный элемент.
- * @param {Node|null|undefined} dom Существующий DOM-узел.
- * @param {string} path Путь в дереве, по которому хранятся DOM-узлы и состояние.
- * @param {object|null|undefined} previousElement Предыдущий виртуальный элемент.
- * @param {Node} parentDom Родитель для вставки, замены и удаления узла.
- * @returns {Node|null} Обновлённый DOM-узел или null после удаления.
- */
-function reconcile(element, dom, path, previousElement, parentDom) {
+const reconcile = (element, dom, path, previousElement, parentDom) => {
     // удаление узла
     if (element === null || element === undefined) {
         if (dom) parentDom.removeChild(dom)
@@ -73,21 +37,18 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         return null
     }
 
-    // после смены компонента сбасываем DOM и его состояние
+    // после смены компонента сбрасываем DOM и его состояние
     if (typeof element.type === 'function' && previousElement && previousElement.type !== element.type) {
         if (dom) parentDom.removeChild(dom)
         clearPath(path)
         dom = null
         previousElement = null
     }
-
-    // 
     if (typeof element.type === 'function') {
         const previousPath = currentPath
         const previousHookIndex = currentHookIndex
         currentPath = path
         currentHookIndex = 0
-
         const renderedElement = element.type(element.props)
         const previousRenderedElement = componentOutputByPath.get(path) ?? null
         const result = reconcile(
@@ -97,7 +58,6 @@ function reconcile(element, dom, path, previousElement, parentDom) {
             previousRenderedElement,
             parentDom,
         )
-
         componentOutputByPath.set(path, renderedElement)
         if (result) domByPath.set(path, result)
         else domByPath.delete(path)
@@ -105,7 +65,6 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         currentHookIndex = previousHookIndex
         return result
     }
-
     const isText = element.type === 'TEXT_ELEMENT'
     const previousIsText = previousElement?.type === 'TEXT_ELEMENT'
     const sameType = dom && previousElement && element.type === previousElement.type
@@ -116,7 +75,7 @@ function reconcile(element, dom, path, previousElement, parentDom) {
             element.type === 'svg' ||
             (parentDom.namespaceURI === SVG_NAMESPACE && parentDom.localName !== 'foreignObject')
         const replacement = isText
-            ? document.createTextNode(element.props.nodeValue)
+            ? document.createTextNode(String(element.props.nodeValue))
             : isSvg
               ? document.createElementNS(SVG_NAMESPACE, element.type)
               : document.createElement(element.type)
@@ -126,35 +85,29 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         dom = replacement
         previousElement = null
     }
-
     domByPath.set(path, dom)
 
     // текстовый узел
     if (isText) {
         if (dom.nodeValue !== element.props.nodeValue) {
-            dom.nodeValue = element.props.nodeValue
+            dom.nodeValue = String(element.props.nodeValue)
         }
         return dom
     }
-
     updateProps(dom, previousElement?.props ?? {}, element.props)
-
     const oldChildren = previousElement?.props.children ?? []
     const newChildren = element.props.children ?? []
     const nextDomChildren = []
     const nextChildPaths = new Set()
-
     for (let index = 0; index < newChildren.length; index++) {
         nextChildPaths.add(getChildPath(path, newChildren[index], index))
     }
-
     for (let index = 0; index < oldChildren.length; index++) {
         const oldChildPath = getChildPath(path, oldChildren[index], index)
         if (!nextChildPaths.has(oldChildPath)) {
             reconcile(null, domByPath.get(oldChildPath) ?? null, oldChildPath, oldChildren[index], dom)
         }
     }
-
     for (let index = 0; index < newChildren.length; index++) {
         const newChild = newChildren[index] ?? null
         const childPath = getChildPath(path, newChild, index)
@@ -166,42 +119,40 @@ function reconcile(element, dom, path, previousElement, parentDom) {
         const nextChildDom = reconcile(newChild, childDom, childPath, oldChild, dom)
         if (nextChildDom) nextDomChildren.push(nextChildDom)
     }
-
     nextDomChildren.forEach((childDom, index) => {
         const currentAtIndex = dom.childNodes[index] ?? null
         if (currentAtIndex !== childDom) dom.insertBefore(childDom, currentAtIndex)
     })
-
     for (const child of Array.from(dom.childNodes)) {
         if (!nextDomChildren.includes(child)) dom.removeChild(child)
     }
-
+    const ref = element.props.ref
+    const oldRef = refsByPath.get(path)
+    if (ref !== oldRef) {
+        oldRef?.(null)
+        if (ref) {
+            refsByPath.set(path, ref)
+            ref(dom)
+        } else {
+            refsByPath.delete(path)
+        }
+    }
     return dom
 }
-
-/**
- * Строит путь по key, а если его нет — по индексу среди детей.
- * Стабильный key позволяет сохранить узел и состояние при перестановке.
- * @param {string} parentPath Путь родителя.
- * @param {object|null|undefined} child Дочерний элемент.
- * @param {number} index Позиция в массиве детей.
- * @returns {string} Путь дочернего элемента.
- */
-function getChildPath(parentPath, child, index) {
+const getChildPath = (parentPath, child, index) => {
     if (child?.key !== null && child?.key !== undefined) {
         return `${parentPath}.key:${encodeURIComponent(String(child.key))}`
     }
     return `${parentPath}.index:${index}`
 }
-
-/**
- * Удаляет сохранённые узлы, состояния и результаты компонентов для всей ветки.
- * Сам DOM здесь не меняется.
- * @param {string} path Путь удаляемой или заменяемой ветки.
- * @returns {void}
- */
-function clearPath(path) {
+const clearPath = path => {
     const prefix = `${path}.`
+    for (const [key, ref] of refsByPath) {
+        if (key === path || key.startsWith(prefix)) {
+            ref(null)
+            refsByPath.delete(key)
+        }
+    }
     for (const key of domByPath.keys()) {
         if (key === path || key.startsWith(prefix)) domByPath.delete(key)
     }
@@ -212,32 +163,18 @@ function clearPath(path) {
         if (key === path || key.startsWith(prefix)) componentOutputByPath.delete(key)
     }
 }
-
-/**
- * Обновляет свойства, атрибуты, стили и обработчики событий, убирает старые значения.
- * Дочерние элементы обрабатываются отдельно в reconcile.
- * @param {HTMLElement} dom Обновляемый DOM-элемент.
- * @param {object} previousProps Предыдущие свойства.
- * @param {object} nextProps Новые свойства.
- * @returns {void}
- */
-function updateProps(dom, previousProps, nextProps) {
+const updateProps = (dom, previousProps, nextProps) => {
     const isSvg = dom.namespaceURI === SVG_NAMESPACE
     const names = new Set([...Object.keys(previousProps), ...Object.keys(nextProps)])
-
     for (const name of names) {
-        if (name === 'children') continue
-
+        if (name === 'children' || name === 'ref') continue
         const previousValue = previousProps[name]
         const nextValue = nextProps[name]
         const attributeName = name === 'className' ? 'class' : name
-
         if (previousValue === nextValue) continue
-
         if (name.startsWith('on') && typeof previousValue === 'function') {
             dom.removeEventListener(name.slice(2).toLowerCase(), previousValue)
         }
-
         if (nextValue === null || nextValue === undefined || nextValue === false) {
             if (name === 'style') dom.removeAttribute('style')
             else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
@@ -247,7 +184,6 @@ function updateProps(dom, previousProps, nextProps) {
             }
             continue
         }
-
         if (name.startsWith('on') && typeof nextValue === 'function') {
             dom.addEventListener(name.slice(2).toLowerCase(), nextValue)
         } else if (name === 'style' && typeof nextValue === 'object') {
@@ -258,7 +194,7 @@ function updateProps(dom, previousProps, nextProps) {
         } else if (!isSvg && name in dom && !name.startsWith('aria-') && !name.startsWith('data-')) {
             dom[name] = nextValue
         } else {
-            dom.setAttribute(attributeName, nextValue === true ? '' : nextValue)
+            dom.setAttribute(attributeName, nextValue === true ? '' : String(nextValue))
         }
     }
 }

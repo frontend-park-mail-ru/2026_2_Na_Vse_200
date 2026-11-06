@@ -1,56 +1,48 @@
 import { createElement, useState } from '../shared/lib/my-react/index.js'
-import { FormField } from '../components/ui/FormField.jsx'
 import { login } from '../features/auth/api.js'
 import { validateLogin } from '../features/auth/validation.js'
+import { FormField } from '../components/ui/FormField.jsx'
 import logo from '../assets/2une-dark-transparent.png'
 import './AuthPage.css'
 
-/** @param {{notice?: string, onAuthenticated?: (user: object) => void}} props Сообщение и обработчик успешного входа. @returns {object} Форма входа. */
-export function LoginPage({ notice, onAuthenticated } = {}) {
+export const LoginPage = ({ notice, onAuthenticated } = {}) => {
     const [state, setState] = useState({ message: '', errors: {}, pending: false })
-    function readValues(form) {
-        return {
-            email: form.elements.namedItem('email').value,
-            password: form.elements.namedItem('password').value,
-        }
-    }
-
-    function clearError(event) {
-        const name = event.target.name
+    const readValues = form => ({
+        email: form.elements.namedItem('email').value,
+        password: form.elements.namedItem('password').value,
+    })
+    const clearError = event => {
+        const name = event.currentTarget.name
         if (state.errors[name] || state.message) {
             setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
         }
     }
-
-    function validateField(event) {
-        const { name, form } = event.target
-        if (form.dataset.submitting === 'true') return
-        const { errors } = validateLogin(readValues(form))
+    const validateField = event => {
+        if (state.pending) return
+        const input = event.currentTarget
+        const name = input.name
+        const { errors } = validateLogin(readValues(input.form))
         setState(previous => ({ ...previous, errors: { ...previous.errors, [name]: errors[name] || '' } }))
     }
-
-    async function submit(event) {
+    const submit = async event => {
         event.preventDefault()
+        if (state.pending) return
         const form = event.currentTarget
-        if (form.dataset.submitting === 'true') return
         const { data, errors } = validateLogin(readValues(form))
         if (Object.keys(errors).length) {
-            setState({ message: 'Неверный email или пароль', errors, pending: false })
-            form.elements.namedItem(Object.keys(errors)[0]).focus()
+            setState({ message: 'Проверьте email или пароль', errors, pending: false })
+            const input = form.elements.namedItem(Object.keys(errors)[0])
+            input.focus()
             return
         }
-        form.dataset.submitting = 'true'
         setState({ message: '', errors: {}, pending: true })
         try {
             const user = await login(data)
             if (form.isConnected) onAuthenticated?.(user)
         } catch (error) {
             if (form.isConnected) setState({ message: error.message, errors: error.fields || {}, pending: false })
-        } finally {
-            form.dataset.submitting = 'false'
         }
     }
-
     return (
         <section className="auth-page" aria-labelledby="login-title">
             <aside className="auth-page__art">
