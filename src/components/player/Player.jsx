@@ -3,7 +3,7 @@ import { Icon } from '../ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../../features/music/presentation.js'
 import './Player.css'
 
-export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
+export const Player = ({ track, tracks = [], onTrackSelect = () => {} }) => {
     const [isPlaying, setIsPlaying] = useState(false)
     const [progress, setProgress] = useState(32)
     const [volume, setVolume] = useState(62)
@@ -14,16 +14,21 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
         const index = tracks.findIndex(item => item.id === track?.id)
         onTrackSelect(tracks[(Math.max(0, index) + offset + tracks.length) % tracks.length])
     }
+    const previousTrack = () => selectAdjacent(-1)
+    const nextTrack = () => selectAdjacent(1)
+    const togglePlay = () => setIsPlaying(playing => !playing)
+    const seek = event => setProgress(Number(event.currentTarget.value))
+    const changeVolume = event => setVolume(Number(event.currentTarget.value))
+    const coverError = () => setFailedCover(cover)
     const timelineStyle = {
         background: `linear-gradient(90deg, #bba4ff 0%, #bba4ff ${progress}%, #494956 ${progress}%, #494956 100%)`,
     }
-
     return (
         <footer className="player" aria-label="Музыкальный плеер">
             <div className="player__track">
                 <span className="player__cover">
                     {cover && failedCover !== cover ? (
-                        <img src={cover} alt="" onError={() => setFailedCover(cover)} />
+                        <img src={cover} alt="" onError={coverError} />
                     ) : (
                         <Icon name="music" size={22} />
                     )}
@@ -41,7 +46,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                         className="player__control player__control--secondary"
                         aria-label="Предыдущий трек"
                         disabled={!track}
-                        onClick={() => selectAdjacent(-1)}
+                        onClick={previousTrack}
                     >
                         <Icon name="trackPrevious" size={25} />
                     </button>
@@ -50,7 +55,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                         className="player__control player__control--play"
                         aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
                         disabled={!track}
-                        onClick={() => setIsPlaying(!isPlaying)}
+                        onClick={togglePlay}
                     >
                         <Icon name={isPlaying ? 'pause' : 'play'} size={25} />
                     </button>
@@ -59,7 +64,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                         className="player__control player__control--secondary"
                         aria-label="Следующий трек"
                         disabled={!track}
-                        onClick={() => selectAdjacent(1)}
+                        onClick={nextTrack}
                     >
                         <Icon name="trackNext" size={25} />
                     </button>
@@ -74,7 +79,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                         disabled={!track}
                         style={timelineStyle}
                         aria-label="Позиция воспроизведения"
-                        onInput={event => setProgress(Number(event.target.value))}
+                        onInput={seek}
                     />
                 </div>
             </div>
@@ -91,7 +96,7 @@ export function Player({ track, tracks = [], onTrackSelect = () => {} }) {
                     max="100"
                     value={volume}
                     aria-label="Громкость"
-                    onInput={event => setVolume(Number(event.target.value))}
+                    onInput={changeVolume}
                     style={{ background: `linear-gradient(to right, #afa3ca ${volume}%, #f1eff5 ${volume}%)` }}
                 />
             </div>

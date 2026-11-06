@@ -1,3 +1,5 @@
+export type ElementRef = (element: Element | null) => void
+
 export interface VNode {
     type: unknown
     key?: string | number | null
@@ -11,6 +13,10 @@ export function useState<T>(initial: T): [T, (value: T | ((previous: T) => T)) =
 declare global {
     namespace JSX {
         type Element = VNode
+
+        interface ElementChildrenAttribute {
+            children: unknown
+        }
 
         interface IntrinsicElements {
             [tag: string]: Record<string, unknown>

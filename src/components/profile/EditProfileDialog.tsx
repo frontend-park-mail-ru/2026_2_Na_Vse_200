@@ -1,28 +1,15 @@
 import { createElement, useState } from '../../shared/lib/my-react/index.js'
 import { ProfileError, updateProfile } from '../../features/profile/api.ts'
 import { validateProfile } from '../../features/profile/validation.ts'
-import type { FieldErrors, User } from '../../features/profile/types.ts'
+import type { EditProfileDialogProps, EditProfileDialogState } from './EditProfileDialog.types.ts'
 import { UserAvatar } from './UserAvatar.tsx'
+import { Modal } from '../modal/Modal.tsx'
+import { modals } from '../modal/manager.ts'
 import './EditProfileDialog.scss'
 
-interface Props {
-    user: User
-    onClose: () => void
-    onSaved: (user: User) => void
-    onExpired: () => void
-}
-
-interface State {
-    avatar: File | null
-    preview: string
-    errors: FieldErrors
-    message: string
-    pending: boolean
-    reading: boolean
-}
-
-export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) {
-    const [state, setState] = useState<State>({
+export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialogProps) => {
+    const [state, setState] = useState<EditProfileDialogState>({
+        name: user.display_name,
         avatar: null,
         preview: '',
         errors: {},
@@ -31,17 +18,28 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
         reading: false,
     })
 
-    function close(event: Event) {
-        if (state.pending) return
-        const dialog = (event.currentTarget as HTMLElement).closest('dialog')!
-        dialog.close()
+    const choosePhoto = (event: MouseEvent) => {
+        const button = event.currentTarget as HTMLButtonElement
+        const input = button.form!.elements.namedItem('avatar') as HTMLInputElement
+        input.click()
     }
 
-    function selectPhoto(event: Event) {
+    const changeName = (event: Event) => {
+        const input = event.currentTarget as HTMLInputElement
+        const name = input.value
+        setState(previous => ({
+            ...previous,
+            name,
+            message: '',
+            errors: { ...previous.errors, display_name: '' },
+        }))
+    }
+
+    const selectPhoto = (event: Event) => {
         const input = event.currentTarget as HTMLInputElement
         const file = input.files?.[0]
         if (!file) return
-        const { errors } = validateProfile(user.display_name, file)
+        const { errors } = validateProfile(state.name, file)
         if (errors.avatar) {
             input.value = ''
             setState(previous => ({
@@ -81,25 +79,26 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
         reader.readAsDataURL(file)
     }
 
-    async function submit(event: SubmitEvent) {
+    const submit = async (event: SubmitEvent) => {
         event.preventDefault()
         const form = event.currentTarget as HTMLFormElement
-        if (form.dataset.submitting === 'true' || state.reading) return
-        const field = form.elements.namedItem('display_name') as HTMLInputElement
-        const { name, errors } = validateProfile(field.value, state.avatar)
+        if (state.pending || state.reading) return
+        const { name, errors } = validateProfile(state.name, state.avatar)
         if (state.errors.avatar) errors.avatar = state.errors.avatar
         if (Object.keys(errors).length) {
             setState(previous => ({ ...previous, errors }))
-            if (errors.display_name) field.focus()
+            if (errors.display_name) {
+                const input = form.elements.namedItem('display_name') as HTMLInputElement
+                input.focus()
+            }
             return
         }
 
-        form.dataset.submitting = 'true'
         setState(previous => ({ ...previous, errors: {}, message: '', pending: true }))
         try {
             const updated = await updateProfile(name, state.avatar)
             if (!form.isConnected) return
-            form.closest('dialog')!.close()
+            modals.close()
             onSaved(updated)
         } catch (error) {
             if (!form.isConnected) return
@@ -113,37 +112,11 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
                 message: error instanceof Error ? error.message : 'Не удалось сохранить профиль.',
                 pending: false,
             }))
-        } finally {
-            form.dataset.submitting = 'false'
         }
     }
 
     return (
-        <dialog
-            className="profile-edit"
-            aria-labelledby="profile-edit-title"
-            onCancel={(event: Event) => {
-                event.preventDefault()
-                close(event)
-            }}
-            onClose={(event: Event) => {
-                if ((event.currentTarget as HTMLDialogElement).isConnected) onClose()
-            }}
-        >
-            <header className="profile-edit__header">
-                <h2 id="profile-edit-title">Редактировать профиль</h2>
-                <button
-                    className="profile-edit__close"
-                    type="button"
-                    aria-label="Закрыть"
-                    onClick={close}
-                    disabled={state.pending}
-                >
-                    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true">
-                        <path d="m4 4 16 16M20 4 4 20" stroke="currentColor" stroke-width="2" />
-                    </svg>
-                </button>
-            </header>
+        <Modal title="Редактировать профиль" busy={state.pending} className="profile-edit">
             <form
                 className="profile-edit__form"
                 noValidate
@@ -153,16 +126,7 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
                 <div className="profile-edit__photo">
                     <UserAvatar src={state.preview || user.avatar_url} className="profile-edit__avatar" />
                     <div>
-                        <button
-                            className="profile-button"
-                            type="button"
-                            disabled={state.pending}
-                            onClick={(event: MouseEvent) => {
-                                const button = event.currentTarget as HTMLButtonElement
-                                const input = button.form!.elements.namedItem('avatar') as HTMLInputElement
-                                input.click()
-                            }}
-                        >
+                        <button className="profile-button" type="button" disabled={state.pending} onClick={choosePhoto}>
                             Изменить фото
                         </button>
                         <p className="profile-edit__hint" id="profile-photo-hint">
@@ -188,20 +152,14 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
                     <input
                         id="profile-name"
                         name="display_name"
-                        value={user.display_name}
+                        value={state.name}
                         autoComplete="nickname"
                         autoFocus
                         required
                         disabled={state.pending}
                         aria-invalid={state.errors.display_name ? 'true' : 'false'}
                         aria-describedby={state.errors.display_name ? 'profile-name-error' : undefined}
-                        onInput={() =>
-                            setState(previous => ({
-                                ...previous,
-                                message: '',
-                                errors: { ...previous.errors, display_name: '' },
-                            }))
-                        }
+                        onInput={changeName}
                     />
                     <p className="profile-edit__error" id="profile-name-error" role="alert">
                         {state.errors.display_name}
@@ -214,7 +172,7 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
                     <button
                         className="profile-button profile-button--cancel"
                         type="button"
-                        onClick={close}
+                        onClick={modals.close}
                         disabled={state.pending}
                     >
                         Отмена
@@ -224,6 +182,6 @@ export function EditProfileDialog({ user, onClose, onSaved, onExpired }: Props) 
                     </button>
                 </div>
             </form>
-        </dialog>
+        </Modal>
     )
 }

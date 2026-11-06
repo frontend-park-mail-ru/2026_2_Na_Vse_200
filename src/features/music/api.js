@@ -1,10 +1,10 @@
 import { requestJson } from '../../shared/api/request.js'
 
 /** Данные главной: треки, исполнители и альбомы. */
-export async function getHomeData() {
+export const getHomeData = async signal => {
     let result
     try {
-        result = await requestJson('/home', { method: 'GET' })
+        result = await requestJson('/home', { method: 'GET', signal })
     } catch {
         throw new Error('Не удалось подключиться к серверу. Попробуйте ещё раз.')
     }

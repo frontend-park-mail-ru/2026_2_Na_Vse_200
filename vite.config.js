@@ -16,7 +16,7 @@ export default defineConfig({
                 const result = await transformAsync(source, {
                     filename: file,
                     presets: [[typescript, { jsxPragma: 'createElement', onlyRemoveTypeImports: true }]],
-                    plugins: [[jsx, { runtime: 'classic', pragma: 'createElement' }]],
+                    plugins: /\.[jt]sx$/.test(file) ? [[jsx, { runtime: 'classic', pragma: 'createElement' }]] : [],
                     sourceMaps: true,
                     configFile: false,
                     babelrc: false,
@@ -35,12 +35,6 @@ export default defineConfig({
                 target: 'http://localhost:8080',
                 changeOrigin: true,
             },
-        },
-    },
-    oxc: {
-        jsx: {
-            runtime: 'classic',
-            pragma: 'createElement',
         },
     },
     optimizeDeps: {

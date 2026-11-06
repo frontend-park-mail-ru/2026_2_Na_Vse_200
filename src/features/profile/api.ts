@@ -13,14 +13,14 @@ export class ProfileError extends Error {
     }
 }
 
-export async function updateProfile(name: string, avatar: File | null = null): Promise<User> {
+export const updateProfile = async (name: string, avatar: File | null = null): Promise<User> => {
     const data = new FormData()
     data.append('display_name', name)
     if (avatar) data.append('avatar', avatar)
 
     let result
     try {
-        result = await requestJson('/users/me', { method: 'PATCH', body: data })
+        result = await requestJson('/users/me', { method: 'PATCH', body: data, multipart: true })
     } catch {
         throw new ProfileError('Не удалось связаться с сервером. Попробуйте ещё раз.')
     }

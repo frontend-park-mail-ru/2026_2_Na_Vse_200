@@ -1,29 +1,20 @@
 import { createElement, useState } from '../shared/lib/my-react/index.js'
 import { UserAvatar } from '../components/profile/UserAvatar.tsx'
 import { EditProfileDialog } from '../components/profile/EditProfileDialog.tsx'
+import { modals } from '../components/modal/manager.ts'
 import type { User } from '../features/profile/types.ts'
+import type { ProfilePageProps } from './ProfilePage.types.ts'
 import './ProfilePage.scss'
 
-interface Props {
-    user: User
-    onUserUpdated: (user: User) => void
-    onSessionExpired: () => void
-    onLogout: () => void
-    authAction: boolean
-}
-
-export function ProfilePage({ user, onUserUpdated, onSessionExpired, onLogout, authAction }: Props) {
-    const [editing, setEditing] = useState(false)
+export const ProfilePage = ({ user, onUserUpdated, onSessionExpired, onLogout, authAction }: ProfilePageProps) => {
     const [notice, setNotice] = useState('')
 
-    function edit(event: MouseEvent) {
-        const page = (event.currentTarget as HTMLElement).closest('.profile-page')!
+    const edit = () => {
         setNotice('')
-        setEditing(true)
-        page.querySelector('dialog')!.showModal()
+        modals.open(<EditProfileDialog user={user} onSaved={saved} onExpired={onSessionExpired} />)
     }
 
-    function saved(updated: User) {
+    const saved = (updated: User) => {
         onUserUpdated(updated)
         setNotice('Профиль сохранён')
     }
@@ -79,14 +70,6 @@ export function ProfilePage({ user, onUserUpdated, onSessionExpired, onLogout, a
                     </button>
                 </div>
             </section>
-            {editing && (
-                <EditProfileDialog
-                    user={user}
-                    onClose={() => setEditing(false)}
-                    onSaved={saved}
-                    onExpired={onSessionExpired}
-                />
-            )}
         </section>
     )
 }

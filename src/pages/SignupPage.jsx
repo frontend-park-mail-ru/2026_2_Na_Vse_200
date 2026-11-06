@@ -1,54 +1,53 @@
 import { createElement, useState } from '../shared/lib/my-react/index.js'
-import { FormField } from '../components/ui/FormField.jsx'
-import { validateSignup } from '../features/signup/validation.js'
 import { signup } from '../features/signup/api.js'
+import { validateSignup } from '../features/signup/validation.js'
+import { FormField } from '../components/ui/FormField.jsx'
 import logo from '../assets/2une-dark-transparent.png'
 import './AuthPage.css'
 
-/** @param {{onRegistered: () => void}} props Переход после регистрации. @returns {object} Экран регистрации. */
-export function SignupPage({ onRegistered }) {
+export const SignupPage = ({ onRegistered }) => {
     const [state, setState] = useState({ errors: {}, message: '', pending: false })
-
-    function readValues(form) {
-        return Object.fromEntries(
-            ['display_name', 'email', 'password'].map(name => [name, form.elements.namedItem(name).value]),
-        )
-    }
-    function clearError(event) {
-        const name = event.target.name
-        if (state.errors[name] || state.message)
+    const readValues = form => ({
+        display_name: form.elements.namedItem('display_name').value,
+        email: form.elements.namedItem('email').value,
+        password: form.elements.namedItem('password').value,
+    })
+    const clearError = event => {
+        const name = event.currentTarget.name
+        if (state.errors[name] || state.message) {
             setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
+        }
     }
-    function validateField(event) {
-        const { name, form } = event.target
-        if (form.dataset.submitting === 'true') return
-        const { errors } = validateSignup(readValues(form))
+    const validateField = event => {
+        if (state.pending) return
+        const input = event.currentTarget
+        const name = input.name
+        const { errors } = validateSignup(readValues(input.form))
         setState(previous => ({ ...previous, errors: { ...previous.errors, [name]: errors[name] || '' } }))
     }
-    async function submit(event) {
+    const submit = async event => {
         event.preventDefault()
+        if (state.pending) return
         const form = event.currentTarget
-        if (form.dataset.submitting === 'true') return
         const { data, errors } = validateSignup(readValues(form))
         if (Object.keys(errors).length) {
             setState({ errors, message: '', pending: false })
-            form.elements.namedItem(Object.keys(errors)[0]).focus()
+            const input = form.elements.namedItem(Object.keys(errors)[0])
+            input.focus()
             return
         }
-        form.dataset.submitting = 'true'
         setState({ errors: {}, message: '', pending: true })
         try {
             await signup(data)
             if (!form.isConnected) return
-            form.elements.namedItem('password').value = ''
+            const password = form.elements.namedItem('password')
+            password.value = ''
             onRegistered()
         } catch (error) {
             if (!form.isConnected) return
             setState({ errors: error.fields || {}, message: error.message, pending: false })
-            const firstField = Object.keys(error.fields || {})[0]
-            if (firstField) form.elements.namedItem(firstField).focus()
-        } finally {
-            form.dataset.submitting = 'false'
+            const first = Object.keys(error.fields || {})[0]
+            if (first) form.elements.namedItem(first).focus()
         }
     }
     return (

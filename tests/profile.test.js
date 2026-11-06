@@ -4,6 +4,7 @@ import { validateProfile } from '../src/features/profile/validation.ts'
 import { ProfileError, updateProfile } from '../src/features/profile/api.ts'
 import { getCurrentUser } from '../src/features/auth/api.js'
 import { requestJson } from '../src/shared/api/request.js'
+import { createSession } from '../src/app/session.js'
 
 const user = { id: 'user-id', display_name: 'Андрей', email: 'andrey@example.com', avatar_url: null }
 
@@ -35,6 +36,7 @@ test('профиль отправляется одной multipart-формой 
         assert.equal(options.body.get('display_name'), 'Андрей')
         assert.equal(options.body.get('avatar'), photo)
         assert.equal(new Headers(options.headers).has('Content-Type'), false)
+        assert.equal('multipart' in options, false)
         return Response.json(user)
     })
     assert.deepEqual(await updateProfile('Андрей', photo), user)
@@ -98,4 +100,48 @@ test('сбой сети при проверке сессии не превращ
 test('401 при чтении сессии означает отсутствие пользователя', async t => {
     t.mock.method(globalThis, 'fetch', async () => Response.json({ error: { code: 'unauthorized' } }, { status: 401 }))
     assert.equal(await getCurrentUser(), null)
+})
+
+test('поздний ответ проверки сессии не заменяет пользователя после входа', async t => {
+    let finish
+    let signal
+    t.mock.method(globalThis, 'fetch', (_url, options) => {
+        signal = options.signal
+        return new Promise(resolve => {
+            finish = resolve
+        })
+    })
+    const session = createSession()
+    t.after(session.destroy)
+    const pending = session.restore()
+    session.setUser(user)
+    assert.equal(signal.aborted, true)
+    finish(Response.json({ ...user, id: 'old-user' }))
+    await pending
+    assert.equal(session.getState().user.id, user.id)
+    assert.equal(session.getState().status, 'ready')
+})
+
+test('ошибка выхода сохраняет пользователя и снимает блокировку', async t => {
+    t.mock.method(globalThis, 'fetch', async () => Response.json({}, { status: 500 }))
+    const session = createSession()
+    t.after(session.destroy)
+    session.setUser(user)
+    assert.equal(await session.signOut(), false)
+    assert.equal(session.getState().user.id, user.id)
+    assert.equal(session.getState().pending, false)
+    assert.ok(session.getState().error)
+})
+
+test('выход и истечение сессии используют одинаковое состояние гостя', async t => {
+    t.mock.method(globalThis, 'fetch', async () => new Response(null, { status: 204 }))
+    const session = createSession()
+    t.after(session.destroy)
+    session.setUser(user)
+    assert.equal(await session.signOut(), true)
+    const signedOut = session.getState()
+    session.setUser(user)
+    session.clear()
+    assert.deepEqual(session.getState(), signedOut)
+    assert.deepEqual(signedOut, { user: null, status: 'ready', error: '', pending: false })
 })

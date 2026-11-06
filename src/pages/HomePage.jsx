@@ -3,27 +3,28 @@ import { Icon } from '../components/ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.js'
 import './HomePage.css'
 
-function formatDuration(duration) {
+const formatDuration = duration => {
     if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
-    const seconds = Number(duration?.seconds ?? duration?.duration_seconds ?? duration ?? 0)
+    const seconds = Number(
+        typeof duration === 'object' ? (duration.seconds ?? duration.duration_seconds ?? 0) : (duration ?? 0),
+    )
     if (!Number.isFinite(seconds) || seconds <= 0) return '—:——'
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 }
-
-function Cover({ cover, className = '', icon = 'music' }) {
+const Cover = ({ cover, className = '', icon = 'music' }) => {
     const [failedCover, setFailedCover] = useState('')
+    const coverError = () => setFailedCover(cover ?? '')
     return (
         <span className={`music-cover ${className}`}>
             {cover && failedCover !== cover ? (
-                <img src={cover} alt="" loading="lazy" onError={() => setFailedCover(cover)} />
+                <img src={cover} alt="" loading="lazy" onError={coverError} />
             ) : (
                 <Icon name={icon} size={20} />
             )}
         </span>
     )
 }
-
-function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksError, onTracksRetry }) {
+const TrackList = ({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksError, onTracksRetry }) => {
     const [likedTracks, setLikedTracks] = useState({})
     if (tracksStatus === 'loading') {
         return (
@@ -32,7 +33,6 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
             </p>
         )
     }
-
     if (tracksStatus === 'error') {
         return (
             <div className="home-page__message home-page__message--error" role="alert">
@@ -43,53 +43,67 @@ function TrackList({ tracks, activeTrack, onTrackSelect, tracksStatus, tracksErr
             </div>
         )
     }
-
     if (!tracks.length) return <p className="home-page__message">Пока нет треков.</p>
-
+    const renderTrack = (track, index) => {
+        const isActive = activeTrack?.id === track.id
+        const isLiked = likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)
+        const selectTrack = () => onTrackSelect(track)
+        const toggleLike = () => setLikedTracks(previous => ({ ...previous, [track.id]: !isLiked }))
+        return (
+            <li
+                className={`track-list__item${isActive ? ' track-list__item--active' : ''}`}
+                key={track.id ?? `${track.title}-${index}`}
+            >
+                <button
+                    className="track-list__select"
+                    type="button"
+                    onClick={selectTrack}
+                    aria-current={isActive ? 'true' : undefined}
+                >
+                    <span className="track-list__index">{index + 1}</span>
+                    <Cover cover={getTrackCover(track)} />
+                    <span className="track-list__meta">
+                        <strong>{track.title || 'Без названия'}</strong>
+                        <small>{getArtistName(track)}</small>
+                    </span>
+                    <span className="track-list__duration">
+                        {formatDuration(track.duration ?? track.duration_seconds ?? (track.duration_ms ?? 0) / 1000)}
+                    </span>
+                </button>
+                <button
+                    className="track-list__like"
+                    type="button"
+                    aria-label={`${isLiked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
+                    aria-pressed={isLiked ? 'true' : 'false'}
+                    onClick={toggleLike}
+                >
+                    <Icon name="heart" size={19} />
+                </button>
+                <Icon name="more" size={20} className="track-list__more" />
+            </li>
+        )
+    }
     return (
         <ol className="track-list" aria-label="Популярные треки">
-            {tracks.slice(0, 6).map((track, index) => {
-                const isActive = activeTrack?.id === track.id
-                const isLiked = likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)
-                return (
-                    <li
-                        className={`track-list__item${isActive ? ' track-list__item--active' : ''}`}
-                        key={track.id ?? `${track.title}-${index}`}
-                    >
-                        <button
-                            className="track-list__select"
-                            type="button"
-                            onClick={() => onTrackSelect(track)}
-                            aria-current={isActive ? 'true' : undefined}
-                        >
-                            <span className="track-list__index">{index + 1}</span>
-                            <Cover cover={getTrackCover(track)} />
-                            <span className="track-list__meta">
-                                <strong>{track.title || 'Без названия'}</strong>
-                                <small>{getArtistName(track)}</small>
-                            </span>
-                            <span className="track-list__duration">
-                                {formatDuration(track.duration ?? track.duration_seconds ?? track.duration_ms / 1000)}
-                            </span>
-                        </button>
-                        <button
-                            className="track-list__like"
-                            type="button"
-                            aria-label={`${isLiked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
-                            aria-pressed={isLiked ? 'true' : 'false'}
-                            onClick={() => setLikedTracks(previous => ({ ...previous, [track.id]: !isLiked }))}
-                        >
-                            <Icon name="heart" size={19} />
-                        </button>
-                        <Icon name="more" size={20} className="track-list__more" />
-                    </li>
-                )
-            })}
+            {tracks.slice(0, 6).map(renderTrack)}
         </ol>
     )
 }
-
-function CollectionSection({ title, items, type, tracksStatus }) {
+const CollectionSection = ({ title, items, type, tracksStatus }) => {
+    const emptyMessage = () => {
+        if (tracksStatus === 'loading') return 'Загружаем…'
+        if (tracksStatus === 'error') return 'Не удалось загрузить данные.'
+        return type === 'artist' ? 'Пока нет исполнителей.' : 'Пока нет альбомов.'
+    }
+    const renderCard = item => (
+        <article className="music-collection__card" key={item.id}>
+            <Cover
+                cover={type === 'artist' ? item.image_url : item.cover_url}
+                icon={type === 'artist' ? 'artist' : 'music'}
+            />
+            <strong>{type === 'artist' ? item.name : item.title}</strong>
+        </article>
+    )
     return (
         <section className="music-collection" aria-label={title}>
             <div className="music-collection__heading">
@@ -100,33 +114,14 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                     </button>
                 )}
             </div>
-            {items.length === 0 && (
-                <p className="music-collection__empty">
-                    {tracksStatus === 'loading'
-                        ? 'Загружаем…'
-                        : tracksStatus === 'error'
-                          ? 'Не удалось загрузить данные.'
-                          : type === 'artist'
-                            ? 'Пока нет исполнителей.'
-                            : 'Пока нет альбомов.'}
-                </p>
-            )}
+            {items.length === 0 && <p className="music-collection__empty">{emptyMessage()}</p>}
             <div className={`music-collection__list music-collection__list--${type}`}>
-                {items.slice(0, 4).map(item => (
-                    <article className="music-collection__card" key={item.id}>
-                        <Cover
-                            cover={type === 'artist' ? item.image_url : item.cover_url}
-                            icon={type === 'artist' ? 'artist' : 'music'}
-                        />
-                        <strong>{type === 'artist' ? item.name : item.title}</strong>
-                    </article>
-                ))}
+                {items.slice(0, 4).map(renderCard)}
             </div>
         </section>
     )
 }
-
-export function HomePage({
+export const HomePage = ({
     tracks = [],
     artists = [],
     albums = [],
@@ -135,7 +130,11 @@ export function HomePage({
     tracksStatus = 'ready',
     tracksError = '',
     onTracksRetry = () => {},
-}) {
+}) => {
+    const playPlaylist = () => {
+        const track = tracks[0]
+        if (track) onTrackSelect(track)
+    }
     return (
         <div className="home-page">
             <header className="home-page__header">
@@ -150,11 +149,7 @@ export function HomePage({
                         <br />
                         Собрано на основе твоих прослушиваний.
                     </p>
-                    <button
-                        type="button"
-                        onClick={() => tracks[0] && onTrackSelect(tracks[0])}
-                        disabled={!tracks.length}
-                    >
+                    <button type="button" onClick={playPlaylist} disabled={!tracks.length}>
                         <Icon name="play" size={16} /> Слушать
                     </button>
                 </div>

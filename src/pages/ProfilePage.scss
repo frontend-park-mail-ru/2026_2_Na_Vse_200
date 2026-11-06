@@ -67,8 +67,7 @@
     background: #f18f80;
 }
 
-.profile-button:disabled,
-.profile-edit__close:disabled {
+.profile-button:disabled {
     opacity: 0.6;
     cursor: wait;
 }

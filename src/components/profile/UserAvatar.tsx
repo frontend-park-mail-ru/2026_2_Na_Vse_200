@@ -1,18 +1,15 @@
 import { createElement, useState } from '../../shared/lib/my-react/index.js'
+import type { UserAvatarProps } from './UserAvatar.types.ts'
 import './UserAvatar.css'
 
-interface Props {
-    src?: string | null
-    className?: string
-}
-
-export function UserAvatar({ src, className = '' }: Props) {
+export const UserAvatar = ({ src, className = '' }: UserAvatarProps) => {
     const [failed, setFailed] = useState('')
+    const imageError = () => setFailed(src ?? '')
 
     return (
         <span className={`user-avatar ${className}`} aria-hidden="true">
             {src && failed !== src ? (
-                <img src={src} alt="" onError={() => setFailed(src)} />
+                <img src={src} alt="" onError={imageError} />
             ) : (
                 <svg viewBox="0 0 80 80" fill="none">
                     <circle cx="40" cy="40" r="31" stroke="currentColor" stroke-width="6" />

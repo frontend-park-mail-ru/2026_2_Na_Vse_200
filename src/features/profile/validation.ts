@@ -1,6 +1,6 @@
 import type { FieldErrors } from './types.ts'
 
-export function validateProfile(name: string, avatar: File | null = null) {
+export const validateProfile = (name: string, avatar: File | null = null) => {
     const displayName = name.trim()
     const errors: FieldErrors = {}
     const length = Array.from(displayName).length
