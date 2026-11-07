@@ -1,4 +1,4 @@
-import type { Child, Key, VNode } from '../../types.ts'
+import type { Child, Key, VNode } from '../../myReact/index.ts'
 
 // Native browser events, not React SyntheticEvent.
 interface DOMProps {
@@ -11,6 +11,7 @@ interface DOMProps {
     tabIndex?: number
     style?: Partial<CSSStyleDeclaration>
     onClick?: (event: MouseEvent) => void
+    onChange?: (event: Event) => void
     onInput?: (event: Event) => void
     onBlur?: (event: FocusEvent) => void
     onError?: (event: Event) => void
@@ -19,8 +20,9 @@ interface DOMProps {
     [name: `data-${string}`]: string | boolean | undefined
 }
 interface InputProps extends DOMProps {
+    accept?: string
     name?: string
-    type?: 'text' | 'email' | 'password' | 'range'
+    type?: 'text' | 'email' | 'password' | 'range' | 'file'
     placeholder?: string
     autoComplete?: string
     required?: boolean

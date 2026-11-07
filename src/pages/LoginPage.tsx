@@ -1,7 +1,7 @@
 import type { FormState, FieldErrors, User } from '../types/domain.ts'
 import { getInput, errorMessage } from '../shared/lib/forms.ts'
 import { AuthError } from '../features/auth/api.ts'
-import { createElement, useState } from '../../index.ts'
+import { createElement, useState } from '../../myReact/index.ts'
 import { FormField } from '../components/ui/FormField.tsx'
 import { login } from '../features/auth/api.ts'
 import './AuthPage.css'

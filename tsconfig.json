@@ -15,5 +15,5 @@
         "skipLibCheck": true,
         "types": ["vite/client", "node"]
     },
-    "include": ["src", "index.ts", "createElement.ts", "render.ts", "types.ts", "tests", "*.config.ts"]
+    "include": ["src", "myReact", "tests", "*.config.ts"]
 }

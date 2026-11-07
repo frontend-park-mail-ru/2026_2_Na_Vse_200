@@ -4,19 +4,20 @@ export interface CollectionItem {
     id: EntityId
     name?: string
     title?: string
-    image_url?: string
-    cover_url?: string
+    image_url?: string | null
+    cover_url?: string | null
 }
 export interface Track {
+    audio_url?: string | null
     id: EntityId
     title?: string
     artists?: (string | { name?: string })[]
     artist?: string | { name?: string }
     artist_name?: string
-    cover_url?: string
+    cover_url?: string | null
     cover?: string
-    image_url?: string
-    album?: { cover_url?: string }
+    image_url?: string | null
+    album?: { cover_url?: string | null }
     duration?: number | string | { seconds?: number; duration_seconds?: number }
     duration_seconds?: number
     duration_ms?: number

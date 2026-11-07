@@ -43,7 +43,7 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx,ts,tsx}', 'createElement.ts', 'render.ts', 'index.ts'],
+        files: ['src/**/*.{js,jsx,ts,tsx}', 'myReact/**/*.ts'],
         languageOptions: { globals: globals.browser },
     },
     {

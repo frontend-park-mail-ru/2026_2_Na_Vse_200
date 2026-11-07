@@ -1,6 +1,6 @@
 import test from 'node:test'
 import assert from 'node:assert/strict'
-import { createElement, useState } from '../index.ts'
+import { createElement, useState } from '../myReact/index.ts'
 
 test('normalizes nested children without losing zero or empty text', () => {
     const child = createElement('span', null, 'child')

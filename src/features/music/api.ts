@@ -27,7 +27,12 @@ export async function getHomeData(request = fetch): Promise<Catalog> {
 }
 
 function optionalStrings(value: Record<string, unknown>, keys: string[]): boolean {
-    return keys.every(key => value[key] === undefined || typeof value[key] === 'string')
+    return keys.every(
+        key =>
+            value[key] === undefined ||
+            (['cover_url', 'image_url', 'audio_url'].includes(key) && value[key] === null) ||
+            typeof value[key] === 'string',
+    )
 }
 function isCollectionItem(value: unknown): value is CollectionItem {
     return (
@@ -43,7 +48,7 @@ function isTrack(value: unknown): value is Track {
     if (!isCollectionItem(value) || !isRecord(value)) return false
     const duration = value.duration
     return (
-        optionalStrings(value, ['artist_name', 'cover']) &&
+        optionalStrings(value, ['artist_name', 'cover', 'audio_url']) &&
         (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist))) &&
         (value.artist === undefined || isArtist(value.artist)) &&
         (value.album === undefined || (isRecord(value.album) && optionalStrings(value.album, ['cover_url']))) &&

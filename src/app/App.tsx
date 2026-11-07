@@ -1,7 +1,8 @@
+import { createPlayer, getAudioUrl } from '../features/music/player.ts'
 import type { User, Track } from '../types/domain.ts'
 import type { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
 import { errorMessage } from '../shared/lib/forms.ts'
-import { createElement, render } from '../../index.ts'
+import { createElement, render } from '../../myReact/index.ts'
 import { appStore } from './store.ts'
 import { getCurrentUser, logout } from '../features/auth/api.ts'
 import { AppLayout } from '../components/layout/AppLayout.tsx'
@@ -24,6 +25,11 @@ const pages = {
  * @returns {() => void} Очистка при горячей перезагрузке.
  */
 export function mountApp(container: HTMLElement, router: VanillaRouter) {
+    const player = createPlayer()
+    let disposed = false
+    let localTrack: Track | undefined
+    let localUrl: string | undefined
+    let localId = 0
     let initial = true
     let notice = ''
     let user: User | null = null
@@ -50,11 +56,13 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         renderCurrent()
         try {
             await logout()
+            if (disposed) return
             user = null
             sessionError = ''
             authAction = false
             router.navigate('/login')
         } catch (error) {
+            if (disposed) return
             sessionError = errorMessage(error)
             authAction = false
             renderCurrent()
@@ -62,16 +70,37 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     }
 
     const onTrackSelect = (track: Track) => {
+        localTrack = undefined
         activeTrackId = track.id
         renderCurrent()
+        if (localUrl) URL.revokeObjectURL(localUrl)
+        localUrl = undefined
+        void player.play()
     }
 
-    function renderCurrent() {
+    const onLocalFile = (file: File) => {
+        const previousUrl = localUrl
+        localUrl = URL.createObjectURL(file)
+        localTrack = { id: `local-${++localId}`, title: file.name, audio_url: localUrl, artist_name: 'Локальный файл' }
+        renderCurrent()
+        if (previousUrl) URL.revokeObjectURL(previousUrl)
+        void player.play()
+    }
+    player.setOnEnded(() => {
+        if (localTrack) return
+        const playable = appStore.getState().tracks.filter(track => getAudioUrl(track))
+        const index = playable.findIndex(track => track.id === activeTrackId)
+        if (playable.length > 1) onTrackSelect(playable[(index + 1) % playable.length])
+    })
+
+    function renderCurrent(focusHeading = false) {
+        if (disposed) return
         const { tracks, artists, albums, catalogStatus, catalogError } = appStore.getState()
-        const activeTrack = tracks.find(track => track.id === activeTrackId) ?? tracks[0]
+        const activeTrack = localTrack ?? tracks.find(track => track.id === activeTrackId) ?? tracks[0]
         const route = router.getCurrentUrl().pathname
         const routeName = router.findRoute(route)?.value ?? 'not-found'
         const { component: Page, title } = pages[routeName as keyof typeof pages] ?? pages['not-found']
+        player.setTrack(routeName === 'login' || routeName === 'signup' ? undefined : activeTrack)
         document.title = `${title} — На все 200`
 
         if (sessionState === 'loading' && routeName === 'home') {
@@ -86,6 +115,8 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
 
         render(
             <AppLayout
+                player={player}
+                onLocalFile={onLocalFile}
                 tracks={tracks}
                 route={routeName}
                 user={user}
@@ -113,14 +144,15 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         )
 
         notice = ''
-        if (!initial) {
+        if (!initial && focusHeading) {
             container.querySelector('h1')?.focus()
             window.scrollTo(0, 0)
         }
         initial = false
     }
 
-    const handleRoute = () => renderCurrent()
+    const handleRoute = () => renderCurrent(true)
+    const unsubscribePlayer = player.subscribe(() => renderCurrent())
     const unsubscribeStore = appStore.subscribe(() => {
         const { tracks } = appStore.getState()
         if (!tracks.some(track => track.id === activeTrackId)) activeTrackId = tracks[0]?.id
@@ -130,6 +162,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
 
     getCurrentUser()
         .then(nextUser => {
+            if (disposed) return
             user = nextUser
             sessionState = 'ready'
             const currentPath = router.getCurrentUrl().pathname
@@ -140,12 +173,17 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
             appStore.loadCatalog()
         })
         .catch(error => {
+            if (disposed) return
             sessionState = 'error'
             sessionError = errorMessage(error)
             appStore.loadCatalog()
         })
 
     return () => {
+        disposed = true
+        unsubscribePlayer()
+        player.dispose()
+        if (localUrl) URL.revokeObjectURL(localUrl)
         unsubscribeStore()
         router.off('route', handleRoute).destroy()
     }

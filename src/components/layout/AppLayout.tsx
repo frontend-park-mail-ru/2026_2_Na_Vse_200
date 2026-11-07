@@ -1,6 +1,9 @@
-import type { Child } from '../../../types.ts'
+import type { AudioPlayer } from '../../features/music/player.ts'
+import type { Child } from '../../../myReact/index.ts'
 import type { AccountProps, Track } from '../../types/domain.ts'
 interface AppLayoutProps extends AccountProps {
+    player: AudioPlayer
+    onLocalFile: (file: File) => void
     route: string
     tracks: Track[]
     activeTrack?: Track
@@ -8,7 +11,7 @@ interface AppLayoutProps extends AccountProps {
     sessionError: string
     children?: Child
 }
-import { createElement } from '../../../index.ts'
+import { createElement } from '../../../myReact/index.ts'
 import { Sidebar } from '../sidebar/Sidebar.tsx'
 import { Player } from '../player/Player.tsx'
 import './AppLayout.css'
@@ -19,6 +22,8 @@ import './AppLayout.css'
  * @returns {object} Виртуальное DOM-дерево.
  */
 export function AppLayout({
+    player,
+    onLocalFile,
     route,
     user,
     onLogout,
@@ -53,7 +58,13 @@ export function AppLayout({
                     </p>
                 ) : null}
             </div>
-            <Player track={activeTrack} tracks={tracks} onTrackSelect={onTrackSelect} />
+            <Player
+                player={player}
+                onLocalFile={onLocalFile}
+                track={activeTrack}
+                tracks={tracks}
+                onTrackSelect={onTrackSelect}
+            />
         </div>
     )
 }

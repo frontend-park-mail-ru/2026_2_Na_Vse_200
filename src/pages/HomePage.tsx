@@ -1,5 +1,5 @@
 import type { Track, HomePageProps, CollectionItem, CatalogStatus } from '../types/domain.ts'
-import { createElement, useState } from '../../index.ts'
+import { createElement, useState } from '../../myReact/index.ts'
 import { Icon } from '../components/ui/Icon.tsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.ts'
 import './HomePage.css'
@@ -13,7 +13,15 @@ function formatDuration(duration: Track['duration']) {
     return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
 }
 
-function Cover({ cover, className = '', icon = 'music' }: { cover?: string; className?: string; icon?: string }) {
+function Cover({
+    cover,
+    className = '',
+    icon = 'music',
+}: {
+    cover?: string | null
+    className?: string
+    icon?: string
+}) {
     const [failedCover, setFailedCover] = useState('')
     return (
         <span className={`music-cover ${className}`}>

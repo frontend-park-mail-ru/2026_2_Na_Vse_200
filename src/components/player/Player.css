@@ -157,9 +157,40 @@
 .player-timeline {
     display: flex;
     align-items: center;
+    gap: 8px;
+}
+
+.player-time {
+    font-size: 11px;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+}
+
+.player-status {
+    margin: 0;
+    color: #c9c4d7;
+    font-size: 12px;
+}
+
+.player-status:empty {
+    display: none;
+}
+
+.player-file {
+    display: grid;
+    gap: 4px;
+    font-size: 12px;
+}
+
+.player-file input {
+    width: 100%;
+    min-width: 0;
+    color: inherit;
+    font-size: 11px;
 }
 
 .player-timeline input {
+    min-width: 0;
     width: 100%;
     height: 3px;
     margin: 0;
@@ -230,7 +261,7 @@
     }
 
     .player-volume {
-        display: none;
+        width: 80px;
     }
 }
 
@@ -248,7 +279,8 @@
     }
 
     .player-extra {
-        display: none;
+        grid-column: 1 / -1;
+        justify-content: center;
     }
 }
 

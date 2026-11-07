@@ -1,5 +1,5 @@
 import type { AccountProps } from '../../types/domain.ts'
-import { createElement } from '../../../index.ts'
+import { createElement } from '../../../myReact/index.ts'
 import { Icon } from '../ui/Icon.tsx'
 import './Sidebar.css'
 
