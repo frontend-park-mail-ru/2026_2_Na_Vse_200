@@ -63,6 +63,16 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         notice = 'Сессия истекла. Войдите снова.'
         router.navigate('/login?next=/profile', { replace: true })
     }
+    const accountClosed = (message: string) => {
+        appStore.reset()
+        artist.reset()
+        selectedTrack = undefined
+        activeTrackId = undefined
+        session.clear()
+        modals.close()
+        notice = message
+        router.navigate('/login', { replace: true })
+    }
     const signOut = async () => {
         if (!connectionAvailable()) return
         if (await session.signOut()) {
@@ -161,6 +171,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
                                 user={user}
                                 onUserUpdated={updated}
                                 onSessionExpired={expired}
+                                onAccountClosed={accountClosed}
                                 onLogout={() => void signOut()}
                                 authAction={pending}
                             />

@@ -1,4 +1,6 @@
 import { createElement, useState } from '@navse200/my-react'
+import { AccountDialog } from '../components/profile/AccountDialog.tsx'
+import type { AccountAction } from '../features/profile/account.ts'
 import { UserAvatar } from '../components/profile/UserAvatar.tsx'
 import { EditProfileDialog } from '../components/profile/EditProfileDialog.tsx'
 import { modals } from '../components/modal/manager.ts'
@@ -6,8 +8,28 @@ import type { User } from '../features/profile/types.ts'
 import type { ProfilePageProps } from './ProfilePage.types.ts'
 import './ProfilePage.scss'
 
-export const ProfilePage = ({ user, onUserUpdated, onSessionExpired, onLogout, authAction }: ProfilePageProps) => {
+export const ProfilePage = ({
+    user,
+    onUserUpdated,
+    onSessionExpired,
+    onLogout,
+    authAction,
+    onAccountClosed,
+}: ProfilePageProps) => {
     const [notice, setNotice] = useState('')
+
+    const account = (action: AccountAction) => {
+        setNotice('')
+        modals.open(
+            <AccountDialog
+                user={user}
+                action={action}
+                onSaved={saved}
+                onExpired={onSessionExpired}
+                onClosed={onAccountClosed}
+            />,
+        )
+    }
 
     const edit = () => {
         setNotice('')
@@ -37,7 +59,17 @@ export const ProfilePage = ({ user, onUserUpdated, onSessionExpired, onLogout, a
                 <dl className="profile-page__details">
                     <div className="profile-page__row">
                         <dt>E-mail</dt>
-                        <dd>{user.email}</dd>
+                        <dd>
+                            {user.email}{' '}
+                            <button
+                                className="profile-page__link"
+                                type="button"
+                                onClick={() => account('email')}
+                                disabled={authAction}
+                            >
+                                Сменить email
+                            </button>
+                        </dd>
                     </div>
                     <div className="profile-page__row">
                         <dt>Пароль</dt>
@@ -48,8 +80,8 @@ export const ProfilePage = ({ user, onUserUpdated, onSessionExpired, onLogout, a
                             <button
                                 className="profile-page__link"
                                 type="button"
-                                disabled
-                                title="Смена пароля пока недоступна"
+                                disabled={authAction}
+                                onClick={() => account('password')}
                             >
                                 Сменить пароль
                             </button>
@@ -63,8 +95,8 @@ export const ProfilePage = ({ user, onUserUpdated, onSessionExpired, onLogout, a
                     <button
                         className="profile-button profile-button--delete"
                         type="button"
-                        disabled
-                        title="Удаление аккаунта пока недоступно"
+                        disabled={authAction}
+                        onClick={() => account('delete')}
                     >
                         Удалить аккаунт
                     </button>
