@@ -1,6 +1,6 @@
-import { createElement } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { Sidebar } from '../sidebar/Sidebar.jsx'
-import { Player } from '../player/Player.jsx'
+import { Player } from '../player/Player.tsx'
 import './AppLayout.css'
 
 /**
@@ -11,14 +11,17 @@ import './AppLayout.css'
 export function AppLayout({
     route,
     user,
-    onLogout,
     onTrackSelect,
     tracks,
     activeTrack,
     sessionError,
+    player,
+    onLogout,
     authAction,
+    offline,
     children,
 }) {
+    const [queueOpen, setQueueOpen] = useState(false)
     if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
             <main id="main-content" tabIndex={-1}>
@@ -28,12 +31,32 @@ export function AppLayout({
     }
 
     return (
-        <div className="app-shell">
+        <div
+            className="app-shell"
+            onClick={event => {
+                if (!event.target.closest('.player__queue-panel, .player__queue-button')) setQueueOpen(false)
+            }}
+            onKeyDown={event => {
+                if (event.key === 'Escape') setQueueOpen(false)
+            }}
+        >
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
+            <Sidebar className="app-shell__sidebar" user={user} />
             <div className="app-shell__main-column">
+                {user && onLogout ? (
+                    <div className="app-shell__account-actions">
+                        <button
+                            type="button"
+                            onClick={onLogout}
+                            disabled={authAction || offline}
+                            title={offline ? 'Для выхода подключитесь к интернету' : undefined}
+                        >
+                            {authAction ? 'Выходим…' : 'Выйти из аккаунта'}
+                        </button>
+                    </div>
+                ) : null}
                 <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
                 </main>
@@ -43,7 +66,16 @@ export function AppLayout({
                     </p>
                 ) : null}
             </div>
-            <Player track={activeTrack} tracks={tracks} onTrackSelect={onTrackSelect} />
+            <Player
+                player={player}
+                className="app-shell__player"
+                track={activeTrack}
+                tracks={tracks}
+                onTrackSelect={onTrackSelect}
+                queueOpen={queueOpen}
+                onQueueToggle={() => setQueueOpen(!queueOpen)}
+                onQueueClose={() => setQueueOpen(false)}
+            />
         </div>
     )
 }

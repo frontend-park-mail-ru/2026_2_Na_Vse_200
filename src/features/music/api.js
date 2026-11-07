@@ -1,13 +1,14 @@
 import { requestJson } from '../../shared/api/request.js'
+import { loadWithCache } from '../../shared/offline/load.ts'
 
 /** Данные главной: треки, исполнители и альбомы. */
-export async function getHomeData() {
-    let result
-    try {
-        result = await requestJson('/home', { method: 'GET' })
-    } catch {
-        throw new Error('Не удалось подключиться к серверу. Попробуйте ещё раз.')
-    }
+export async function getHomeData(scope) {
+    const result = await loadWithCache('home', fetchHomeData, scope)
+    return { ...result.data, offline: result.offline }
+}
+
+async function fetchHomeData() {
+    const result = await requestJson('/home', { method: 'GET' })
     const { response, body } = result
 
     if (!response.ok) {

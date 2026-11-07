@@ -1,7 +1,8 @@
-import { createElement, useState } from '../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../components/ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.js'
 import './HomePage.css'
+import { artistHref } from '../features/artist/route.ts'
 
 function formatDuration(duration) {
     if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
@@ -118,7 +119,15 @@ function CollectionSection({ title, items, type, tracksStatus }) {
                             cover={type === 'artist' ? item.image_url : item.cover_url}
                             icon={type === 'artist' ? 'artist' : 'music'}
                         />
-                        <strong>{type === 'artist' ? item.name : item.title}</strong>
+                        <strong>
+                            {type === 'artist' ? (
+                                <a href={artistHref(item.id)} data-link>
+                                    {item.name}
+                                </a>
+                            ) : (
+                                item.title
+                            )}
+                        </strong>
                     </article>
                 ))}
             </div>

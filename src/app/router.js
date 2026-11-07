@@ -11,6 +11,7 @@ export function createAppRouter() {
             '/': 'home',
             '/signup': 'signup',
             '/login': 'login',
+            '/artists/:id': 'artist',
             '*': 'not-found',
         },
     })

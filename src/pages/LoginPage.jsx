@@ -1,4 +1,4 @@
-import { createElement, useState } from '../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { FormField } from '../components/ui/FormField.jsx'
 import { login } from '../features/auth/api.js'
 import { validateLogin } from '../features/auth/validation.js'
