@@ -1,6 +1,6 @@
 export type { User } from '../../types/domain.ts'
 
-export type AccountAction = 'email' | 'password' | 'delete'
+export type { AccountAction } from './account.ts'
 
 export interface AccountValues {
     email: string

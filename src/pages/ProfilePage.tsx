@@ -11,7 +11,7 @@ export const ProfilePage = ({
     user,
     onUserUpdated,
     onSessionExpired,
-    onAccountDeleted,
+    onAccountClosed,
     onLogout,
     authAction,
 }: ProfilePageProps) => {
@@ -32,12 +32,12 @@ export const ProfilePage = ({
     const openAccount = (action: AccountAction) => {
         setNotice('')
         const done = (updated?: User) => {
-            if (action === 'delete') {
-                onAccountDeleted()
+            if (action !== 'email') {
+                onAccountClosed(action === 'delete' ? 'Аккаунт удалён.' : 'Пароль изменён. Войдите с новым паролем.')
                 return
             }
             if (updated) onUserUpdated(updated)
-            setNotice(action === 'email' ? 'E-mail изменён' : 'Пароль изменён')
+            setNotice('E-mail изменён')
         }
         modals.open(<AccountDialog action={action} user={user} onSuccess={done} onExpired={onSessionExpired} />)
     }

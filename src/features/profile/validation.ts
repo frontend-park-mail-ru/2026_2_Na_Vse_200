@@ -20,12 +20,12 @@ export const validateProfile = (name: string, avatar: File | null = null) => {
 export const validateAccount = (action: AccountAction, values: AccountValues) => {
     const email = values.email.trim().toLowerCase()
     const errors: FieldErrors = {}
+    if (!values.current_password) errors.current_password = 'Введите текущий пароль'
     if (action === 'email') {
         if (email.length < 3 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             errors.email = 'Введите корректный e-mail'
         }
     } else {
-        if (!values.current_password) errors.current_password = 'Введите текущий пароль'
         if (action === 'password') {
             const length = Array.from(values.new_password).length
             if (length < 8 || !/\p{L}/u.test(values.new_password) || !/\p{Nd}/u.test(values.new_password)) {

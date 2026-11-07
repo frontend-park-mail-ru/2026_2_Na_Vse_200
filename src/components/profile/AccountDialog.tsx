@@ -1,5 +1,5 @@
 import { createElement, useState } from '@navse200/my-react'
-import { changePassword, deleteAccount, ProfileError, updateEmail } from '../../features/profile/api.ts'
+import { AccountError, changeAccount } from '../../features/profile/account.ts'
 import { validateAccount } from '../../features/profile/validation.ts'
 import type { AccountAction, AccountValues } from '../../features/profile/types.ts'
 import type { AccountDialogProps, AccountDialogState, AccountField } from './AccountDialog.types.ts'
@@ -14,7 +14,10 @@ const titles: Record<AccountAction, string> = {
 }
 
 const fields: Record<AccountAction, AccountField[]> = {
-    email: [{ name: 'email', label: 'Новый e-mail', type: 'email', autoComplete: 'email' }],
+    email: [
+        { name: 'email', label: 'Новый e-mail', type: 'email', autoComplete: 'email' },
+        { name: 'current_password', label: 'Текущий пароль', type: 'password', autoComplete: 'current-password' },
+    ],
     password: [
         { name: 'current_password', label: 'Текущий пароль', type: 'password', autoComplete: 'current-password' },
         { name: 'new_password', label: 'Новый пароль', type: 'password', autoComplete: 'new-password' },
@@ -56,23 +59,22 @@ export const AccountDialog = ({ action, user, onSuccess, onExpired }: AccountDia
         }
         setState(previous => ({ ...previous, errors: {}, message: '', pending: true }))
         try {
-            let updated
-            if (action === 'email') updated = await updateEmail(user, email)
-            else if (action === 'password')
-                await changePassword(user, state.values.current_password, state.values.new_password)
-            else await deleteAccount(user, state.values.current_password)
+            const values: Record<string, string> = { current_password: state.values.current_password }
+            if (action === 'email') values.email = email
+            if (action === 'password') values.new_password = state.values.new_password
+            const updated = await changeAccount(user, action, values)
             if (!form.isConnected) return
             modals.close()
             onSuccess(updated)
         } catch (error) {
             if (!form.isConnected) return
-            if (error instanceof ProfileError && error.code === 'unauthorized') {
+            if (error instanceof AccountError && error.code === 'unauthorized') {
                 onExpired()
                 return
             }
             setState(previous => ({
                 ...previous,
-                errors: error instanceof ProfileError ? error.fields : {},
+                errors: error instanceof AccountError ? error.fields : {},
                 message: error instanceof Error ? error.message : 'Не удалось сохранить изменения.',
                 pending: false,
             }))

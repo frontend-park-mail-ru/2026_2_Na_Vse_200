@@ -4,7 +4,7 @@ export interface ProfilePageProps {
     user: User
     onUserUpdated: (user: User) => void
     onSessionExpired: () => void
-    onAccountDeleted: () => void
+    onAccountClosed: (message: string) => void
     onLogout: () => void
     authAction: boolean
 }

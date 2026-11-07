@@ -92,27 +92,3 @@ export const updateProfile = async (user: User, name: string, avatar: File | nul
         throw failure
     }
 }
-
-export const updateEmail = async (user: User, email: string): Promise<User> =>
-    readProfile(
-        await requestProfile(userPath(user), {
-            method: 'PUT',
-            body: JSON.stringify({ email, display_name: user.display_name }),
-        }),
-    )
-
-export const changePassword = async (user: User, current: string, password: string): Promise<void> => {
-    const result = await requestProfile(userPath(user) + '/password', {
-        method: 'PUT',
-        body: JSON.stringify({ current_password: current, new_password: password }),
-    })
-    if (result.response.status !== 204) throw responseError(result, 'Смена пароля пока недоступна.')
-}
-
-export const deleteAccount = async (user: User, password: string): Promise<void> => {
-    const result = await requestProfile(userPath(user), {
-        method: 'DELETE',
-        body: JSON.stringify({ current_password: password }),
-    })
-    if (result.response.status !== 204) throw responseError(result, 'Удаление аккаунта пока недоступно.')
-}
