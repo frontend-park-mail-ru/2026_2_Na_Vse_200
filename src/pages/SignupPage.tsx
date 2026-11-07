@@ -1,74 +1,65 @@
 import type { FormState } from '../types/domain.ts'
+import type { SignupPageProps } from './SignupPage.types.ts'
 import type { SignupValues } from '../features/signup/validation.ts'
-import { SignupError } from '../features/signup/api.ts'
-import { getInput, errorMessage } from '../shared/lib/forms.ts'
+import { errorMessage } from '../shared/lib/forms.ts'
 import { createElement, useState } from '../../myReact/index.ts'
-import { FormField } from '../components/ui/FormField.tsx'
+import { SignupError, signup } from '../features/signup/api.ts'
 import { validateSignup } from '../features/signup/validation.ts'
-import { signup } from '../features/signup/api.ts'
+import { FormField } from '../components/ui/FormField.tsx'
+import logo from '../assets/2une-dark-transparent.png'
 import './AuthPage.css'
 
-/** @param {{onRegistered: () => void}} props Переход после регистрации. @returns {object} Экран регистрации. */
-export function SignupPage({ onRegistered }: { onRegistered: () => void }) {
+export const SignupPage = ({ onRegistered }: SignupPageProps) => {
     const [state, setState] = useState<FormState>({ errors: {}, message: '', pending: false })
-
-    function readValues(form: HTMLFormElement): SignupValues {
-        return {
-            display_name: getInput(form, 'display_name').value,
-            email: getInput(form, 'email').value,
-            password: getInput(form, 'password').value,
+    const readValues = (form: HTMLFormElement): SignupValues => ({
+        display_name: (form.elements.namedItem('display_name') as HTMLInputElement).value,
+        email: (form.elements.namedItem('email') as HTMLInputElement).value,
+        password: (form.elements.namedItem('password') as HTMLInputElement).value,
+    })
+    const clearError = (event: Event) => {
+        const name = (event.currentTarget as HTMLInputElement).name
+        if (state.errors[name] || state.message) {
+            setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
         }
     }
-    function clearError(event: Event) {
-        if (!(event.currentTarget instanceof HTMLInputElement)) return
-        const name = event.currentTarget.name
-        if (state.errors[name] || state.message)
-            setState(previous => ({ ...previous, message: '', errors: { ...previous.errors, [name]: '' } }))
+    const validateField = (event: FocusEvent) => {
+        if (state.pending) return
+        const input = event.currentTarget as HTMLInputElement
+        const name = input.name as keyof SignupValues
+        const { errors } = validateSignup(readValues(input.form!))
+        setState(previous => ({ ...previous, errors: { ...previous.errors, [name]: errors[name] || '' } }))
     }
-    function validateField(event: FocusEvent) {
-        if (!(event.currentTarget instanceof HTMLInputElement)) return
-        const { name, form } = event.currentTarget
-        if (!form) return
-        if (form.dataset.submitting === 'true') return
-        const { errors } = validateSignup(readValues(form))
-        setState(previous => ({
-            ...previous,
-            errors: { ...previous.errors, [name]: errors[name as keyof SignupValues] || '' },
-        }))
-    }
-    async function submit(event: SubmitEvent) {
+    const submit = async (event: SubmitEvent) => {
         event.preventDefault()
-        const form = event.currentTarget
-        if (!(form instanceof HTMLFormElement)) return
-        if (form.dataset.submitting === 'true') return
+        if (state.pending) return
+        const form = event.currentTarget as HTMLFormElement
         const { data, errors } = validateSignup(readValues(form))
         if (Object.keys(errors).length) {
             setState({ errors, message: '', pending: false })
-            getInput(form, Object.keys(errors)[0]).focus()
+            const input = form.elements.namedItem(Object.keys(errors)[0]) as HTMLInputElement
+            input.focus()
             return
         }
-        form.dataset.submitting = 'true'
         setState({ errors: {}, message: '', pending: true })
         try {
             await signup(data)
             if (!form.isConnected) return
-            getInput(form, 'password').value = ''
+            const password = form.elements.namedItem('password') as HTMLInputElement
+            password.value = ''
             onRegistered()
         } catch (error) {
             if (!form.isConnected) return
             const fields = error instanceof SignupError ? error.fields : {}
             setState({ errors: fields, message: errorMessage(error), pending: false })
-            const firstField = Object.keys(fields)[0]
-            const input = firstField ? form.elements.namedItem(firstField) : null
-            if (input instanceof HTMLInputElement) input.focus()
-        } finally {
-            form.dataset.submitting = 'false'
+            const first = Object.keys(fields)[0]
+            if (first) (form.elements.namedItem(first) as HTMLInputElement).focus()
         }
     }
     return (
-        <section className="auth-screen" aria-labelledby="signup-title">
-            <aside className="auth-art" aria-label="Музыка под настроение, каждый день">
-                <p>
+        <section className="auth-page" aria-labelledby="signup-title">
+            <aside className="auth-page__art" aria-label="Музыка под настроение, каждый день">
+                <img className="auth-page__logo" src={logo} alt="2une tune" />
+                <p className="auth-page__slogan">
                     Музыка
                     <br />
                     под твое
@@ -76,13 +67,18 @@ export function SignupPage({ onRegistered }: { onRegistered: () => void }) {
                     настроение
                 </p>
             </aside>
-            <div className="auth-panel">
-                <div className="auth-content">
-                    <h1 id="signup-title" tabIndex={-1}>
+            <div className="auth-page__panel">
+                <div className="auth-page__content">
+                    <h1 className="auth-page__title" id="signup-title" tabIndex={-1}>
                         Регистрация
                     </h1>
-                    <p className="auth-intro">Пара секунд — и можно слушать.</p>
-                    <form noValidate onSubmit={submit} aria-busy={state.pending ? 'true' : 'false'}>
+                    <p className="auth-page__intro">Пара секунд — и можно слушать.</p>
+                    <form
+                        className="auth-page__form"
+                        noValidate
+                        onSubmit={submit}
+                        aria-busy={state.pending ? 'true' : 'false'}
+                    >
                         <FormField
                             name="display_name"
                             label="Имя"
@@ -115,14 +111,14 @@ export function SignupPage({ onRegistered }: { onRegistered: () => void }) {
                             onBlur={validateField}
                             disabled={state.pending}
                         />
-                        <div className="auth-feedback" role="alert">
+                        <div className="auth-page__feedback" role="alert">
                             {state.message}
                         </div>
-                        <button className="auth-submit" type="submit" disabled={state.pending}>
+                        <button className="auth-page__submit" type="submit" disabled={state.pending}>
                             {state.pending ? 'Создаём аккаунт…' : 'Создать аккаунт'}
                         </button>
                     </form>
-                    <p className="auth-switch">
+                    <p className="auth-page__switch">
                         Уже есть аккаунт?{' '}
                         <a href="/login" data-link>
                             Войти

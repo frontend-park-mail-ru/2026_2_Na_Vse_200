@@ -1,4 +1,4 @@
-import type { Child, Key, VNode } from '../../myReact/index.ts'
+import type { Child, ElementRef, Key, VNode } from '../../myReact/index.ts'
 
 // Native browser events, not React SyntheticEvent.
 interface DOMProps {
@@ -10,6 +10,10 @@ interface DOMProps {
     role?: string
     tabIndex?: number
     style?: Partial<CSSStyleDeclaration>
+    ref?: ElementRef
+    hidden?: boolean
+    onCancel?: (event: Event) => void
+    onClose?: (event: Event) => void
     onClick?: (event: MouseEvent) => void
     onChange?: (event: Event) => void
     onInput?: (event: Event) => void
@@ -20,6 +24,7 @@ interface DOMProps {
     [name: `data-${string}`]: string | boolean | undefined
 }
 interface InputProps extends DOMProps {
+    autoFocus?: boolean
     accept?: string
     name?: string
     type?: 'text' | 'email' | 'password' | 'range' | 'file'
@@ -75,6 +80,10 @@ declare global {
             aside: DOMProps
             nav: DOMProps
             section: DOMProps
+            dialog: DOMProps
+            dl: DOMProps
+            dt: DOMProps
+            dd: DOMProps
             article: DOMProps
             h1: DOMProps
             h2: DOMProps

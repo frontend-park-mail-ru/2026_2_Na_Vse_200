@@ -7,4 +7,4 @@ export { createElement } from './createElement.ts'
 
 export { render, useState } from './render.ts'
 
-export type { Child, Component, Key, Props, VNode, StateSetter, StateUpdate } from './types.ts'
+export type { Child, Component, ElementRef, Key, Props, VNode, StateSetter, StateUpdate } from './types.ts'

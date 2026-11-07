@@ -141,8 +141,12 @@ registerIcon('trackNext', {
         },
     ],
 })
-export function Icon({ name, size = 20, className = '', label }: IconProps) {
+export const Icon = ({ name, size = 20, className = '', label }: IconProps) => {
     const definition = getIconDefinition(name)
+    const renderShape = (element: IconDefinition['elements'][number], index: number) => {
+        const SvgElement = element.tag
+        return <SvgElement {...element.attributes} key={`${name}-${index}`} />
+    }
 
     return (
         <svg
@@ -160,12 +164,7 @@ export function Icon({ name, size = 20, className = '', label }: IconProps) {
             role={label ? 'img' : undefined}
             focusable="false"
         >
-            <g transform={definition.transform}>
-                {definition.elements.map((element, index) => {
-                    const SvgElement = element.tag
-                    return <SvgElement {...element.attributes} key={`${name}-${index}`} />
-                })}
-            </g>
+            <g transform={definition.transform}>{definition.elements.map(renderShape)}</g>
         </svg>
     )
 }

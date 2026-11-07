@@ -73,6 +73,8 @@ test('session distinguishes signed-out, valid and malformed users', async () => 
         display_name: undefined,
     })
     await assert.rejects(getCurrentUser(respond({ email: {} })), AuthError)
+    const user = await getCurrentUser(respond({ id: 1, display_name: 'User', avatar_url: '/avatar.png' }))
+    assert.equal(user?.avatar_url, '/avatar.png')
 })
 
 test('login and signup retain validation messages and success statuses', async () => {

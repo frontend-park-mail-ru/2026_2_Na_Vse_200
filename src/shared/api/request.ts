@@ -1,6 +1,9 @@
 import { API_URL, API_REQUEST_OPTIONS } from '../../config.ts'
 
 export type Fetch = typeof fetch
+export interface RequestOptions extends RequestInit {
+    multipart?: boolean
+}
 export function isRecord(value: unknown): value is Record<string, unknown> {
     return typeof value === 'object' && value !== null && !Array.isArray(value)
 }
@@ -18,14 +21,15 @@ export function readApiError(body: unknown) {
         fields,
     }
 }
-export async function requestJson(path: string, options: RequestInit = {}, request: Fetch = fetch) {
-    const headers = new Headers(options.headers)
-    if (!headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
+export async function requestJson(path: string, options: RequestOptions = {}, request: Fetch = fetch) {
+    const { multipart = false, ...config } = options
+    const headers = new Headers(config.headers)
+    if (!multipart && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
     const response = await request(`${API_URL}${path}`, {
         ...API_REQUEST_OPTIONS,
-        ...options,
+        ...config,
         headers,
-        signal: options.signal ?? AbortSignal.timeout(15000),
+        signal: config.signal ?? AbortSignal.timeout(15000),
     })
     const body: unknown = await response.json().catch(() => null)
     return { response, body }

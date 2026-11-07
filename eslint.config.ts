@@ -47,7 +47,7 @@ export default [
         languageOptions: { globals: globals.browser },
     },
     {
-        files: ['tests/**/*.ts', 'scripts/**/*.ts', '*.config.ts'],
+        files: ['tests/**/*.{js,ts}', 'scripts/**/*.ts', '*.config.ts'],
         languageOptions: { globals: globals.node },
     },
     {

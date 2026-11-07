@@ -1,4 +1,4 @@
-import type { Props, StateSetter, StateUpdate, VNode } from './types.ts'
+import type { ElementRef, Props, StateSetter, StateUpdate, VNode } from './types.ts'
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 
@@ -7,6 +7,7 @@ let rootContainer: HTMLElement | null = null
 const hooksByPath = new Map<string, unknown[]>()
 const componentOutputByPath = new Map<string, VNode | null>()
 const domByPath = new Map<string, Node>()
+const refsByPath = new Map<string, ElementRef>()
 let currentPath = ''
 let currentHookIndex = 0
 
@@ -186,6 +187,17 @@ function reconcile(
         if (!nextDomChildren.includes(child)) dom.removeChild(child)
     }
 
+    const ref = element.props.ref
+    const oldRef = refsByPath.get(path)
+    if (ref !== oldRef) {
+        oldRef?.(null)
+        if (ref) {
+            refsByPath.set(path, ref)
+            ref(dom)
+        } else {
+            refsByPath.delete(path)
+        }
+    }
     return dom
 }
 
@@ -212,6 +224,12 @@ function getChildPath(parentPath: string, child: VNode | null | undefined, index
  */
 function clearPath(path: string): void {
     const prefix = `${path}.`
+    for (const [key, ref] of refsByPath) {
+        if (key === path || key.startsWith(prefix)) {
+            ref(null)
+            refsByPath.delete(key)
+        }
+    }
     for (const key of domByPath.keys()) {
         if (key === path || key.startsWith(prefix)) domByPath.delete(key)
     }
@@ -236,7 +254,7 @@ function updateProps(dom: HTMLElement | SVGElement, previousProps: Props, nextPr
     const names = new Set([...Object.keys(previousProps), ...Object.keys(nextProps)])
 
     for (const name of names) {
-        if (name === 'children') continue
+        if (name === 'children' || name === 'ref') continue
 
         const previousValue = previousProps[name]
         const nextValue = nextProps[name]

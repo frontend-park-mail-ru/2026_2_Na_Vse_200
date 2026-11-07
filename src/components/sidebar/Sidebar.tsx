@@ -1,6 +1,8 @@
-import type { AccountProps } from '../../types/domain.ts'
+import type { SidebarProps } from './Sidebar.types.ts'
 import { createElement } from '../../../myReact/index.ts'
 import { Icon } from '../ui/Icon.tsx'
+import { UserAvatar } from '../profile/UserAvatar.tsx'
+import logo from '../../assets/2une-dark-transparent.png'
 import './Sidebar.css'
 
 const navigation = [
@@ -15,42 +17,43 @@ const playlists = [
     { name: 'Вечер', detail: 'Плейлист · 58 треков', icon: 'moon', color: 'amber' },
 ]
 
-export function Sidebar({ user, onLogout, authAction }: AccountProps) {
+export const Sidebar = ({ route, user, onLogout, authAction }: SidebarProps) => {
     return (
         <aside className="sidebar">
-            <a className="sidebar__brand" href="/" data-link aria-label="MUSIC — на главную">
-                <span>MUSIC</span>
+            <a className="sidebar__brand" href="/" data-link aria-label="2une — на главную">
+                <img className="sidebar__logo" src={logo} alt="2une tune" />
             </a>
 
-            <nav className="sidebar-nav" aria-label="Основная навигация">
+            <nav className="sidebar__nav" aria-label="Основная навигация">
                 {navigation.map(item => (
                     <a
-                        className={`sidebar__nav-link${item.href === '/' ? ' sidebar__nav-link--active' : ''}`}
+                        className={`sidebar__nav-link${item.href === '/' && route === 'home' ? ' sidebar__nav-link--active' : ''}`}
+                        aria-current={item.href === '/' && route === 'home' ? 'page' : undefined}
                         href={item.href}
                         data-link={item.href.startsWith('/') ? 'true' : undefined}
                         key={item.label}
                     >
-                        <Icon name={item.icon} size={18} className="nav-icon" />
-                        <span className="nav-label">{item.label}</span>
+                        <Icon name={item.icon} size={18} className="sidebar__nav-icon" />
+                        <span className="sidebar__nav-label">{item.label}</span>
                     </a>
                 ))}
             </nav>
 
-            <div className="sidebar-divider"></div>
-            <div className="playlist-heading">
+            <div className="sidebar__divider"></div>
+            <div className="sidebar__playlist-heading">
                 <span>Плейлисты</span>
                 <button type="button" aria-label="Создать плейлист">
                     <Icon name="plus" size={18} />
                 </button>
             </div>
 
-            <nav className="playlist-links" aria-label="Плейлисты">
+            <nav className="sidebar__playlists" aria-label="Плейлисты">
                 {playlists.map(playlist => (
                     <a href={`#${playlist.color}`} key={playlist.name}>
-                        <span className={`playlist-icon playlist-icon-${playlist.color}`}>
+                        <span className={`sidebar__playlist-icon sidebar__playlist-icon--${playlist.color}`}>
                             <Icon name={playlist.icon} size={15} />
                         </span>
-                        <span className="playlist-copy">
+                        <span className="sidebar__playlist-copy">
                             <strong>{playlist.name}</strong>
                             <small>{playlist.detail}</small>
                         </span>
@@ -58,14 +61,20 @@ export function Sidebar({ user, onLogout, authAction }: AccountProps) {
                 ))}
             </nav>
 
-            <div className="sidebar-account">
-                <span className="sidebar-account-avatar" aria-hidden="true">
-                    {(user?.display_name || user?.email || 'П').slice(0, 1).toUpperCase()}
-                </span>
-                <span className="sidebar-account-copy">
-                    <strong>{user?.display_name || user?.email || 'Пользователь'}</strong>
-                    <small>Личный аккаунт</small>
-                </span>
+            <div className="sidebar__account">
+                <a
+                    className="sidebar__profile"
+                    href="/profile"
+                    data-link
+                    aria-label="Открыть профиль"
+                    aria-current={route === 'profile' ? 'page' : undefined}
+                >
+                    <UserAvatar src={user?.avatar_url} className="sidebar__avatar" />
+                    <span className="sidebar__account-copy">
+                        <strong>{user?.display_name || user?.email || 'Пользователь'}</strong>
+                        <small>Личный аккаунт</small>
+                    </span>
+                </a>
                 <button type="button" onClick={onLogout} disabled={authAction} aria-label="Выйти из аккаунта">
                     <Icon name="more" size={18} />
                 </button>

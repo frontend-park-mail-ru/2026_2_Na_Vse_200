@@ -30,6 +30,22 @@ export function Player(props: PlayerProps) {
             index < 0 ? (offset > 0 ? 0 : playable.length - 1) : (index + offset + playable.length) % playable.length
         onTrackSelect(playable[nextIndex])
     }
+    const previousTrack = () => selectAdjacent(-1)
+    const nextTrack = () => selectAdjacent(1)
+    const togglePlay = () => {
+        if (isPlaying || loading) player.pause()
+        else void player.play()
+    }
+    const seek = (event: Event) => {
+        const input = event.currentTarget as HTMLInputElement
+        player.seek((Number(input.value) / 100) * duration)
+    }
+    const changeVolume = (event: Event) => {
+        const input = event.currentTarget as HTMLInputElement
+        player.setVolume(Number(input.value) / 100)
+    }
+    const toggleMute = () => player.toggleMute()
+    const coverError = () => setFailedCover(cover)
     const timelineStyle = {
         background: `linear-gradient(90deg, #bba4ff 0%, #bba4ff ${progress}%, #494956 ${progress}%, #494956 100%)`,
     }
@@ -39,7 +55,7 @@ export function Player(props: PlayerProps) {
             <div className="player-track">
                 <span className="player-cover">
                     {cover && failedCover !== cover ? (
-                        <img src={cover} alt="" onError={() => setFailedCover(cover)} />
+                        <img src={cover} alt="" onError={coverError} />
                     ) : (
                         <Icon name="music" size={22} />
                     )}
@@ -57,7 +73,7 @@ export function Player(props: PlayerProps) {
                         className="player-control player__secondary-control"
                         aria-label="Предыдущий трек"
                         disabled={!playable.length}
-                        onClick={() => selectAdjacent(-1)}
+                        onClick={previousTrack}
                     >
                         <Icon name="trackPrevious" size={25} />
                     </button>
@@ -66,7 +82,7 @@ export function Player(props: PlayerProps) {
                         className="player-control player__play-toggle"
                         aria-label={isPlaying || loading ? 'Пауза' : 'Воспроизвести'}
                         disabled={!available}
-                        onClick={() => (isPlaying || loading ? player.pause() : void player.play())}
+                        onClick={togglePlay}
                     >
                         <Icon name={isPlaying ? 'pause' : 'play'} size={25} />
                     </button>
@@ -75,7 +91,7 @@ export function Player(props: PlayerProps) {
                         className="player-control player__secondary-control"
                         aria-label="Следующий трек"
                         disabled={!playable.length}
-                        onClick={() => selectAdjacent(1)}
+                        onClick={nextTrack}
                     >
                         <Icon name="trackNext" size={25} />
                     </button>
@@ -91,20 +107,12 @@ export function Player(props: PlayerProps) {
                         disabled={!available || duration <= 0}
                         style={timelineStyle}
                         aria-label="Позиция воспроизведения"
-                        onInput={event => {
-                            if (event.currentTarget instanceof HTMLInputElement)
-                                player.seek((Number(event.currentTarget.value) / 100) * duration)
-                        }}
+                        onInput={seek}
                     />
                     <span className="player-time">{formatTime(duration)}</span>
                 </div>
                 <p className="player-status" role="status">
-                    {error ||
-                        (loading
-                            ? 'Загружаем аудио…'
-                            : !available
-                              ? 'Для трека пока нет аудиофайла.'
-                              : '')}
+                    {error || (loading ? 'Загружаем аудио…' : !available ? 'Для трека пока нет аудиофайла.' : '')}
                 </p>
                 {/* Локальный выбор файла временно отключён.
                 <label className="player-file">
@@ -128,7 +136,7 @@ export function Player(props: PlayerProps) {
                     type="button"
                     aria-label={muted ? 'Включить звук' : 'Выключить звук'}
                     aria-pressed={muted ? 'true' : 'false'}
-                    onClick={() => player.toggleMute()}
+                    onClick={toggleMute}
                 >
                     <Icon name="volume" size={22} />
                 </button>
@@ -139,10 +147,7 @@ export function Player(props: PlayerProps) {
                     max="100"
                     value={visibleVolume}
                     aria-label="Громкость"
-                    onInput={event => {
-                        if (event.currentTarget instanceof HTMLInputElement)
-                            player.setVolume(Number(event.currentTarget.value) / 100)
-                    }}
+                    onInput={changeVolume}
                     style={{
                         background: `linear-gradient(to right, #afa3ca ${visibleVolume}%, #f1eff5 ${visibleVolume}%)`,
                     }}

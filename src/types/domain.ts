@@ -34,6 +34,7 @@ export interface User {
     id?: EntityId
     display_name?: string
     email?: string
+    avatar_url?: string | null
 }
 export type FieldErrors = Partial<Record<string, string>>
 export interface FormState {

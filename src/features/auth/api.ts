@@ -27,8 +27,8 @@ async function requestAuth(path: string, options: RequestInit, request: typeof f
 }
 
 /** Текущий пользователь по сессии. При 401 пользователь не вошёл — возвращаем null. */
-export async function getCurrentUser(request = fetch) {
-    const { response, body } = await requestAuth('/auth/me', { method: 'GET' }, request)
+export async function getCurrentUser(request = fetch, signal?: AbortSignal) {
+    const { response, body } = await requestAuth('/auth/me', { method: 'GET', signal }, request)
     if (response.status === 200) return parseUser(body)
     if (response.status === 401) return null
     throw new AuthError(
@@ -52,8 +52,8 @@ export async function login(data: { email: string; password: string }, request =
 }
 
 /** Выход из аккаунта. Ждём статус 204. */
-export async function logout(request = fetch) {
-    const { response, body } = await requestAuth('/auth/logout', { method: 'POST' }, request)
+export async function logout(request = fetch, signal?: AbortSignal) {
+    const { response, body } = await requestAuth('/auth/logout', { method: 'POST', signal }, request)
     if (response.status === 204) return
     throw new AuthError(
         'Не удалось выйти из аккаунта. Попробуйте ещё раз.',
@@ -71,5 +71,7 @@ function parseUser(body: unknown): User {
     ) {
         throw new AuthError('Сервер вернул пользователя в неизвестном формате.')
     }
-    return { id: body.id, email: body.email, display_name: body.display_name }
+    const user: User = { id: body.id, email: body.email, display_name: body.display_name }
+    if (body.avatar_url !== undefined) user.avatar_url = typeof body.avatar_url === 'string' ? body.avatar_url : null
+    return user
 }

@@ -1,8 +1,10 @@
 export type Key = string | number | null
 export type Child = VNode | string | number | boolean | null | undefined | Child[]
+export type ElementRef = (element: Element | null) => void
 export interface Props {
     [name: string]: unknown
     children?: (VNode | null)[]
+    ref?: ElementRef
 }
 export type Component<P = Props> = (props: P) => VNode | null
 export interface VNode {

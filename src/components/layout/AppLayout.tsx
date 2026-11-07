@@ -1,27 +1,11 @@
-import type { AudioPlayer } from '../../features/music/player.ts'
-import type { Child } from '../../../myReact/index.ts'
-import type { AccountProps, Track } from '../../types/domain.ts'
-interface AppLayoutProps extends AccountProps {
-    player: AudioPlayer
-    onLocalFile: (file: File) => void
-    route: string
-    tracks: Track[]
-    activeTrack?: Track
-    onTrackSelect: (track: Track) => void
-    sessionError: string
-    children?: Child
-}
+import type { AppLayoutProps } from './AppLayout.types.ts'
 import { createElement } from '../../../myReact/index.ts'
 import { Sidebar } from '../sidebar/Sidebar.tsx'
 import { Player } from '../player/Player.tsx'
+import { UserAvatar } from '../profile/UserAvatar.tsx'
 import './AppLayout.css'
 
-/**
- * Вход и регистрация — без плеера и боковой панели. Остальные страницы — с ними.
- * @param {object} props Текущий маршрут, действия с аккаунтом, выбранный трек и страница.
- * @returns {object} Виртуальное DOM-дерево.
- */
-export function AppLayout({
+export const AppLayout = ({
     player,
     onLocalFile,
     route,
@@ -33,8 +17,8 @@ export function AppLayout({
     sessionError,
     authAction,
     children,
-}: AppLayoutProps) {
-    if (route === 'signup' || route === 'login') {
+}: AppLayoutProps) => {
+    if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
             <main id="main-content" tabIndex={-1}>
                 {children}
@@ -44,16 +28,29 @@ export function AppLayout({
 
     return (
         <div className="app-shell">
-            <a className="skip-link" href="#main-content">
+            <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar user={user} onLogout={onLogout} authAction={authAction} />
-            <div className="app-main-column">
-                <main className="app-content" id="main-content" tabIndex={-1}>
+            <Sidebar route={route} user={user} onLogout={onLogout} authAction={authAction} />
+            <div className="app-shell__main-column">
+                <nav className="app-shell__mobile-nav" aria-label="Навигация">
+                    <a href="/" data-link>
+                        Главная
+                    </a>
+                    <a
+                        href="/profile"
+                        data-link
+                        aria-label="Открыть профиль"
+                        aria-current={route === 'profile' ? 'page' : undefined}
+                    >
+                        <UserAvatar src={user?.avatar_url} />
+                    </a>
+                </nav>
+                <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
                 </main>
                 {sessionError ? (
-                    <p className="session-error" role="alert">
+                    <p className="app-shell__session-error" role="alert">
                         {sessionError}
                     </p>
                 ) : null}
