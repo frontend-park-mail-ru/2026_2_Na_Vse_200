@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../../myReact/index.ts'
+import { createElement, useState } from '@navse200/my-react'
 import { ProfileError, updateProfile } from '../../features/profile/api.ts'
 import { validateProfile } from '../../features/profile/validation.ts'
 import type { EditProfileDialogProps, EditProfileDialogState } from './EditProfileDialog.types.ts'

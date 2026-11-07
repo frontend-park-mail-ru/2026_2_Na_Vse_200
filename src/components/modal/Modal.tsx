@@ -1,4 +1,4 @@
-import { createElement } from '../../../myReact/index.ts'
+import { createElement } from '@navse200/my-react'
 import { modals } from './manager.ts'
 import type { ModalProps } from './Modal.types.ts'
 import './Modal.scss'

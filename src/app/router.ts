@@ -12,6 +12,7 @@ export function createAppRouter() {
             '/profile': 'profile',
             '/signup': 'signup',
             '/login': 'login',
+            '/artists/:id': 'artist',
             '*': 'not-found',
         },
     })

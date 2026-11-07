@@ -1,9 +1,10 @@
 import type { Track, CollectionItem, HomePageProps } from '../types/domain.ts'
 import type { CoverProps, TrackListProps, CollectionProps } from './HomePage.types.ts'
-import { createElement, useState } from '../../myReact/index.ts'
+import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../components/ui/Icon.tsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.ts'
 import './HomePage.css'
+import { artistHref } from '../features/artist/route.ts'
 
 const formatDuration = (duration: Track['duration']) => {
     if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
@@ -106,11 +107,17 @@ const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps
     }
     const renderCard = (item: CollectionItem) => (
         <article className="music-collection__card" key={item.id}>
-            <Cover
-                cover={type === 'artist' ? item.image_url : item.cover_url}
-                icon={type === 'artist' ? 'artist' : 'music'}
-            />
-            <strong>{type === 'artist' ? item.name : item.title}</strong>
+            {type === 'artist' ? (
+                <a href={artistHref(item.id)} data-link>
+                    <Cover cover={item.image_url} icon="artist" />
+                    <strong>{item.name}</strong>
+                </a>
+            ) : (
+                <div className="music-collection__card-content">
+                    <Cover cover={item.cover_url} icon="music" />
+                    <strong>{item.title}</strong>
+                </div>
+            )}
         </article>
     )
     return (

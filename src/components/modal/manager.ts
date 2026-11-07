@@ -1,5 +1,5 @@
 import { createStore } from '../../shared/lib/store.ts'
-import type { ElementRef, VNode } from '../../../myReact/index.ts'
+import type { ElementRef, VNode } from '@navse200/my-react'
 import type { ModalState } from './Modal.types.ts'
 
 const store = createStore<ModalState>({ content: null })

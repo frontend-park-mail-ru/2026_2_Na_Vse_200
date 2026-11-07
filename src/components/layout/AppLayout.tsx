@@ -1,23 +1,24 @@
-import type { AppLayoutProps } from './AppLayout.types.ts'
-import { createElement } from '../../../myReact/index.ts'
+import { createElement, useState } from '@navse200/my-react'
 import { Sidebar } from '../sidebar/Sidebar.tsx'
 import { Player } from '../player/Player.tsx'
 import { UserAvatar } from '../profile/UserAvatar.tsx'
+import type { AppLayoutProps } from './AppLayout.types.ts'
 import './AppLayout.css'
 
-export const AppLayout = ({
-    player,
-    onLocalFile,
+export function AppLayout({
     route,
     user,
-    onLogout,
     onTrackSelect,
     tracks,
     activeTrack,
     sessionError,
+    player,
+    onLogout,
     authAction,
+    offline,
     children,
-}: AppLayoutProps) => {
+}: AppLayoutProps) {
+    const [queueOpen, setQueueOpen] = useState(false)
     if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
             <main id="main-content" tabIndex={-1}>
@@ -25,13 +26,28 @@ export const AppLayout = ({
             </main>
         )
     }
-
     return (
-        <div className="app-shell">
+        <div
+            className="app-shell"
+            onClick={event => {
+                if (!(event.target as Element | null)?.closest('.player__queue-panel, .player__queue-button'))
+                    setQueueOpen(false)
+            }}
+            onKeyDown={event => {
+                if (event.key === 'Escape') setQueueOpen(false)
+            }}
+        >
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar route={route} user={user} onLogout={onLogout} authAction={authAction} />
+            <Sidebar
+                className="app-shell__sidebar"
+                route={route}
+                user={user}
+                onLogout={onLogout}
+                authAction={authAction}
+                offline={offline}
+            />
             <div className="app-shell__main-column">
                 <nav className="app-shell__mobile-nav" aria-label="Навигация">
                     <a href="/" data-link>
@@ -57,10 +73,13 @@ export const AppLayout = ({
             </div>
             <Player
                 player={player}
-                onLocalFile={onLocalFile}
+                className="app-shell__player"
                 track={activeTrack}
                 tracks={tracks}
                 onTrackSelect={onTrackSelect}
+                queueOpen={queueOpen}
+                onQueueToggle={() => setQueueOpen(!queueOpen)}
+                onQueueClose={() => setQueueOpen(false)}
             />
         </div>
     )

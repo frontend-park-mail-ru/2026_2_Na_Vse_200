@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../../myReact/index.ts'
+import { createElement, useState } from '@navse200/my-react'
 import type { UserAvatarProps } from './UserAvatar.types.ts'
 import './UserAvatar.css'
 

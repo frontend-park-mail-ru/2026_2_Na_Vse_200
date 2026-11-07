@@ -1,4 +1,4 @@
-import { createElement } from '../../myReact/index.ts'
+import { createElement } from '@navse200/my-react'
 
 export function NotFoundPage() {
     return (

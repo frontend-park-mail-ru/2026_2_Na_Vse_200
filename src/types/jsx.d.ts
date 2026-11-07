@@ -1,4 +1,4 @@
-import type { Child, ElementRef, Key, VNode } from '../../myReact/index.ts'
+import type { Child, ElementRef, Key, VNode } from '@navse200/my-react'
 
 // Native browser events, not React SyntheticEvent.
 interface DOMProps {
@@ -13,6 +13,7 @@ interface DOMProps {
     ref?: ElementRef
     hidden?: boolean
     onCancel?: (event: Event) => void
+    onKeyDown?: (event: KeyboardEvent) => void
     onClose?: (event: Event) => void
     onClick?: (event: MouseEvent) => void
     onChange?: (event: Event) => void
@@ -24,6 +25,7 @@ interface DOMProps {
     [name: `data-${string}`]: string | boolean | undefined
 }
 interface InputProps extends DOMProps {
+    step?: string | number
     autoFocus?: boolean
     accept?: string
     name?: string
@@ -97,6 +99,7 @@ declare global {
             input: InputProps
             button: DOMProps & { type?: 'button' | 'submit' | 'reset'; disabled?: boolean }
             form: DOMProps & { noValidate?: boolean }
+            fieldset: DOMProps & { disabled?: boolean }
             img: DOMProps & { src?: string; alt?: string; loading?: 'lazy' | 'eager' }
             svg: SVGProps
             g: SVGProps

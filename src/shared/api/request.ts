@@ -1,4 +1,5 @@
 import { API_URL, API_REQUEST_OPTIONS } from '../../config.ts'
+import { NetworkError, reportConnection } from '../offline/network.ts'
 
 export type Fetch = typeof fetch
 export interface RequestOptions extends RequestInit {
@@ -25,12 +26,21 @@ export async function requestJson(path: string, options: RequestOptions = {}, re
     const { multipart = false, ...config } = options
     const headers = new Headers(config.headers)
     if (!multipart && !headers.has('Content-Type')) headers.set('Content-Type', 'application/json')
-    const response = await request(`${API_URL}${path}`, {
-        ...API_REQUEST_OPTIONS,
-        ...config,
-        headers,
-        signal: config.signal ?? AbortSignal.timeout(15000),
-    })
+    let response: Response
+    try {
+        if (typeof window !== 'undefined' && window.navigator.onLine === false) throw new NetworkError()
+        response = await request(`${API_URL}${path}`, {
+            ...API_REQUEST_OPTIONS,
+            ...config,
+            headers,
+            signal: config.signal ?? AbortSignal.timeout(15000),
+        })
+    } catch (error) {
+        if (config.signal?.aborted && config.signal.reason?.name !== 'TimeoutError') throw error
+        reportConnection(false)
+        throw new NetworkError()
+    }
+    reportConnection(true)
     const body: unknown = await response.json().catch(() => null)
     return { response, body }
 }

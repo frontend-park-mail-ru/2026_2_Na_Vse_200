@@ -1,0 +1,9 @@
+<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="50" height="50" viewBox="0 0 50 50" fill="none" xmlns="http://www.w3.org/2000/svg">
+<g id="btn-play">
+<circle id="Ellipse" cx="25" cy="25" r="25" fill="white"/>
+<g id="Group">
+<path id="Line" d="M19 16V36" stroke-width="6" stroke-linecap="round" stroke="#0D0E13"/>
+<path id="Line_2" d="M32 16V36" stroke-width="6" stroke-linecap="round" stroke="#0D0E13"/>
+</g>
+</g>
+</svg>

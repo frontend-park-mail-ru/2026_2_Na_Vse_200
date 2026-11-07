@@ -10,7 +10,7 @@ export interface IconProps {
     className?: string
     label?: string
 }
-import { createElement } from '../../../myReact/index.ts'
+import { createElement } from '@navse200/my-react'
 
 const glyphs: Record<string, string[]> = {
     home: ['M3 10.8 12 3l9 7.8', 'M5.5 9.5v10h13v-10', 'M9.5 19.5v-6h5v6'],

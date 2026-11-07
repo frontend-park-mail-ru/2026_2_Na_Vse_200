@@ -1,5 +1,6 @@
 import type { FieldErrors, User } from '../../types/domain.ts'
 import { readApiError, isRecord, requestJson } from '../../shared/api/request.ts'
+import { isNetworkError } from '../../shared/offline/network.ts'
 
 /** Ошибка запроса аутентификации. */
 export class AuthError extends Error {
@@ -17,7 +18,8 @@ export class AuthError extends Error {
 async function requestAuth(path: string, options: RequestInit, request: typeof fetch) {
     try {
         return await requestJson(path, options, request)
-    } catch {
+    } catch (error) {
+        if (isNetworkError(error)) throw error
         throw new AuthError(
             'Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.',
             {},
@@ -65,9 +67,9 @@ export async function logout(request = fetch, signal?: AbortSignal) {
 function parseUser(body: unknown): User {
     if (
         !isRecord(body) ||
-        (body.id !== undefined && typeof body.id !== 'string' && typeof body.id !== 'number') ||
+        (typeof body.id !== 'string' && typeof body.id !== 'number') ||
         (body.email !== undefined && typeof body.email !== 'string') ||
-        (body.display_name !== undefined && typeof body.display_name !== 'string')
+        typeof body.display_name !== 'string'
     ) {
         throw new AuthError('Сервер вернул пользователя в неизвестном формате.')
     }

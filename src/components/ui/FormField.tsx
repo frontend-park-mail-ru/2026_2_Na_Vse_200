@@ -1,5 +1,5 @@
 import type { FormFieldProps } from './FormField.types.ts'
-import { createElement } from '../../../myReact/index.ts'
+import { createElement } from '@navse200/my-react'
 
 export const FormField = ({
     name,

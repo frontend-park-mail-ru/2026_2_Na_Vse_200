@@ -1,4 +1,4 @@
-import type { Child, Component, Key, Props, VNode } from './types.ts'
+import type { Child, Component, Key, Props, VNode } from './types.js'
 
 /**
  * JSX вызывает эту функцию вместо React.createElement.

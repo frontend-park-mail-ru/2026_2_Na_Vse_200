@@ -1,15 +1,18 @@
 import type { Catalog, Track, CollectionItem } from '../../types/domain.ts'
 import { isRecord, readApiError } from '../../shared/api/request.ts'
 import { requestJson } from '../../shared/api/request.ts'
+import { loadWithCache } from '../../shared/offline/load.ts'
+import { getCacheScope } from '../../shared/offline/storage.ts'
+import type { CacheScope } from '../../shared/offline/storage.ts'
 
 /** Данные главной: треки, исполнители и альбомы. */
-export async function getHomeData(request = fetch): Promise<Catalog> {
-    let result
-    try {
-        result = await requestJson('/home', { method: 'GET' }, request)
-    } catch {
-        throw new Error('Не удалось подключиться к серверу. Попробуйте ещё раз.')
-    }
+export async function getHomeData(request = fetch, scope: CacheScope = getCacheScope(), signal?: AbortSignal) {
+    const result = await loadWithCache('home', () => fetchHomeData(request, signal), scope)
+    return { ...result.data, offline: result.offline }
+}
+
+async function fetchHomeData(request: typeof fetch, signal?: AbortSignal): Promise<Catalog> {
+    const result = await requestJson('/home', { method: 'GET', signal }, request)
     const { response, body } = result
 
     if (!response.ok) {

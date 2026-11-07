@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../myReact/index.ts'
+import { createElement, useState } from '@navse200/my-react'
 import { UserAvatar } from '../components/profile/UserAvatar.tsx'
 import { EditProfileDialog } from '../components/profile/EditProfileDialog.tsx'
 import { modals } from '../components/modal/manager.ts'

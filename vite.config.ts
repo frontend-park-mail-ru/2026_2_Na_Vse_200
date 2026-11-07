@@ -4,9 +4,19 @@ import { defineConfig } from 'vite'
 import { transformAsync } from '@babel/core'
 import typescript from '@babel/preset-typescript'
 import jsx from '@babel/plugin-transform-react-jsx'
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+    ssr: { external: ['@navse200/my-react'] },
     plugins: [
+        VitePWA({
+            strategies: 'injectManifest',
+            srcDir: 'src',
+            filename: 'sw.ts',
+            injectRegister: false,
+            manifest: false,
+            injectManifest: { globPatterns: ['**/*.{html,js,css,png,jpg,jpeg,svg,webp,ico,woff,woff2}'] },
+        }),
         {
             name: 'babel',
             enforce: 'pre',
@@ -39,6 +49,7 @@ export default defineConfig({
         },
     },
     optimizeDeps: {
+        include: ['@navse200/my-react'],
         rolldownOptions: {
             transform: {
                 jsx: {

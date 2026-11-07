@@ -152,3 +152,28 @@ input:focus-visible {
     font-weight: 700;
     text-decoration: none;
 }
+/* Connectivity status stays visible on both authentication and application screens. */
+.offline-banner {
+    padding: 10px 20px;
+    background: #353044;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+}
+
+.offline-banner button {
+    margin-left: 12px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+.offline-auth {
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}

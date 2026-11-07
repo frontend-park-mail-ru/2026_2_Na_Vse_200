@@ -1,4 +1,4 @@
-import type { ElementRef, Props, StateSetter, StateUpdate, VNode } from './types.ts'
+import type { ElementRef, Props, StateSetter, StateUpdate, VNode } from './types.js'
 
 const SVG_NAMESPACE = 'http://www.w3.org/2000/svg'
 

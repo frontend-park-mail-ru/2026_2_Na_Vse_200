@@ -8,7 +8,6 @@ export interface CollectionItem {
     cover_url?: string | null
 }
 export interface Track {
-    audio_url?: string | null
     id: EntityId
     title?: string
     artists?: (string | { name?: string })[]
@@ -31,8 +30,8 @@ export interface Catalog {
 }
 export type CatalogStatus = 'idle' | 'loading' | 'ready' | 'error'
 export interface User {
-    id?: EntityId
-    display_name?: string
+    id: EntityId
+    display_name: string
     email?: string
     avatar_url?: string | null
 }

@@ -30,7 +30,7 @@ const jsxReferences: Rule.RuleModule = {
 }
 
 export default [
-    { ignores: ['dist/**', 'node_modules/**'] },
+    { ignores: ['dist/**', 'packages/*/dist/**', '**/node_modules/**'] },
     js.configs.recommended,
     ...tseslint.configs.recommended,
     {
@@ -43,11 +43,11 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx,ts,tsx}', 'myReact/**/*.ts'],
+        files: ['src/**/*.{js,jsx,ts,tsx}', 'packages/*/src/**/*.ts'],
         languageOptions: { globals: globals.browser },
     },
     {
-        files: ['tests/**/*.{js,ts}', 'scripts/**/*.ts', '*.config.ts'],
+        files: ['scripts/**/*.ts', '*.config.ts'],
         languageOptions: { globals: globals.node },
     },
     {

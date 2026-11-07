@@ -1,9 +1,17 @@
 import type { SidebarProps } from './Sidebar.types.ts'
-import { createElement } from '../../../myReact/index.ts'
-import { Icon } from '../ui/Icon.tsx'
 import { UserAvatar } from '../profile/UserAvatar.tsx'
+import { createElement } from '@navse200/my-react'
+import { Icon } from '../ui/Icon.tsx'
 import logo from '../../assets/2une-dark-transparent.png'
 import './Sidebar.css'
+import homeIcon from '../../assets/artist/figma/home.svg'
+import searchIcon from '../../assets/artist/figma/search.svg'
+import libraryIcon from '../../assets/artist/figma/library.svg'
+import plusIcon from '../../assets/artist/figma/plus.svg'
+import heartIcon from '../../assets/artist/figma/playlist-heart-exact.svg'
+
+const navigationIcons: Record<string, string> = { home: homeIcon, search: searchIcon, library: libraryIcon }
+const playlistImages: Record<string, string> = { rose: heartIcon }
 
 const navigation = [
     { label: 'Главная', href: '/', icon: 'home' },
@@ -17,9 +25,9 @@ const playlists = [
     { name: 'Вечер', detail: 'Плейлист · 58 треков', icon: 'moon', color: 'amber' },
 ]
 
-export const Sidebar = ({ route, user, onLogout, authAction }: SidebarProps) => {
+export function Sidebar({ route, user, onLogout, authAction, offline, className = '' }: SidebarProps) {
     return (
-        <aside className="sidebar">
+        <aside className={`sidebar ${className}`}>
             <a className="sidebar__brand" href="/" data-link aria-label="2une — на главную">
                 <img className="sidebar__logo" src={logo} alt="2une tune" />
             </a>
@@ -28,13 +36,20 @@ export const Sidebar = ({ route, user, onLogout, authAction }: SidebarProps) => 
                 {navigation.map(item => (
                     <a
                         className={`sidebar__nav-link${item.href === '/' && route === 'home' ? ' sidebar__nav-link--active' : ''}`}
-                        aria-current={item.href === '/' && route === 'home' ? 'page' : undefined}
                         href={item.href}
                         data-link={item.href.startsWith('/') ? 'true' : undefined}
                         key={item.label}
                     >
-                        <Icon name={item.icon} size={18} className="sidebar__nav-icon" />
-                        <span className="sidebar__nav-label">{item.label}</span>
+                        <img
+                            src={navigationIcons[item.icon]}
+                            className={`sidebar__nav-icon sidebar__nav-icon--${item.icon}`}
+                            alt=""
+                        />
+                        <span
+                            className={`sidebar__nav-label${item.icon !== 'home' ? ' sidebar__nav-label--offset' : ''}`}
+                        >
+                            {item.label}
+                        </span>
                     </a>
                 ))}
             </nav>
@@ -42,20 +57,24 @@ export const Sidebar = ({ route, user, onLogout, authAction }: SidebarProps) => 
             <div className="sidebar__divider"></div>
             <div className="sidebar__playlist-heading">
                 <span>Плейлисты</span>
-                <button type="button" aria-label="Создать плейлист">
-                    <Icon name="plus" size={18} />
+                <button className="sidebar__playlist-add" type="button" aria-label="Создать плейлист">
+                    <img src={plusIcon} alt="" />
                 </button>
             </div>
 
             <nav className="sidebar__playlists" aria-label="Плейлисты">
                 {playlists.map(playlist => (
-                    <a href={`#${playlist.color}`} key={playlist.name}>
+                    <a className="sidebar__playlist-link" href={`#${playlist.color}`} key={playlist.name}>
                         <span className={`sidebar__playlist-icon sidebar__playlist-icon--${playlist.color}`}>
-                            <Icon name={playlist.icon} size={15} />
+                            {playlistImages[playlist.color] ? (
+                                <img src={playlistImages[playlist.color]} alt="" />
+                            ) : (
+                                <Icon name="music" size={26} />
+                            )}
                         </span>
                         <span className="sidebar__playlist-copy">
-                            <strong>{playlist.name}</strong>
-                            <small>{playlist.detail}</small>
+                            <strong className="sidebar__playlist-name">{playlist.name}</strong>
+                            <small className="sidebar__playlist-detail">{playlist.detail.replace(' · ', '  ')}</small>
                         </span>
                     </a>
                 ))}
@@ -71,11 +90,20 @@ export const Sidebar = ({ route, user, onLogout, authAction }: SidebarProps) => 
                 >
                     <UserAvatar src={user?.avatar_url} className="sidebar__avatar" />
                     <span className="sidebar__account-copy">
-                        <strong>{user?.display_name || user?.email || 'Пользователь'}</strong>
-                        <small>Личный аккаунт</small>
+                        <strong className="sidebar__account-name">
+                            {user?.display_name || user?.email || 'Пользователь'}
+                        </strong>
+                        <small className="sidebar__account-detail">Личный аккаунт</small>
                     </span>
                 </a>
-                <button type="button" onClick={onLogout} disabled={authAction} aria-label="Выйти из аккаунта">
+                <button
+                    className="sidebar__logout"
+                    type="button"
+                    onClick={onLogout}
+                    disabled={authAction || offline}
+                    aria-label="Выйти из аккаунта"
+                    title={offline ? 'Для выхода подключитесь к интернету' : 'Выйти из аккаунта'}
+                >
                     <Icon name="more" size={18} />
                 </button>
             </div>

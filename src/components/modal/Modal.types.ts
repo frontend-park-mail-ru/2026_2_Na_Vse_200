@@ -1,4 +1,4 @@
-import type { Child, VNode } from '../../../myReact/index.ts'
+import type { Child, VNode } from '@navse200/my-react'
 
 export interface ModalProps {
     title: string

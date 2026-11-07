@@ -5,6 +5,7 @@ node_modules/
 
 # Результаты сборки и артефакты тестов
 /dist/
+/packages/*/dist/
 /dist-ssr/
 /coverage/
 /playwright-report/
