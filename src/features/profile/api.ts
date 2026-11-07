@@ -4,6 +4,7 @@ import type { FieldErrors, User } from './types.ts'
 export class ProfileError extends Error {
     fields: FieldErrors
     code: string
+    savedUser?: User
 
     constructor(message: string, fields: FieldErrors = {}, code = '') {
         super(message)
@@ -13,18 +14,7 @@ export class ProfileError extends Error {
     }
 }
 
-export const updateProfile = async (name: string, avatar: File | null = null): Promise<User> => {
-    const data = new FormData()
-    data.append('display_name', name)
-    if (avatar) data.append('avatar', avatar)
-
-    let result
-    try {
-        result = await requestJson('/users/me', { method: 'PATCH', body: data, multipart: true })
-    } catch {
-        throw new ProfileError('Не удалось связаться с сервером. Попробуйте ещё раз.')
-    }
-
+const readProfile = (result: Awaited<ReturnType<typeof requestJson>>): User => {
     const { response, body } = result
     const error = readApiError(body)
     if (
@@ -50,4 +40,29 @@ export const updateProfile = async (name: string, avatar: File | null = null): P
         throw new ProfileError('', { avatar: 'Файл слишком большой. Выберите изображение меньшего размера.' })
     }
     throw new ProfileError(error.message || 'Не удалось сохранить профиль. Попробуйте ещё раз.')
+}
+
+export const updateProfile = async (user: User, name: string, avatar: File | null = null): Promise<User> => {
+    const path = `/users/${encodeURIComponent(String(user.id))}`
+    let saved: User | undefined
+    try {
+        // Backend updates text fields and uploads the avatar with separate requests.
+        saved = readProfile(await requestJson(path, {
+            method: 'PUT',
+            body: JSON.stringify({ email: user.email, display_name: name }),
+        }))
+        if (!avatar) return saved
+        const data = new FormData()
+        data.append('avatar', avatar)
+        return readProfile(await requestJson(`${path}/avatar`, { method: 'POST', body: data, multipart: true }))
+    } catch (error) {
+        const failure = error instanceof ProfileError
+            ? error
+            : new ProfileError('Не удалось связаться с сервером. Попробуйте ещё раз.')
+        if (saved) {
+            failure.savedUser = saved
+            failure.message = `Имя сохранено. Фото не обновлено. ${failure.message}`
+        }
+        throw failure
+    }
 }

@@ -96,7 +96,7 @@ export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialo
 
         setState(previous => ({ ...previous, errors: {}, message: '', pending: true }))
         try {
-            const updated = await updateProfile(name, state.avatar)
+            const updated = await updateProfile(user, name, state.avatar)
             if (!form.isConnected) return
             modals.close()
             onSaved(updated)
@@ -106,6 +106,7 @@ export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialo
                 onExpired()
                 return
             }
+            if (error instanceof ProfileError && error.savedUser) onSaved(error.savedUser)
             setState(previous => ({
                 ...previous,
                 errors: error instanceof ProfileError ? error.fields : {},
@@ -130,13 +131,13 @@ export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialo
                             Изменить фото
                         </button>
                         <p className="profile-edit__hint" id="profile-photo-hint">
-                            JPG или PNG
+                            JPG, PNG или WebP до 2 МБ
                         </p>
                     </div>
                     <input
                         type="file"
                         name="avatar"
-                        accept="image/jpeg,image/png"
+                        accept="image/jpeg,image/png,image/webp"
                         aria-label="Фотография профиля"
                         aria-describedby="profile-photo-hint profile-photo-error"
                         disabled={state.pending}
