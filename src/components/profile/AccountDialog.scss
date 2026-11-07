@@ -1,0 +1,61 @@
+@use '../../styles/breakpoints' as bp;
+
+.account-dialog__form {
+    display: grid;
+    gap: 20px;
+}
+
+.account-dialog__description {
+    margin: 0;
+    line-height: 1.5;
+}
+
+.account-dialog__field {
+    display: grid;
+    gap: 8px;
+}
+
+.account-dialog__label {
+    font-size: 18px;
+    font-weight: 500;
+}
+
+.account-dialog__input {
+    width: 100%;
+    min-height: 54px;
+    padding: 12px 18px;
+    border: 2px solid #86809e;
+    border-radius: 16px;
+    background: #16181f;
+    color: inherit;
+    font: inherit;
+
+    &[aria-invalid='true'] {
+        border-color: #ff9ab2;
+    }
+}
+
+.account-dialog__error {
+    margin: 0;
+    color: #ff9ab2;
+    font-size: 14px;
+    line-height: 1.5;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.account-dialog__actions {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-top: 8px;
+}
+
+@media (max-width: bp.$mobile) {
+    .account-dialog__button {
+        width: 100%;
+    }
+}

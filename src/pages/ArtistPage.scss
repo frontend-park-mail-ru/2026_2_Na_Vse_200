@@ -1,0 +1,251 @@
+@use '../styles/breakpoints' as bp;
+
+.artist-page {
+    min-height: 100%;
+    color: #fff;
+    background: #0d0e13;
+    font-family: var(--font-heading);
+    font-weight: 500;
+    font-variation-settings:
+        'CRSV' 0,
+        'SHRP' 0;
+}
+
+.artist-page__hero {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    min-height: 345px;
+    padding: 74px 20px 87px;
+    background: url('../assets/artist/figma/hero-background.svg') left top repeat-x;
+}
+
+.artist-page__photo {
+    width: 180px;
+    height: 180px;
+    border-radius: 50%;
+}
+
+.artist-page__intro {
+    min-width: 0;
+}
+
+.artist-page__title {
+    margin: 0 0 25px;
+    font-family: var(--font-heading);
+    font-size: 48px;
+    font-weight: 500;
+    line-height: 60px;
+    overflow-wrap: anywhere;
+}
+
+.artist-page__listeners {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 210px;
+    height: 32px;
+    margin: 0 0 25px;
+    padding: 0;
+    border-radius: 36px;
+    background: rgb(159 154 192 / 29%);
+    font-size: 12px;
+    font-weight: 500;
+    line-height: 15px;
+}
+
+.artist-page__listen {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 8px;
+    width: 122px;
+    min-height: 42px;
+    padding: 0 18px;
+    border: 0;
+    border-radius: 30px;
+    background: #9d8cff;
+    color: #08070c;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.artist-page__listen-icon {
+    flex-shrink: 0;
+    transform: rotate(90deg);
+}
+
+.artist-page__listen:hover:not(:disabled) {
+    background: #b5a2ff;
+}
+
+.artist-page__listen:disabled {
+    opacity: 0.5;
+    cursor: default;
+}
+
+.artist-page__columns {
+    display: grid;
+    grid-template-columns: minmax(0, 540px) minmax(0, 544px);
+    align-items: start;
+    gap: 32px;
+    padding: 24px 15px 48px;
+}
+
+.artist-page__section-title {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 0 24px;
+    font-size: 32px;
+    font-weight: 700;
+    line-height: 40px;
+}
+
+.artist-page__section-icon {
+    flex-shrink: 0;
+}
+
+.artist-page__section-title--albums {
+    gap: 10px;
+}
+
+.artist-page__more {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    height: 19px;
+    margin-top: 24px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #7f7c9b;
+    font-family: var(--font-heading);
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    line-height: 19px;
+}
+
+.artist-page__more-label {
+    width: 108px;
+    text-align: left;
+}
+
+.artist-page__more-icon {
+    align-self: flex-start;
+    margin-top: 3.75px;
+    margin-left: -1px;
+}
+
+.artist-page__more:hover:not(:disabled) {
+    color: #c5b7e8;
+}
+
+.artist-page__more:disabled {
+    cursor: default;
+}
+
+.artist-page__empty {
+    color: #a29cb3;
+    font-size: 14px;
+}
+
+.artist-page--empty {
+    padding: 32px;
+}
+
+.artist-page__home-link {
+    color: #b7a3ff;
+}
+
+@media (max-width: 1200px) {
+    .artist-page__columns {
+        grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+        gap: 24px;
+    }
+
+    .artist-page__section-title {
+        font-size: 25px;
+    }
+}
+
+@media (max-width: 1000px) {
+    .artist-page__hero {
+        gap: 20px;
+        min-height: 300px;
+        padding-top: 65px;
+    }
+
+    .artist-page__photo {
+        width: 145px;
+        height: 145px;
+    }
+
+    .artist-page__title {
+        font-size: 36px;
+    }
+
+    .artist-page__columns {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 32px;
+    }
+}
+
+@media (max-width: bp.$tablet) {
+    .artist-page__hero {
+        padding: 40px 18px;
+        min-height: 260px;
+    }
+
+    .artist-page__title {
+        margin-bottom: 18px;
+        font-size: 30px;
+        line-height: 1.2;
+    }
+
+    .artist-page__photo {
+        width: 110px;
+        height: 110px;
+    }
+
+    .artist-page__listeners {
+        padding: 7px 10px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: bp.$mobile) {
+    .artist-page__hero {
+        gap: 15px;
+        min-height: 240px;
+        padding: 36px 16px;
+    }
+
+    .artist-page__photo {
+        width: 96px;
+        height: 96px;
+    }
+
+    .artist-page__title {
+        margin-top: 0;
+        font-size: 28px;
+        line-height: 1.2;
+    }
+
+    .artist-page__listeners {
+        max-width: 180px;
+        margin-bottom: 17px;
+    }
+
+    .artist-page__columns {
+        padding: 24px 12px 32px;
+    }
+
+    .artist-page__section-title {
+        gap: 3px;
+        margin-bottom: 18px;
+        font-size: 24px;
+    }
+}

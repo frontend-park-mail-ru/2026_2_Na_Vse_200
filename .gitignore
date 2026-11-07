@@ -3,13 +3,10 @@ node_modules/
 .pnp/
 .pnp.cjs
 
-# Результаты сборки и артефакты тестов
+# Результаты сборки
 /dist/
+/packages/*/dist/
 /dist-ssr/
-/coverage/
-/playwright-report/
-/test-results/
-/blob-report/
 
 # Кеши инструментов
 /.vite/
