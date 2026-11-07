@@ -25,7 +25,7 @@ const jsxReferences = {
 }
 
 export default [
-    { ignores: ['dist/**', 'node_modules/**'] },
+    { ignores: ['dist/**', 'packages/*/dist/**', '**/node_modules/**'] },
     js.configs.recommended,
     ...ts.configs.recommended.map(config => ({ ...config, files: ['**/*.{ts,tsx}'] })),
     {
@@ -38,11 +38,11 @@ export default [
         rules: { 'no-unused-vars': ['error', { argsIgnorePattern: '^_' }] },
     },
     {
-        files: ['src/**/*.{js,jsx,ts,tsx}'],
+        files: ['src/**/*.{js,jsx,ts,tsx}', 'packages/*/src/**/*.ts'],
         languageOptions: { globals: globals.browser },
     },
     {
-        files: ['tests/**/*.js', 'scripts/**/*.js', '*.config.js'],
+        files: ['scripts/**/*.{js,ts}', '*.config.{js,ts}'],
         languageOptions: { globals: globals.node },
     },
     {

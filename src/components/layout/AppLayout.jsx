@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { Sidebar } from '../sidebar/Sidebar.jsx'
 import { Player } from '../player/Player.tsx'
 import './AppLayout.css'
@@ -8,7 +8,19 @@ import './AppLayout.css'
  * @param {object} props Текущий маршрут, действия с аккаунтом, выбранный трек и страница.
  * @returns {object} Виртуальное DOM-дерево.
  */
-export function AppLayout({ route, user, onTrackSelect, tracks, activeTrack, sessionError, children }) {
+export function AppLayout({
+    route,
+    user,
+    onTrackSelect,
+    tracks,
+    activeTrack,
+    sessionError,
+    player,
+    onLogout,
+    authAction,
+    offline,
+    children,
+}) {
     const [queueOpen, setQueueOpen] = useState(false)
     if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
@@ -33,6 +45,18 @@ export function AppLayout({ route, user, onTrackSelect, tracks, activeTrack, ses
             </a>
             <Sidebar className="app-shell__sidebar" user={user} />
             <div className="app-shell__main-column">
+                {user && onLogout ? (
+                    <div className="app-shell__account-actions">
+                        <button
+                            type="button"
+                            onClick={onLogout}
+                            disabled={authAction || offline}
+                            title={offline ? 'Для выхода подключитесь к интернету' : undefined}
+                        >
+                            {authAction ? 'Выходим…' : 'Выйти из аккаунта'}
+                        </button>
+                    </div>
+                ) : null}
                 <main className="app-shell__content" id="main-content" tabIndex={-1}>
                     {children}
                 </main>
@@ -43,6 +67,7 @@ export function AppLayout({ route, user, onTrackSelect, tracks, activeTrack, ses
                 ) : null}
             </div>
             <Player
+                player={player}
                 className="app-shell__player"
                 track={activeTrack}
                 tracks={tracks}

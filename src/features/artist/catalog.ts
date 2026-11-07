@@ -1,12 +1,12 @@
 import type { Artist } from './types.ts'
 
-interface CatalogArtist {
+export interface CatalogArtist {
     id: string
     name: string
     image_url: string | null
 }
 
-interface CatalogTrack {
+export interface CatalogTrack {
     id: string
     title: string
     cover_url: string | null
@@ -15,7 +15,7 @@ interface CatalogTrack {
     is_liked?: boolean
 }
 
-interface CatalogAlbum {
+export interface CatalogAlbum {
     id: string
     title: string
     cover_url: string | null

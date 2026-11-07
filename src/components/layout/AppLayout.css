@@ -89,3 +89,20 @@
         border-radius: 0;
     }
 }
+.app-shell__account-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: 6px 20px;
+}
+
+.app-shell__account-actions button {
+    border: 0;
+    background: transparent;
+    color: #d3c8e0;
+    cursor: pointer;
+}
+
+.app-shell__account-actions button:disabled {
+    opacity: 0.5;
+    cursor: default;
+}

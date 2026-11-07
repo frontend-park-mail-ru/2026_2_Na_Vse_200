@@ -1,5 +1,5 @@
 import './ArtistAlbums.css'
-import { createElement } from '../../shared/lib/my-react/index.js'
+import { createElement } from '@navse200/my-react'
 import { ArtistCover } from './ArtistCover.tsx'
 import type { ArtistAlbum } from '../../features/artist/types.ts'
 

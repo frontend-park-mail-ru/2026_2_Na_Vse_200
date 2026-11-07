@@ -22,3 +22,15 @@ export interface Artist {
     tracks: ArtistTrack[]
     albums: ArtistAlbum[]
 }
+
+/** Public screen contract, independent of the host App, auth store and player implementation. */
+export interface ArtistPageProps {
+    offline?: boolean
+    artist?: Artist
+    tracksStatus?: string
+    tracksError?: string
+    onTracksRetry?: () => void
+    artistId: string
+    activeTrack?: { id: string | number }
+    onTrackSelect: (track: ArtistTrack) => void
+}

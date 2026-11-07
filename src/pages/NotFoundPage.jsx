@@ -1,4 +1,4 @@
-import { createElement } from '../shared/lib/my-react/index.js'
+import { createElement } from '@navse200/my-react'
 
 export function NotFoundPage() {
     return (

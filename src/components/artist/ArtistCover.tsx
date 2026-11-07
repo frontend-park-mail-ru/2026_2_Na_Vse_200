@@ -1,5 +1,5 @@
 import './ArtistCover.css'
-import { createElement, useState } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.jsx'
 
 interface Props {

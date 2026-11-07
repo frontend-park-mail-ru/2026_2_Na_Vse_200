@@ -1,5 +1,5 @@
 import './ArtistTracks.css'
-import { createElement, useState } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import heartIcon from '../../assets/artist/figma/heart-exact.svg'
 import moreIcon from '../../assets/artist/figma/track-more.svg'
 import { ArtistCover } from './ArtistCover.tsx'

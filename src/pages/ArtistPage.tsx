@@ -1,22 +1,12 @@
-import { createElement, useState } from '../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import chevron from '../assets/artist/figma/chevron.svg'
 import chevronSmall from '../assets/artist/figma/chevron-small.svg'
 import playIcon from '../assets/artist/figma/listen-play.svg'
 import { ArtistCover } from '../components/artist/ArtistCover.tsx'
 import { ArtistTracks } from '../components/artist/ArtistTracks.tsx'
 import { ArtistAlbums } from '../components/artist/ArtistAlbums.tsx'
-import type { Artist, ArtistTrack } from '../features/artist/types.ts'
+import type { ArtistPageProps } from '../features/artist/types.ts'
 import './ArtistPage.css'
-
-interface Props {
-    artist?: Artist
-    tracksStatus?: string
-    tracksError?: string
-    onTracksRetry?: () => void
-    artistId: string
-    activeTrack?: { id: string | number }
-    onTrackSelect: (track: ArtistTrack) => void
-}
 
 export function ArtistPage({
     artist,
@@ -26,7 +16,8 @@ export function ArtistPage({
     tracksStatus,
     tracksError,
     onTracksRetry,
-}: Props) {
+    offline = false,
+}: ArtistPageProps) {
     const [allTracks, setAllTracks] = useState(false)
     const [allAlbums, setAllAlbums] = useState(false)
 
@@ -50,7 +41,7 @@ export function ArtistPage({
     if (!artist || artistId !== artist.id) {
         return (
             <section className="artist-page artist-page--empty">
-                <h1>Исполнитель не найден</h1>
+                <h1>{offline ? 'Этот исполнитель ещё не сохранён для оффлайна' : 'Исполнитель не найден'}</h1>
                 <a className="artist-page__home-link" href="/" data-link>
                     На главную
                 </a>

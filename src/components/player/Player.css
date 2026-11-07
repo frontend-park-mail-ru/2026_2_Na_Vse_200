@@ -421,3 +421,10 @@
         width: 58%;
     }
 }
+.player__status {
+    margin: 4px 0 0;
+    color: #d3c8e0;
+    font-size: 11px;
+    line-height: 1.3;
+    text-align: center;
+}

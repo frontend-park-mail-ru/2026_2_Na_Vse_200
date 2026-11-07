@@ -1,4 +1,4 @@
-import { createElement, useState } from '../../shared/lib/my-react/index.js'
+import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.jsx'
 import { getArtistName, getTrackCover } from '../../features/music/presentation.js'
 import previousIcon from '../../assets/artist/figma/previous.svg'
@@ -8,6 +8,8 @@ import heartIcon from '../../assets/artist/figma/heart-exact.svg'
 import dislikeIcon from '../../assets/artist/figma/dislike.svg'
 import volumeIcon from '../../assets/artist/figma/volume-exact.svg'
 import './Player.css'
+import type { AudioPlayer, PlaybackState } from '../../shared/audio/player.ts'
+import { connectionAvailable } from '../../shared/offline/network.ts'
 
 interface PlayerTrack {
     id: string | number
@@ -19,6 +21,7 @@ interface PlayerTrack {
 }
 
 interface Props {
+    player?: AudioPlayer
     className?: string
     queueOpen?: boolean
     onQueueToggle?: () => void
@@ -33,14 +36,14 @@ function formatTime(seconds: number) {
     return `${Math.floor(total / 60)}:${String(total % 60).padStart(2, '0')}`
 }
 
-function PlayerTimeline({ track }: { key?: string | number; track?: PlayerTrack }) {
-    const [progress, setProgress] = useState(0)
-    const duration = track?.duration ?? (track?.duration_ms ?? 0) / 1000
+function PlayerTimeline({ playback, player }: { playback: PlaybackState; player?: AudioPlayer }) {
+    const { duration, currentTime, available } = playback
+    const progress = duration > 0 ? (currentTime / duration) * 100 : 0
 
     return (
         <div className="player__timeline">
             <span className="player__time" aria-label="Прошло времени">
-                {formatTime((duration * progress) / 100)}
+                {formatTime(currentTime)}
             </span>
             <input
                 className="player__seek"
@@ -49,12 +52,14 @@ function PlayerTimeline({ track }: { key?: string | number; track?: PlayerTrack 
                 max="100"
                 step="0.1"
                 value={progress}
-                disabled={!track}
+                disabled={!available || duration <= 0}
                 aria-label="Позиция воспроизведения"
                 style={{
                     background: `linear-gradient(to right, #9f9ac0 ${progress}%, #827676 ${progress}%)`,
                 }}
-                onInput={(event: Event) => setProgress(Number((event.currentTarget as HTMLInputElement).value))}
+                onInput={(event: Event) =>
+                    player?.seek((Number((event.currentTarget as HTMLInputElement).value) / 100) * duration)
+                }
             />
             <span className="player__time">{formatTime(duration)}</span>
         </div>
@@ -62,6 +67,7 @@ function PlayerTimeline({ track }: { key?: string | number; track?: PlayerTrack 
 }
 
 export function Player({
+    player,
     className = '',
     track,
     tracks = [],
@@ -70,8 +76,18 @@ export function Player({
     onQueueToggle,
     onQueueClose,
 }: Props) {
-    const [isPlaying, setIsPlaying] = useState(Boolean(track))
-    const [volume, setVolume] = useState(61.36)
+    const playback = player?.getState() ?? {
+        available: false,
+        playing: false,
+        loading: false,
+        currentTime: 0,
+        duration: 0,
+        volume: 0.6136,
+        muted: false,
+        error: '',
+    }
+    const { playing: isPlaying, muted } = playback
+    const volume = muted ? 0 : Math.round(playback.volume * 10000) / 100
     const [failedCover, setFailedCover] = useState('')
     const [likedTracks, setLikedTracks] = useState<Record<string, boolean>>({})
     const [dislikedTracks, setDislikedTracks] = useState<Record<string, boolean>>({})
@@ -141,8 +157,8 @@ export function Player({
                             className="player__button player__control player__control--play"
                             type="button"
                             aria-label={isPlaying ? 'Пауза' : 'Воспроизвести'}
-                            disabled={!track}
-                            onClick={() => setIsPlaying(!isPlaying)}
+                            disabled={!playback.available}
+                            onClick={() => (isPlaying || playback.loading ? player?.pause() : void player?.play())}
                         >
                             {isPlaying ? (
                                 <img className="player__image player__pause-image" src={pauseIcon} alt="" />
@@ -175,7 +191,7 @@ export function Player({
                         >
                             <img className="player__image player__reaction-image" src={dislikeIcon} alt="" />
                         </button>
-                        <PlayerTimeline key={track?.id} track={track} />
+                        <PlayerTimeline playback={playback} player={player} />
                         <button
                             className={`player__button player__like${isLiked ? '' : ' player__like--inactive'}`}
                             type="button"
@@ -187,6 +203,16 @@ export function Player({
                             <img className="player__image player__reaction-image" src={heartIcon} alt="" />
                         </button>
                     </div>
+                    <p className="player__status" role="status">
+                        {playback.error ||
+                            (playback.loading
+                                ? connectionAvailable()
+                                    ? 'Ожидаем аудио…'
+                                    : 'Буфер закончился. Подключитесь к интернету для продолжения.'
+                                : !playback.available
+                                  ? 'Для трека пока нет аудиофайла.'
+                                  : '')}
+                    </p>
                 </div>
                 <div className="player__extra">
                     <button
@@ -201,11 +227,11 @@ export function Player({
                     </button>
                     <div className="player__volume-control">
                         <button
-                            className={`player__button player__mute${volume === 0 ? ' player__mute--active' : ''}`}
+                            className={`player__button player__mute${muted ? ' player__mute--active' : ''}`}
                             type="button"
-                            aria-label={volume ? 'Выключить звук' : 'Включить звук'}
-                            aria-pressed={volume === 0 ? 'true' : 'false'}
-                            onClick={() => setVolume(volume ? 0 : 61.36)}
+                            aria-label={muted ? 'Включить звук' : 'Выключить звук'}
+                            aria-pressed={muted ? 'true' : 'false'}
+                            onClick={() => player?.toggleMute()}
                         >
                             <img className="player__image player__volume-image" src={volumeIcon} alt="" />
                         </button>
@@ -218,7 +244,7 @@ export function Player({
                             value={volume}
                             aria-label="Громкость"
                             onInput={(event: Event) =>
-                                setVolume(Number((event.currentTarget as HTMLInputElement).value))
+                                player?.setVolume(Number((event.currentTarget as HTMLInputElement).value) / 100)
                             }
                             style={{ background: `linear-gradient(to right, #9f9ac0 ${volume}%, #fff ${volume}%)` }}
                         />

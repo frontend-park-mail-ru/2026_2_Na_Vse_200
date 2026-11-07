@@ -1,4 +1,4 @@
-import { createElement } from '../../shared/lib/my-react/index.js'
+import { createElement } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.jsx'
 import logo from '../../assets/2une-dark-transparent.png'
 import './Sidebar.css'
