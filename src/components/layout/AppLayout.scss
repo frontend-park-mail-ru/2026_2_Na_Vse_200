@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 .app-shell {
     display: grid;
     grid-template-columns: 340px minmax(0, 1fr);
@@ -53,7 +55,7 @@
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: bp.$tablet) {
     .app-shell__sidebar {
         margin: 0;
     }
@@ -76,7 +78,7 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .app-shell {
         grid-template-columns: minmax(0, 1fr);
         grid-template-rows: minmax(0, 1fr) 82px;
@@ -110,7 +112,7 @@
     display: none;
 }
 
-@media (max-width: 760px) {
+@media (max-width: bp.$tablet) {
     .app-shell__mobile-nav {
         display: flex;
         align-items: center;

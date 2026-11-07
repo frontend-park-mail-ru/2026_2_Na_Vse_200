@@ -1,4 +1,4 @@
-import './ArtistCover.css'
+import './ArtistCover.scss'
 import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.tsx'
 

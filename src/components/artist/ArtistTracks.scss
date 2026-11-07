@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 .artist-tracks {
     display: grid;
     gap: 16px;
@@ -148,7 +150,7 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .artist-tracks {
         gap: 10px;
     }

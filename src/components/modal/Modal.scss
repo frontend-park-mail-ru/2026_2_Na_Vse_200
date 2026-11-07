@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 .modal {
     width: min(680px, calc(100% - 32px));
     max-height: calc(100dvh - 32px);
@@ -51,7 +53,7 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .modal {
         padding: 24px 20px;
         border-radius: 22px;

@@ -54,6 +54,16 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         router.navigate(next === '/profile' ? next : '/')
     }
     const updated = (user: User) => session.setUser(user)
+    const accountDeleted = () => {
+        appStore.reset()
+        artist.reset()
+        selectedTrack = undefined
+        activeTrackId = undefined
+        session.clear()
+        modals.close()
+        notice = 'Аккаунт удалён.'
+        router.navigate('/login', { replace: true })
+    }
     const expired = () => {
         appStore.reset()
         artist.reset()
@@ -161,6 +171,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
                                 user={user}
                                 onUserUpdated={updated}
                                 onSessionExpired={expired}
+                                onAccountDeleted={accountDeleted}
                                 onLogout={() => void signOut()}
                                 authAction={pending}
                             />
@@ -204,12 +215,9 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
                         tracks={queue}
                         route={route}
                         user={user}
-                        onLogout={() => void signOut()}
                         onTrackSelect={selectTrack}
                         activeTrack={activeTrack}
                         sessionError={error}
-                        authAction={pending}
-                        offline={offline}
                     >
                         {page}
                     </AppLayout>

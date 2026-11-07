@@ -7,7 +7,7 @@ import { SignupError, signup } from '../features/signup/api.ts'
 import { validateSignup } from '../features/signup/validation.ts'
 import { FormField } from '../components/ui/FormField.tsx'
 import logo from '../assets/2une-dark-transparent.png'
-import './AuthPage.css'
+import './AuthPage.scss'
 
 export const SignupPage = ({ onRegistered }: SignupPageProps) => {
     const [state, setState] = useState<FormState>({ errors: {}, message: '', pending: false })

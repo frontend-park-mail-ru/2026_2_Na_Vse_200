@@ -2,9 +2,8 @@ import type { Child } from '@navse200/my-react'
 import type { AudioPlayer } from '../../shared/audio/player.ts'
 import type { AccountProps, Track } from '../../types/domain.ts'
 
-export interface AppLayoutProps extends AccountProps {
+export interface AppLayoutProps extends Pick<AccountProps, 'user'> {
     player: AudioPlayer
-    offline?: boolean
     route: string
     tracks: Track[]
     activeTrack?: Track

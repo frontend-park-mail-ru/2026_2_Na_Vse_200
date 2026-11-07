@@ -1,6 +1,6 @@
 import { mountApp } from './app/App.tsx'
 import { createAppRouter } from './app/router.ts'
-import './styles/global.css'
+import './styles/global.scss'
 import { registerOfflineWorker } from './shared/offline/register.ts'
 
 const container = document.getElementById('root')

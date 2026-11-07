@@ -1,3 +1,5 @@
+@use '../styles/breakpoints' as bp;
+
 .auth-page {
     --auth-background: #0d0e13;
     --auth-panel: #17181e;
@@ -197,7 +199,7 @@
     line-height: 1.5;
 }
 
-@media (max-width: 760px) {
+@media (max-width: bp.$tablet) {
     .auth-page {
         grid-template-columns: 1fr;
     }

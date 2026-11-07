@@ -31,7 +31,14 @@ async function requestAuth(path: string, options: RequestInit, request: typeof f
 /** Текущий пользователь по сессии. При 401 пользователь не вошёл — возвращаем null. */
 export async function getCurrentUser(request = fetch, signal?: AbortSignal) {
     const { response, body } = await requestAuth('/auth/me', { method: 'GET', signal }, request)
-    if (response.status === 200) return parseUser(body)
+    if (response.status === 200) {
+        try {
+            return await withProfile(parseUser(body), request, signal)
+        } catch (error) {
+            if (error instanceof AuthError && error.code === 'unauthorized') return null
+            throw error
+        }
+    }
     if (response.status === 401) return null
     throw new AuthError(
         'Не удалось проверить сессию. Попробуйте обновить страницу.',
@@ -43,7 +50,7 @@ export async function getCurrentUser(request = fetch, signal?: AbortSignal) {
 /** Вход в аккаунт. Cookie сессии с флагом HttpOnly устанавливает сервер. */
 export async function login(data: { email: string; password: string }, request = fetch) {
     const { response, body } = await requestAuth('/auth/login', { method: 'POST', body: JSON.stringify(data) }, request)
-    if (response.status === 200) return parseUser(body)
+    if (response.status === 200) return withProfile(parseUser(body), request)
     if (response.status === 400 && readApiError(body).code === 'validation_failed') {
         throw new AuthError('', readApiError(body).fields || {}, readApiError(body).code)
     }
@@ -76,4 +83,13 @@ function parseUser(body: unknown): User {
     const user: User = { id: body.id, email: body.email, display_name: body.display_name }
     if (body.avatar_url !== undefined) user.avatar_url = typeof body.avatar_url === 'string' ? body.avatar_url : null
     return user
+}
+
+const withProfile = async (user: User, request: typeof fetch, signal?: AbortSignal): Promise<User> => {
+    if (user.avatar_url) return user
+    const path = `/users/${encodeURIComponent(String(user.id))}`
+    const { response, body } = await requestAuth(path, { method: 'GET', signal }, request)
+    if (response.status === 200) return parseUser(body)
+    if (response.status === 401) throw new AuthError('Сессия истекла. Войдите снова.', {}, 'unauthorized')
+    throw new AuthError('Не удалось загрузить профиль. Попробуйте ещё раз.', {}, readApiError(body).code)
 }

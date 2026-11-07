@@ -3,6 +3,7 @@ import type { FieldErrors, User } from '../../features/profile/types.ts'
 export interface EditProfileDialogProps {
     user: User
     onSaved: (user: User) => void
+    onUpdated?: (user: User) => void
     onExpired: () => void
 }
 

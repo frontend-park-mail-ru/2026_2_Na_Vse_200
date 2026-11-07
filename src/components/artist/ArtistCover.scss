@@ -8,11 +8,11 @@
     border-radius: 10px;
     background: #332d40;
     color: #b4a2d2;
-}
 
-.artist-cover__image {
-    display: block;
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
+    &__image {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 }

@@ -7,7 +7,7 @@ import { AuthError, login } from '../features/auth/api.ts'
 import { validateLogin } from '../features/auth/validation.ts'
 import { FormField } from '../components/ui/FormField.tsx'
 import logo from '../assets/2une-dark-transparent.png'
-import './AuthPage.css'
+import './AuthPage.scss'
 
 export const LoginPage = ({ notice, onAuthenticated }: LoginPageProps = {}) => {
     const [state, setState] = useState<FormState>({ message: '', errors: {}, pending: false })

@@ -1,3 +1,5 @@
+@use '../styles/breakpoints' as bp;
+
 .profile-page {
     padding: clamp(24px, 4vw, 52px) 28px 32px;
 
@@ -118,7 +120,7 @@
     overflow-wrap: anywhere;
 }
 
-.profile-page__password {
+.profile-page__value {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -133,7 +135,7 @@
     color: #a28aff;
     font-weight: 700;
     text-align: left;
-    cursor: not-allowed;
+    cursor: pointer;
 }
 
 .profile-page__actions {
@@ -155,7 +157,7 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .profile-page {
         padding: 20px 14px 28px;
     }

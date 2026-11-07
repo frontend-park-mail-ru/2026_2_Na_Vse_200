@@ -1,15 +1,17 @@
 import { createElement, useState } from '@navse200/my-react'
 import type { UserAvatarProps } from './UserAvatar.types.ts'
-import './UserAvatar.css'
+import './UserAvatar.scss'
+import { API_ORIGIN } from '../../config.ts'
 
 export const UserAvatar = ({ src, className = '' }: UserAvatarProps) => {
     const [failed, setFailed] = useState('')
-    const imageError = () => setFailed(src ?? '')
+    const image = src?.startsWith('/') ? API_ORIGIN.replace(/\/$/, '') + src : src
+    const imageError = () => setFailed(image ?? '')
 
     return (
         <span className={`user-avatar ${className}`} aria-hidden="true">
-            {src && failed !== src ? (
-                <img src={src} alt="" onError={imageError} />
+            {image && failed !== image ? (
+                <img src={image} alt="" onError={imageError} />
             ) : (
                 <svg viewBox="0 0 80 80" fill="none">
                     <circle cx="40" cy="40" r="31" stroke="currentColor" stroke-width="6" />

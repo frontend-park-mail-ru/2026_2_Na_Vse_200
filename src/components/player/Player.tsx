@@ -7,7 +7,7 @@ import pauseIcon from '../../assets/artist/figma/pause.svg'
 import heartIcon from '../../assets/artist/figma/heart-exact.svg'
 import dislikeIcon from '../../assets/artist/figma/dislike.svg'
 import volumeIcon from '../../assets/artist/figma/volume-exact.svg'
-import './Player.css'
+import './Player.scss'
 import type { AudioPlayer, PlaybackState } from '../../shared/audio/player.ts'
 import { connectionAvailable } from '../../shared/offline/network.ts'
 

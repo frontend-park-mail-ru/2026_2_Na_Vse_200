@@ -8,15 +8,15 @@
     border-radius: 50%;
     background: #a49cbd;
     color: #202129;
-}
 
-.user-avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
+    img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
 
-.user-avatar svg {
-    width: 66%;
-    height: 66%;
+    svg {
+        width: 66%;
+        height: 66%;
+    }
 }

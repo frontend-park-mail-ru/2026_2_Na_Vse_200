@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 .profile-edit__form {
     display: grid;
     gap: 16px;
@@ -69,7 +71,7 @@
     min-width: 160px;
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .profile-edit__photo {
         gap: 18px;
     }

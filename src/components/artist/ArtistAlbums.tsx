@@ -1,4 +1,4 @@
-import './ArtistAlbums.css'
+import './ArtistAlbums.scss'
 import { createElement } from '@navse200/my-react'
 import { ArtistCover } from './ArtistCover.tsx'
 import type { ArtistAlbum } from '../../features/artist/types.ts'

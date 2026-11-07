@@ -6,7 +6,7 @@ import { ArtistCover } from '../components/artist/ArtistCover.tsx'
 import { ArtistTracks } from '../components/artist/ArtistTracks.tsx'
 import { ArtistAlbums } from '../components/artist/ArtistAlbums.tsx'
 import type { ArtistPageProps } from '../features/artist/types.ts'
-import './ArtistPage.css'
+import './ArtistPage.scss'
 
 export function ArtistPage({
     artist,

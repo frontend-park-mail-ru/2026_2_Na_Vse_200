@@ -3,7 +3,7 @@ import { Sidebar } from '../sidebar/Sidebar.tsx'
 import { Player } from '../player/Player.tsx'
 import { UserAvatar } from '../profile/UserAvatar.tsx'
 import type { AppLayoutProps } from './AppLayout.types.ts'
-import './AppLayout.css'
+import './AppLayout.scss'
 
 export function AppLayout({
     route,
@@ -13,9 +13,6 @@ export function AppLayout({
     activeTrack,
     sessionError,
     player,
-    onLogout,
-    authAction,
-    offline,
     children,
 }: AppLayoutProps) {
     const [queueOpen, setQueueOpen] = useState(false)
@@ -40,14 +37,7 @@ export function AppLayout({
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar
-                className="app-shell__sidebar"
-                route={route}
-                user={user}
-                onLogout={onLogout}
-                authAction={authAction}
-                offline={offline}
-            />
+            <Sidebar className="app-shell__sidebar" route={route} user={user} />
             <div className="app-shell__main-column">
                 <nav className="app-shell__mobile-nav" aria-label="Навигация">
                     <a href="/" data-link>

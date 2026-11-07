@@ -7,7 +7,7 @@ import { Modal } from '../modal/Modal.tsx'
 import { modals } from '../modal/manager.ts'
 import './EditProfileDialog.scss'
 
-export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialogProps) => {
+export const EditProfileDialog = ({ user, onSaved, onUpdated, onExpired }: EditProfileDialogProps) => {
     const [state, setState] = useState<EditProfileDialogState>({
         name: user.display_name ?? '',
         avatar: null,
@@ -106,7 +106,7 @@ export const EditProfileDialog = ({ user, onSaved, onExpired }: EditProfileDialo
                 onExpired()
                 return
             }
-            if (error instanceof ProfileError && error.savedUser) onSaved(error.savedUser)
+            if (error instanceof ProfileError && error.savedUser) onUpdated?.(error.savedUser)
             setState(previous => ({
                 ...previous,
                 errors: error instanceof ProfileError ? error.fields : {},

@@ -3,7 +3,7 @@ import type { CoverProps, TrackListProps, CollectionProps } from './HomePage.typ
 import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../components/ui/Icon.tsx'
 import { getArtistName, getTrackCover } from '../features/music/presentation.ts'
-import './HomePage.css'
+import './HomePage.scss'
 import { artistHref } from '../features/artist/route.ts'
 
 const formatDuration = (duration: Track['duration']) => {

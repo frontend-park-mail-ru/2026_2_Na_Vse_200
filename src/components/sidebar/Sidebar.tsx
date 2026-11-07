@@ -3,7 +3,7 @@ import { UserAvatar } from '../profile/UserAvatar.tsx'
 import { createElement } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.tsx'
 import logo from '../../assets/2une-dark-transparent.png'
-import './Sidebar.css'
+import './Sidebar.scss'
 import homeIcon from '../../assets/artist/figma/home.svg'
 import searchIcon from '../../assets/artist/figma/search.svg'
 import libraryIcon from '../../assets/artist/figma/library.svg'
@@ -25,7 +25,7 @@ const playlists = [
     { name: 'Вечер', detail: 'Плейлист · 58 треков', icon: 'moon', color: 'amber' },
 ]
 
-export function Sidebar({ route, user, onLogout, authAction, offline, className = '' }: SidebarProps) {
+export function Sidebar({ route, user, className = '' }: SidebarProps) {
     return (
         <aside className={`sidebar ${className}`}>
             <a className="sidebar__brand" href="/" data-link aria-label="2une — на главную">
@@ -96,16 +96,6 @@ export function Sidebar({ route, user, onLogout, authAction, offline, className 
                         <small className="sidebar__account-detail">Личный аккаунт</small>
                     </span>
                 </a>
-                <button
-                    className="sidebar__logout"
-                    type="button"
-                    onClick={onLogout}
-                    disabled={authAction || offline}
-                    aria-label="Выйти из аккаунта"
-                    title={offline ? 'Для выхода подключитесь к интернету' : 'Выйти из аккаунта'}
-                >
-                    <Icon name="more" size={18} />
-                </button>
             </div>
         </aside>
     )

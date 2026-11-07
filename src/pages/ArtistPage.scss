@@ -1,3 +1,5 @@
+@use '../styles/breakpoints' as bp;
+
 .artist-page {
     min-height: 100%;
     color: #fff;
@@ -191,7 +193,7 @@
     }
 }
 
-@media (max-width: 760px) {
+@media (max-width: bp.$tablet) {
     .artist-page__hero {
         padding: 40px 18px;
         min-height: 260px;
@@ -214,7 +216,7 @@
     }
 }
 
-@media (max-width: 520px) {
+@media (max-width: bp.$mobile) {
     .artist-page__hero {
         gap: 15px;
         min-height: 240px;
