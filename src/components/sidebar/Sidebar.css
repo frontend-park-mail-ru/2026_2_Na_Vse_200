@@ -4,10 +4,10 @@
     display: flex;
     min-height: 0;
     flex-direction: column;
-    padding: 10px 6px;
+    padding: 12px 12px 12px;
     overflow: hidden;
-    border: 0;
-    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.045);
+    border-radius: 22px;
     background: var(--color-panel);
     color: #f1f2f8;
 }
@@ -15,26 +15,23 @@
 .sidebar__brand {
     display: flex;
     align-items: center;
-    justify-content: center;
-    margin: 0 0 14px;
+    gap: 0;
+    margin: 0 0 20px 7px;
     color: #f8f8fb;
     text-decoration: none;
+    font-size: 30px;
+    font-weight: 850;
+    letter-spacing: 0;
 }
 
-.sidebar__logo {
-    display: block;
-    width: clamp(80px, 8.4vw, 104px);
-    height: auto;
-}
-
-.sidebar__nav,
-.sidebar__playlists {
+.sidebar-nav,
+.playlist-links {
     display: grid;
     gap: 3px;
 }
 
-.sidebar__playlists {
-    gap: 6px;
+.playlist-links {
+    gap: 11px;
     flex: 1;
     min-height: 0;
     align-content: start;
@@ -43,10 +40,10 @@
 }
 
 .sidebar__brand,
-.sidebar__nav,
-.sidebar__divider,
-.sidebar__playlist-heading,
-.sidebar__account {
+.sidebar-nav,
+.sidebar-divider,
+.playlist-heading,
+.sidebar-account {
     flex-shrink: 0;
 }
 
@@ -54,7 +51,7 @@
     display: flex;
     align-items: center;
     gap: 12px;
-    min-height: clamp(28px, 2.6vw, 32px);
+    min-height: 32px;
     padding: 0 9px;
     border-radius: 10px;
     color: #a9adbd;
@@ -76,32 +73,32 @@
     background: #20222b;
 }
 
-.sidebar__nav-icon {
+.nav-icon {
     flex: 0 0 auto;
     color: #dedde3;
 }
 
-.sidebar__divider {
+.sidebar-divider {
     height: 1px;
-    margin: 26px 0 14px;
+    margin: 18px 4px 28px;
     background: #a2a2a5;
 }
 
-.sidebar__playlist-heading {
+.playlist-heading {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 11px;
+    margin-bottom: 32px;
     padding-right: 12px;
     color: #f0eff4;
     font-size: 12px;
     font-weight: 500;
 }
 
-.sidebar__playlist-heading button {
+.playlist-heading button {
     display: grid;
-    width: 20px;
-    height: 20px;
+    width: 25px;
+    height: 25px;
     place-items: center;
     border: 0;
     border-radius: 7px;
@@ -113,17 +110,17 @@
         color 0.18s ease;
 }
 
-.sidebar__playlist-heading button:hover {
+.playlist-heading button:hover {
     background: var(--color-hover);
     color: #fff;
 }
 
-.sidebar__playlists a {
+.playlist-links a {
     display: flex;
     align-items: center;
     gap: 9px;
     min-width: 0;
-    padding: 5px 0;
+    padding: 7px 6px;
     border-radius: 8px;
     color: #b1b4c1;
     text-decoration: none;
@@ -133,79 +130,79 @@
         color 0.18s ease;
 }
 
-.sidebar__playlists a:hover {
+.playlist-links a:hover {
     background: var(--color-hover);
     color: #fff;
 }
 
-.sidebar__playlist-copy {
+.playlist-copy {
     display: grid;
     min-width: 0;
     gap: 3px;
 }
 
-.sidebar__playlist-copy strong,
-.sidebar__playlist-copy small {
+.playlist-copy strong,
+.playlist-copy small {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.sidebar__playlist-copy strong {
+.playlist-copy strong {
     color: #f1f2f8;
-    font-size: clamp(11px, 1.05vw, 13px);
+    font-size: 13px;
     font-weight: 600;
 }
 
-.sidebar__playlist-copy small {
+.playlist-copy small {
     color: #898b9b;
     font-size: 9px;
 }
 
-.sidebar__playlist-icon {
+.playlist-icon {
     display: grid;
-    width: clamp(40px, 4.1vw, 50px);
-    height: clamp(40px, 4.1vw, 50px);
-    flex: 0 0 clamp(40px, 4.1vw, 50px);
+    width: 50px;
+    height: 50px;
+    flex: 0 0 50px;
     place-items: center;
     border-radius: 9px;
     color: #fff;
 }
 
-.sidebar__playlist-icon--rose {
+.playlist-icon-rose {
     background: #e87f74;
     color: #624777;
 }
 
-.sidebar__playlist-icon--rose svg {
-    width: 80%;
-    height: 80%;
+.playlist-icon-rose svg {
+    width: 36px;
+    height: 36px;
     fill: currentColor;
 }
-.sidebar__playlist-icon--teal {
+.playlist-icon-teal {
     background: linear-gradient(140deg, #648c8b, #304354);
 }
-.sidebar__playlist-icon--amber {
+.playlist-icon-amber {
     background: linear-gradient(140deg, #c2925d, #5a4560);
 }
 
-.sidebar__account {
+.sidebar-account {
     display: flex;
     min-width: 0;
     align-items: center;
     gap: 8px;
     margin-top: auto;
-    min-height: clamp(48px, 4.9vw, 61px);
-    padding: 9px 8px;
+    min-height: 61px;
+    padding: 9px 12px;
     border-radius: 14px;
     background: #20222b;
 }
 
-.sidebar__avatar {
+.sidebar-account-avatar {
     display: grid;
-    width: clamp(30px, 3vw, 36px);
-    height: clamp(30px, 3vw, 36px);
-    flex: 0 0 clamp(30px, 3vw, 36px);
+    width: 36px;
+    height: 36px;
+    flex: 0 0 36px;
     place-items: center;
     border-radius: 50%;
     background: #a69acb;
@@ -213,30 +210,30 @@
     font-weight: 700;
 }
 
-.sidebar__account-copy {
+.sidebar-account-copy {
     display: grid;
     min-width: 0;
     gap: 2px;
 }
 
-.sidebar__account-copy strong,
-.sidebar__account-copy small {
+.sidebar-account-copy strong,
+.sidebar-account-copy small {
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
 }
 
-.sidebar__account-copy strong {
+.sidebar-account-copy strong {
     color: #f4f3f6;
-    font-size: clamp(9px, 0.9vw, 11px);
+    font-size: 11px;
 }
 
-.sidebar__account-copy small {
+.sidebar-account-copy small {
     color: #898b9b;
     font-size: 9px;
 }
 
-.sidebar__account button {
+.sidebar-account button {
     display: grid;
     width: 24px;
     height: 24px;
@@ -250,7 +247,7 @@
     cursor: pointer;
 }
 
-.sidebar__account button:disabled {
+.sidebar-account button:disabled {
     opacity: 0.6;
     cursor: wait;
 }
@@ -261,7 +258,7 @@
         padding: 19px 8px 14px;
     }
 
-    .sidebar__nav {
+    .sidebar-nav {
         width: 100%;
         justify-items: center;
     }
@@ -277,14 +274,14 @@
     }
 
     .sidebar__brand,
-    .sidebar__nav-label,
-    .sidebar__divider,
-    .sidebar__playlist-heading,
-    .sidebar__playlists {
+    .nav-label,
+    .sidebar-divider,
+    .playlist-heading,
+    .playlist-links {
         display: none;
     }
 
-    .sidebar__account {
+    .sidebar-account {
         display: grid;
         justify-items: center;
         gap: 4px;
@@ -292,11 +289,11 @@
         background: transparent;
     }
 
-    .sidebar__account-copy {
+    .sidebar-account-copy {
         display: none;
     }
 
-    .sidebar__account button {
+    .sidebar-account button {
         margin: 0;
     }
 }
