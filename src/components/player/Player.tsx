@@ -53,7 +53,7 @@ function PlayerTimeline({ playback, player }: { playback: PlaybackState; player?
                 disabled={!available || duration <= 0}
                 aria-label="Позиция воспроизведения"
                 style={{
-                    background: `linear-gradient(to right, #9f9ac0 ${progress}%, #827676 ${progress}%)`,
+                    backgroundImage: `linear-gradient(to right, #9f9ac0 ${progress}%, #827676 ${progress}%)`,
                 }}
                 onInput={(event: Event) =>
                     player?.seek((Number((event.currentTarget as HTMLInputElement).value) / 100) * duration)
@@ -207,9 +207,7 @@ export function Player({
                                 ? connectionAvailable()
                                     ? 'Ожидаем аудио…'
                                     : 'Буфер закончился. Подключитесь к интернету для продолжения.'
-                                : !playback.available
-                                  ? 'Для трека пока нет аудиофайла.'
-                                  : '')}
+                                : '')}
                     </p>
                 </div>
                 <div className="player__extra">
@@ -244,7 +242,9 @@ export function Player({
                             onInput={(event: Event) =>
                                 player?.setVolume(Number((event.currentTarget as HTMLInputElement).value) / 100)
                             }
-                            style={{ background: `linear-gradient(to right, #9f9ac0 ${volume}%, #fff ${volume}%)` }}
+                            style={{
+                                backgroundImage: `linear-gradient(to right, #9f9ac0 ${volume}%, #fff ${volume}%)`,
+                            }}
                         />
                     </div>
                 </div>
