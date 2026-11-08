@@ -13,6 +13,7 @@ import volumeIcon from '../../assets/artist/figma/volume-exact.svg'
 import './Player.scss'
 import type { AudioPlayer, PlaybackState } from '../../shared/audio/player.ts'
 import { connectionAvailable } from '../../shared/offline/network.ts'
+import { API_ORIGIN } from '../../config.ts'
 
 interface Props {
     player?: AudioPlayer
@@ -84,7 +85,8 @@ export function Player({
     const volume = muted ? 0 : Math.round(playback.volume * 10000) / 100
     const [failedCover, setFailedCover] = useState('')
     const [dislikedTracks, setDislikedTracks] = useState<Record<string, boolean>>({})
-    const cover = getTrackCover(track)
+    const rawCover = getTrackCover(track)
+    const cover = rawCover.startsWith('/') ? API_ORIGIN.replace(/\/$/, '') + rawCover : rawCover
     const isLiked = track ? favorites.isLiked(track.id) : false
     const isDisliked = track ? !isLiked && Boolean(dislikedTracks[track.id]) : false
 

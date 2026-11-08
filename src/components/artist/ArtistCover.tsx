@@ -1,6 +1,7 @@
 import './ArtistCover.scss'
 import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.tsx'
+import { API_ORIGIN } from '../../config.ts'
 
 interface Props {
     src: string | null
@@ -10,11 +11,17 @@ interface Props {
 
 export function ArtistCover({ src, name, className = '' }: Props) {
     const [failedImage, setFailedImage] = useState('')
+    const image = src?.startsWith('/') ? API_ORIGIN.replace(/\/$/, '') + src : src
 
     return (
         <span className={`artist-cover ${className}`}>
-            {src && failedImage !== src ? (
-                <img className="artist-cover__image" src={src} alt={name} onError={() => setFailedImage(src)} />
+            {image && failedImage !== image ? (
+                <img
+                    className="artist-cover__image"
+                    src={image}
+                    alt={name}
+                    onError={() => setFailedImage(image)}
+                />
             ) : (
                 <Icon name="music" size={24} label={undefined} />
             )}
