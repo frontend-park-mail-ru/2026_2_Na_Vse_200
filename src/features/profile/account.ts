@@ -43,7 +43,7 @@ export async function changeAccount(
         throw new AccountError('Этот email уже занят.', { email: 'Этот email уже занят.' }, error.code)
     }
     throw new AccountError(
-        error.message || 'Не удалось изменить аккаунт. Попробуйте ещё раз.',
+        error.message || 'Некорректный пароль',
         error.fields,
         error.code,
     )
