@@ -4,19 +4,40 @@ import { defineConfig } from 'vite'
 import { transformAsync } from '@babel/core'
 import typescript from '@babel/preset-typescript'
 import jsx from '@babel/plugin-transform-react-jsx'
-import { VitePWA } from 'vite-plugin-pwa'
+import { createHash } from 'node:crypto'
+import { readFile } from 'node:fs/promises'
+import { transpileModule, ScriptTarget } from 'typescript'
 
 export default defineConfig({
     ssr: { external: ['@navse200/my-react'] },
     plugins: [
-        VitePWA({
-            strategies: 'injectManifest',
-            srcDir: 'src',
-            filename: 'sw.ts',
-            injectRegister: false,
-            manifest: false,
-            injectManifest: { globPatterns: ['**/*.{html,js,css,png,jpg,jpeg,svg,webp,ico,woff,woff2}'] },
-        }),
+        {
+            name: 'offline',
+            apply: 'build',
+            generateBundle: {
+                order: 'post',
+                async handler(_, bundle) {
+                    const source = await readFile(new URL('./src/sw.ts', import.meta.url), 'utf8')
+                    const hash = createHash('sha256').update(source)
+                    const assets = Object.keys(bundle).filter(path => !path.endsWith('.map'))
+                    for (const path of assets) {
+                        const file = bundle[path]
+                        hash.update(file.type === 'chunk' ? file.code : file.source)
+                    }
+                    const worker = source
+                        .replace('declare const __ASSETS__: string[]', '')
+                        .replace('declare const __VERSION__: string', '')
+                        .replace('__ASSETS__', JSON.stringify(assets))
+                        .replace('__VERSION__', JSON.stringify(hash.digest('hex').slice(0, 12)))
+                    this.emitFile({
+                        type: 'asset',
+                        fileName: 'sw.js',
+                        source: transpileModule(worker, { compilerOptions: { target: ScriptTarget.ES2022 } })
+                            .outputText,
+                    })
+                },
+            },
+        },
         {
             name: 'babel',
             enforce: 'pre',

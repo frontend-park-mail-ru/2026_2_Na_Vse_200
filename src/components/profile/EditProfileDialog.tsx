@@ -35,6 +35,17 @@ export const EditProfileDialog = ({ user, onSaved, onUpdated, onExpired }: EditP
         }))
     }
 
+    const setPhoto = (avatar: File | null, preview = '', error = '') => {
+        setState(previous => ({
+            ...previous,
+            avatar,
+            preview,
+            reading: false,
+            message: '',
+            errors: { ...previous.errors, avatar: error },
+        }))
+    }
+
     const selectPhoto = (event: Event) => {
         const input = event.currentTarget as HTMLInputElement
         const file = input.files?.[0]
@@ -42,13 +53,7 @@ export const EditProfileDialog = ({ user, onSaved, onUpdated, onExpired }: EditP
         const { errors } = validateProfile(state.name, file)
         if (errors.avatar) {
             input.value = ''
-            setState(previous => ({
-                ...previous,
-                avatar: null,
-                preview: '',
-                reading: false,
-                errors: { ...previous.errors, avatar: errors.avatar },
-            }))
+            setPhoto(null, '', errors.avatar)
             return
         }
 
@@ -56,25 +61,12 @@ export const EditProfileDialog = ({ user, onSaved, onUpdated, onExpired }: EditP
         const reader = new FileReader()
         reader.onload = () => {
             if (!input.isConnected || input.files?.[0] !== file) return
-            setState(previous => ({
-                ...previous,
-                avatar: file,
-                preview: reader.result as string,
-                reading: false,
-                errors: { ...previous.errors, avatar: '' },
-                message: '',
-            }))
+            setPhoto(file, reader.result as string)
         }
         reader.onerror = () => {
             if (!input.isConnected || input.files?.[0] !== file) return
             input.value = ''
-            setState(previous => ({
-                ...previous,
-                avatar: null,
-                preview: '',
-                reading: false,
-                errors: { ...previous.errors, avatar: 'Не удалось прочитать изображение.' },
-            }))
+            setPhoto(null, '', 'Не удалось прочитать изображение.')
         }
         reader.readAsDataURL(file)
     }

@@ -2,9 +2,7 @@ import type { FieldErrors } from '../../types/domain.ts'
 import type { SignupValues } from './validation.ts'
 import { readApiError, requestJson } from '../../shared/api/request.ts'
 
-/** Ошибка регистрации: общее сообщение и ошибки отдельных полей. */
 export class SignupError extends Error {
-    /** @param {string} message Текст ошибки. @param {object} fields Ошибки полей. */
     fields: FieldErrors
     constructor(message: string, fields: FieldErrors = {}) {
         super(message)
@@ -13,39 +11,26 @@ export class SignupError extends Error {
     }
 }
 
-/**
- * Регистрация без автоматического входа. Логин и пароль локально не сохраняем.
- * @param {{display_name: string, email: string, password: string}} data Данные после валидации.
- * @param {typeof fetch} request fetch или его замена в тестах.
- * @returns {Promise<void>} Успех только при статусе 201.
- */
 export async function signup(data: SignupValues, request = fetch) {
-    let response
-    let body
-
+    let result: Awaited<ReturnType<typeof requestJson>>
     try {
-        ;({ response, body } = await requestJson(
-            '/auth/signup',
-            {
-                method: 'POST',
-                body: JSON.stringify(data),
-            },
-            request,
-        ))
+        result = await requestJson('/auth/signup', { method: 'POST', body: JSON.stringify(data) }, request)
     } catch {
         throw new SignupError('Не удалось связаться с сервером. Проверьте соединение и попробуйте ещё раз.')
     }
 
+    const { response, body } = result
     if (response.status === 201) return
+    const error = readApiError(body)
 
-    if (response.status === 409 && readApiError(body).code === 'email_taken') {
+    if (response.status === 409 && error.code === 'email_taken') {
         throw new SignupError('', { email: 'Пользователь с таким email уже существует' })
     }
-    if (response.status === 400 && readApiError(body).code === 'validation_failed') {
+    if (response.status === 400 && error.code === 'validation_failed') {
         const fields: FieldErrors = {}
         for (const key of ['display_name', 'email', 'password']) {
-            const message = readApiError(body).fields?.[key]
-            if (typeof message === 'string' && message.trim()) fields[key] = message
+            const message = error.fields[key]
+            if (message?.trim()) fields[key] = message
         }
         throw new SignupError(Object.keys(fields).length ? '' : 'Проверьте правильность заполнения полей.', fields)
     }

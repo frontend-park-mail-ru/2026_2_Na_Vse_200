@@ -13,7 +13,6 @@ export interface ArtistScreenState {
 
 export type ArtistLoader = (id: string, scope?: CacheScope, signal?: AbortSignal) => Promise<ArtistResult>
 
-/** Host-independent loader: can be subscribed by either the TS App in 50 or the session-based App in 53. */
 export function createArtistController(load: ArtistLoader = getArtistData) {
     const initial = (): ArtistScreenState => ({ id: '', artist: undefined, status: 'idle', error: '', offline: false })
     let state = initial()

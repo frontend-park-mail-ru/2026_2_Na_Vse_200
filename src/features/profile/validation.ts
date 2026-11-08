@@ -25,16 +25,14 @@ export const validateAccount = (action: AccountAction, values: AccountValues) =>
         if (email.length < 3 || email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
             errors.email = 'Введите корректный e-mail'
         }
-    } else {
-        if (action === 'password') {
-            const length = Array.from(values.new_password).length
-            if (length < 8 || !/\p{L}/u.test(values.new_password) || !/\p{Nd}/u.test(values.new_password)) {
-                errors.new_password = 'Минимум 8 символов, хотя бы одна буква и цифра'
-            }
-            if (new TextEncoder().encode(values.new_password).length > 72)
-                errors.new_password = 'Пароль слишком длинный'
-            if (values.new_password !== values.confirm_password) errors.confirm_password = 'Пароли не совпадают'
+    }
+    if (action === 'password') {
+        const length = Array.from(values.new_password).length
+        if (length < 8 || !/\p{L}/u.test(values.new_password) || !/\p{Nd}/u.test(values.new_password)) {
+            errors.new_password = 'Минимум 8 символов, хотя бы одна буква и цифра'
         }
+        if (new TextEncoder().encode(values.new_password).length > 72) errors.new_password = 'Пароль слишком длинный'
+        if (values.new_password !== values.confirm_password) errors.confirm_password = 'Пароли не совпадают'
     }
     return { email, errors }
 }

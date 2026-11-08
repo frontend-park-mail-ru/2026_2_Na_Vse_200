@@ -12,6 +12,7 @@ interface SessionState {
     pending: boolean
 }
 
+/** Управляет серверной сессией; при сетевой ошибке восстанавливает сохранённые данные для просмотра. */
 export const createSession = () => {
     const store = createStore<SessionState>({ user: null, status: 'idle', error: '', pending: false })
     let request: AbortController | null = null
@@ -36,22 +37,20 @@ export const createSession = () => {
         store.setState({ status: 'loading', error: '' })
         try {
             const user = await getCurrentUser(fetch, AbortSignal.any([controller.signal, AbortSignal.timeout(15000)]))
-            if (!controller.signal.aborted) {
-                setUser(user)
-                await persistence
-            }
+            if (controller.signal.aborted) return
+            setUser(user)
+            await persistence
         } catch (error) {
-            if (!controller.signal.aborted) {
-                if (isNetworkError(error)) {
-                    const saved = await getSavedUser()
-                    if (controller.signal.aborted) return
-                    restoreUserScope(saved)
-                    store.setState({ user: saved ?? null, status: 'offline', error: '', pending: false })
-                } else {
-                    store.setState({ status: 'error', error: errorMessage(error) })
-                }
-                if (request === controller) request = null
+            if (controller.signal.aborted) return
+            if (isNetworkError(error)) {
+                const saved = await getSavedUser()
+                if (controller.signal.aborted) return
+                restoreUserScope(saved)
+                store.setState({ user: saved ?? null, status: 'offline', error: '', pending: false })
+            } else {
+                store.setState({ status: 'error', error: errorMessage(error) })
             }
+            if (request === controller) request = null
         }
     }
 
@@ -68,10 +67,9 @@ export const createSession = () => {
             await persistence
             return true
         } catch (error) {
-            if (!controller.signal.aborted) {
-                request = null
-                store.setState({ pending: false, error: errorMessage(error) })
-            }
+            if (controller.signal.aborted) return false
+            request = null
+            store.setState({ pending: false, error: errorMessage(error) })
             return false
         }
     }

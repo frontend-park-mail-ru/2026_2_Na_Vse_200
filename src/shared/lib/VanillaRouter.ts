@@ -1,9 +1,9 @@
-/** Роутер с режимами history и hash. Клики по ссылкам обрабатывает через document. */
 interface RouterOptions {
     type?: 'history' | 'hash'
     routes?: Record<string, string>
     root?: string
 }
+/** Роутер с режимами history и hash; перехватывает внутренние ссылки с data-link. */
 export class VanillaRouter {
     type: 'history' | 'hash'
     routes: Record<string, string>
@@ -12,7 +12,6 @@ export class VanillaRouter {
     started: boolean
     handleLocationChange: () => void
     handleLinkClick: (event: MouseEvent) => void
-    /** @param {{type?: string, routes?: Object<string, string>, root?: string}} options Настройки роутера. */
     constructor({ type = 'history', routes = {}, root = '/' }: RouterOptions = {}) {
         if (!['history', 'hash'].includes(type)) {
             throw new Error(`Unsupported router type: ${type}`)
@@ -27,7 +26,7 @@ export class VanillaRouter {
         this.handleLinkClick = event => this.onLinkClick(event)
     }
 
-    /** @returns {VanillaRouter} Подписывается на события и сразу сообщает текущий маршрут. */
+    /** Подписывается на переходы и сразу сообщает текущий маршрут. */
     listen() {
         if (this.started) return this
 
@@ -39,19 +38,21 @@ export class VanillaRouter {
         return this
     }
 
-    /** @param {string} eventName Имя события. @param {EventListener} listener Обработчик события. @returns {VanillaRouter} */
     on(eventName: string, listener: EventListener) {
         this.events.addEventListener(eventName, listener)
         return this
     }
 
-    /** @param {string} eventName Имя события. @param {EventListener} listener Обработчик события. @returns {VanillaRouter} */
     off(eventName: string, listener: EventListener) {
         this.events.removeEventListener(eventName, listener)
         return this
     }
 
-    /** @param {string} to URL перехода. @param {{replace?: boolean}} options Заменить текущую запись истории или добавить новую. @returns {VanillaRouter} */
+    /**
+     * Переходит по адресу и уведомляет подписчиков.
+     * @param to Адрес перехода. Внешняя ссылка открывается обычной навигацией браузера.
+     * @param options При replace заменяет текущую запись истории.
+     */
     navigate(to: string, { replace = false }: { replace?: boolean } = {}) {
         const target = new URL(to, window.location.origin)
         if (target.origin !== window.location.origin) {
@@ -76,7 +77,7 @@ export class VanillaRouter {
         return this
     }
 
-    /** @returns {VanillaRouter} Снимает обработчики, добавленные в listen(). */
+    /** Снимает обработчики, добавленные в listen(). */
     destroy() {
         if (!this.started) return this
 

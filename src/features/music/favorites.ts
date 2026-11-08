@@ -8,9 +8,11 @@ import type { EntityId } from '../../types/domain.ts'
 interface FavoritesState {
     ids: Record<string, boolean>
     pending: Record<string, boolean>
-    status: 'idle' | 'loading' | 'ready' | 'error'
+    status: 'idle' | 'loading' | 'ready' | 'unavailable' | 'error'
     error: string
 }
+
+class UnavailableError extends Error {}
 
 const initial = (): FavoritesState => ({ ids: {}, pending: {}, status: 'idle', error: '' })
 const store = createStore<FavoritesState>(initial())
@@ -20,6 +22,7 @@ let confirmed: Record<string, boolean> = {}
 let persistence = Promise.resolve()
 const mutations = new Set<AbortController>()
 
+/** Загружает избранное пользователя; смена аккаунта отменяет незавершённые изменения. */
 async function load(userId: EntityId | null, force = false) {
     const next = userId === null ? null : String(userId)
     if (owner === next && !force) return
@@ -36,6 +39,9 @@ async function load(userId: EntityId | null, force = false) {
             'favorites',
             async () => {
                 const { response, body } = await requestJson('/favorites')
+                if (response.status === 404 || response.status === 405) {
+                    throw new UnavailableError()
+                }
                 if (!response.ok) throw new Error(readApiError(body).message || 'Не удалось загрузить избранное.')
                 if (
                     !isRecord(body) ||
@@ -53,11 +59,15 @@ async function load(userId: EntityId | null, force = false) {
             store.setState({ ids: result.data, status: 'ready' })
         }
     } catch (error) {
-        if (version === generation)
-            store.setState({
-                status: 'error',
-                error: error instanceof Error ? error.message : 'Не удалось загрузить избранное.',
-            })
+        if (version !== generation) return
+        if (error instanceof UnavailableError) {
+            store.setState({ status: 'unavailable', error: '' })
+            return
+        }
+        store.setState({
+            status: 'error',
+            error: error instanceof Error ? error.message : 'Не удалось загрузить избранное.',
+        })
     }
 }
 
@@ -70,6 +80,7 @@ export const favorites = {
         store.getState().status === 'ready' &&
         !store.getState().pending[String(id)] &&
         connectionAvailable(),
+    /** Сразу обновляет лайк в интерфейсе и откатывает его при ошибке сервера. */
     async toggle(id: EntityId) {
         if (!favorites.canToggle(id)) return
         const key = String(id)
@@ -88,6 +99,9 @@ export const favorites = {
                 method: previous ? 'DELETE' : 'PUT',
                 signal: controller.signal,
             })
+            if (response.status === 404 || response.status === 405) {
+                throw new Error('Не удалось сохранить лайк: функция недоступна на сервере.')
+            }
             if (response.status !== 204) throw new Error(readApiError(body).message || 'Не удалось сохранить лайк.')
             if (version !== generation) return
             confirmed = { ...confirmed, [key]: !previous }

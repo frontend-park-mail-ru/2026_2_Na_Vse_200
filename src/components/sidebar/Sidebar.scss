@@ -16,11 +16,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 0 14px;
+    margin: 0 0 18px;
     color: #f8f8fb;
     text-decoration: none;
     flex-shrink: 0;
-    margin-bottom: 18px;
     transform: translate(4px, -2px);
 }
 
@@ -60,8 +59,6 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin-bottom: 11px;
-    padding-right: 12px;
     color: #f0eff4;
     font-size: 16px;
     font-weight: 400;
@@ -107,7 +104,9 @@
     line-height: 20px;
 }
 
-.sidebar__nav-link:hover {
+.sidebar__nav-link:hover,
+.sidebar__playlist-add:hover,
+.sidebar__playlist-link:hover {
     background: var(--color-hover);
     color: #fff;
 }
@@ -144,11 +143,6 @@
     transform: translateX(1px);
 }
 
-.sidebar__playlist-add:hover {
-    background: var(--color-hover);
-    color: #fff;
-}
-
 .sidebar__playlist-link {
     display: flex;
     align-items: center;
@@ -163,11 +157,6 @@
         background 0.18s ease,
         color 0.18s ease;
     width: 100%;
-}
-
-.sidebar__playlist-link:hover {
-    background: var(--color-hover);
-    color: #fff;
 }
 
 .sidebar__playlist-copy {
@@ -202,11 +191,10 @@
     display: grid;
     width: 60px;
     height: 60px;
-    flex: 0 0 clamp(40px, 4.1vw, 50px);
+    flex: 0 0 60px;
     place-items: center;
     border-radius: 9px;
     color: #fff;
-    flex-basis: 60px;
 }
 
 .sidebar__playlist-icon--rose {
@@ -214,10 +202,7 @@
     color: #624777;
 }
 
-.sidebar__playlist-icon--teal {
-    background: #16181f;
-}
-
+.sidebar__playlist-icon--teal,
 .sidebar__playlist-icon--amber {
     background: #16181f;
 }
@@ -317,23 +302,12 @@
         box-shadow: inset 0 -2px #baa3ff;
     }
 
-    .sidebar__brand {
-        display: none;
-    }
-
-    .sidebar__nav-label {
-        display: none;
-    }
-
-    .sidebar__divider {
-        display: none;
-    }
-
-    .sidebar__playlist-heading {
-        display: none;
-    }
-
-    .sidebar__playlists {
+    .sidebar__brand,
+    .sidebar__nav-label,
+    .sidebar__divider,
+    .sidebar__playlist-heading,
+    .sidebar__playlists,
+    .sidebar__account-copy {
         display: none;
     }
 
@@ -350,18 +324,8 @@
         margin-left: 0;
     }
 
-    .sidebar__account-copy {
-        display: none;
-    }
-
-    .sidebar__nav-icon {
-        position: static;
-    }
-
-    .sidebar__nav-icon--search {
-        position: static;
-    }
-
+    .sidebar__nav-icon,
+    .sidebar__nav-icon--search,
     .sidebar__nav-icon--library {
         position: static;
     }

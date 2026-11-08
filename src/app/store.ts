@@ -6,41 +6,41 @@ import { getCacheScope } from '../shared/offline/storage.ts'
 import { createStore } from '../shared/lib/store.ts'
 
 interface AppState extends Catalog {
-    catalogStatus: CatalogStatus
-    catalogError: string
+    status: CatalogStatus
+    error: string
     offline: boolean
 }
 const store = createStore<AppState>({
     tracks: [],
     artists: [],
     albums: [],
-    catalogStatus: 'idle',
-    catalogError: '',
+    status: 'idle',
+    error: '',
     offline: false,
 })
 
 let catalogRequest: Promise<(Catalog & { offline: boolean }) | null> | null = null
-let generation = 0
 let controller: AbortController | null = null
 
-async function loadCatalog() {
+/** Повторный вызов использует текущий запрос; ответ отменённого запроса не меняет каталог. */
+const loadCatalog = async () => {
     if (catalogRequest) return catalogRequest
-    const version = generation
-    controller = new AbortController()
-    store.setState({ catalogStatus: 'loading', catalogError: '' })
-    const pending = getHomeData(fetch, getCacheScope(), controller.signal)
+    const request = new AbortController()
+    controller = request
+    store.setState({ status: 'loading', error: '' })
+    const pending = getHomeData(fetch, getCacheScope(), request.signal)
         .then(catalog => {
-            if (version !== generation) return null
+            if (request.signal.aborted) return null
             store.setState({
                 ...catalog,
-                catalogStatus: 'ready',
-                catalogError: '',
+                status: 'ready',
+                error: '',
             })
             return catalog
         })
         .catch(error => {
-            if (version !== generation) return null
-            store.setState({ catalogStatus: 'error', catalogError: errorMessage(error) })
+            if (request.signal.aborted) return null
+            store.setState({ status: 'error', error: errorMessage(error) })
             return null
         })
         .finally(() => {
@@ -50,12 +50,11 @@ async function loadCatalog() {
     return pending
 }
 
-function reset() {
-    generation++
+const reset = () => {
     controller?.abort()
     controller = null
     catalogRequest = null
-    store.setState({ tracks: [], artists: [], albums: [], catalogStatus: 'idle', catalogError: '', offline: false })
+    store.setState({ tracks: [], artists: [], albums: [], status: 'idle', error: '', offline: false })
 }
 
 export const appStore = {

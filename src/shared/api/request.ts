@@ -54,6 +54,12 @@ async function getCSRF(request: Fetch): Promise<string> {
     return csrfRequest
 }
 
+/**
+ * Выполняет запрос с cookie сессии и CSRF-токеном для изменяющих операций.
+ * @param path Путь относительно /api/v1.
+ * @param options Параметры fetch; multipart отключает автоматический Content-Type: application/json.
+ * @returns HTTP-ответ и разобранный JSON; пустое тело представлено null.
+ */
 export async function requestJson(path: string, options: RequestOptions = {}, request: Fetch = fetch) {
     const { multipart = false, ...config } = options
     const headers = new Headers(config.headers)

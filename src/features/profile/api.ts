@@ -67,6 +67,10 @@ const readProfile = (result: Awaited<ReturnType<typeof requestJson>>): User => {
     throw responseError(result, 'Не удалось сохранить профиль. Попробуйте ещё раз.')
 }
 
+/**
+ * Сохраняет имя и загружает аватар отдельным multipart-запросом.
+ * При ошибке загрузки ProfileError.savedUser содержит уже сохранённый профиль.
+ */
 export const updateProfile = async (user: User, name: string, avatar: File | null = null): Promise<User> => {
     const path = userPath(user)
     let saved: User | undefined

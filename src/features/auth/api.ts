@@ -2,9 +2,7 @@ import type { FieldErrors, User } from '../../types/domain.ts'
 import { readApiError, isRecord, requestJson } from '../../shared/api/request.ts'
 import { isNetworkError } from '../../shared/offline/network.ts'
 
-/** Ошибка запроса аутентификации. */
 export class AuthError extends Error {
-    /** @param {string} message Сообщение для пользователя. @param {object} fields Ошибки полей. @param {string} code Код ошибки API. */
     fields: FieldErrors
     code: string
     constructor(message: string, fields: FieldErrors = {}, code = '') {
@@ -47,20 +45,19 @@ export async function getCurrentUser(request = fetch, signal?: AbortSignal) {
     )
 }
 
-/** Вход в аккаунт. Cookie сессии с флагом HttpOnly устанавливает сервер. */
 export async function login(data: { email: string; password: string }, request = fetch) {
     const { response, body } = await requestAuth('/auth/login', { method: 'POST', body: JSON.stringify(data) }, request)
     if (response.status === 200) return withProfile(parseUser(body), request)
-    if (response.status === 400 && readApiError(body).code === 'validation_failed') {
-        throw new AuthError('', readApiError(body).fields || {}, readApiError(body).code)
+    const error = readApiError(body)
+    if (response.status === 400 && error.code === 'validation_failed') {
+        throw new AuthError('', error.fields, error.code)
     }
-    if (response.status === 401 && readApiError(body).code === 'invalid_credentials') {
-        throw new AuthError('Неверный email или пароль', {}, readApiError(body).code)
+    if (response.status === 401 && error.code === 'invalid_credentials') {
+        throw new AuthError('Неверный email или пароль', {}, error.code)
     }
-    throw new AuthError('Не удалось выполнить вход. Попробуйте ещё раз.', {}, readApiError(body).code || 'login_error')
+    throw new AuthError('Не удалось выполнить вход. Попробуйте ещё раз.', {}, error.code || 'login_error')
 }
 
-/** Выход из аккаунта. Ждём статус 204. */
 export async function logout(request = fetch, signal?: AbortSignal) {
     const { response, body } = await requestAuth('/auth/logout', { method: 'POST', signal }, request)
     if (response.status === 204) return
