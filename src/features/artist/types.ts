@@ -25,7 +25,6 @@ export interface Artist {
     albums: ArtistAlbum[]
 }
 
-/** Public screen contract, independent of the host App, auth store and player implementation. */
 export interface ArtistPageProps {
     offline?: boolean
     artist?: Artist

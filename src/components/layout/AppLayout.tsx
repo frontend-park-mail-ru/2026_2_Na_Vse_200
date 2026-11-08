@@ -18,14 +18,14 @@ export function AppLayout({
     const [queueOpen, setQueueOpen] = useState(false)
     if (route === 'signup' || route === 'login' || route === 'not-found') {
         return (
-            <main id="main-content" tabIndex={-1}>
+            <main className="application__content" id="main-content" tabIndex={-1}>
                 {children}
             </main>
         )
     }
     return (
         <div
-            className="app-shell"
+            className="app-shell application__layout"
             onClick={event => {
                 if (!(event.target as Element | null)?.closest('.player__queue-panel, .player__queue-button'))
                     setQueueOpen(false)

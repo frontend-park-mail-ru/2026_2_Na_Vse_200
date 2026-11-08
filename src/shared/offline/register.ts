@@ -1,4 +1,3 @@
-/** Register only the production worker; dev/HMR must not be intercepted. */
 export function registerOfflineWorker(): void {
     if (!import.meta.env.PROD || !('serviceWorker' in navigator)) return
     const register = () => {

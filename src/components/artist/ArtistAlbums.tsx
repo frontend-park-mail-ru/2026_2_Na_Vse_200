@@ -1,13 +1,9 @@
-import './ArtistAlbums.scss'
 import { createElement } from '@navse200/my-react'
 import { ArtistCover } from './ArtistCover.tsx'
-import type { ArtistAlbum } from '../../features/artist/types.ts'
+import type { ArtistAlbumsProps } from './types.ts'
+import './ArtistAlbums.scss'
 
-interface Props {
-    albums: ArtistAlbum[]
-}
-
-export function ArtistAlbums({ albums }: Props) {
+export const ArtistAlbums = ({ albums }: ArtistAlbumsProps) => {
     if (!albums.length) return <p className="artist-albums__empty">У исполнителя пока нет альбомов.</p>
 
     return (

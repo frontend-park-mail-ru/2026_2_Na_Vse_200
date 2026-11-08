@@ -14,9 +14,6 @@ let currentHookIndex = 0
 /**
  * Обновляет DOM по новому дереву, по возможности сохраняя существующие узлы.
  * Движок хранит один корень: его же обновляет setState.
- * @param {object|null} element Виртуальное дерево; null очищает его.
- * @param {HTMLElement} container Корневой контейнер приложения.
- * @returns {void}
  */
 export function render(element: VNode | null, container: HTMLElement): void {
     const previousRootElement = rootElement
@@ -29,8 +26,6 @@ export function render(element: VNode | null, container: HTMLElement): void {
  * Хранит состояние по пути компонента и порядку вызова хука.
  * Вызывается внутри компонента, каждый раз в одном и том же порядке, без условий.
  * Начальное значение сохраняется как есть; функция-инициализатор не поддерживается.
- * @param {*} initialValue Начальное состояние компонента.
- * @returns {[*, function(*): void]} Значение и setState, который сразу обновляет всё дерево.
  */
 export function useState<S>(initialValue: S): [S, StateSetter<S>] {
     const path = currentPath
@@ -44,8 +39,6 @@ export function useState<S>(initialValue: S): [S, StateSetter<S>] {
 
     /**
      * Меняет состояние и запускает отрисовку. Вызывать только пока компонент в дереве.
-     * @param {*} nextValue Новое значение или функция от предыдущего значения.
-     * @returns {void}
      */
     const setState: StateSetter<S> = (nextValue: StateUpdate<S>) => {
         const latestHooks = hooksByPath.get(path)
@@ -63,12 +56,6 @@ export function useState<S>(initialValue: S): [S, StateSetter<S>] {
 /**
  * Сравнивает старый и новый элементы: обновляет, заменяет или удаляет DOM-узел.
  * Для компонента сначала получает его дерево, затем рекурсивно обновляет потомков.
- * @param {object|null|undefined} element Новый виртуальный элемент.
- * @param {Node|null|undefined} dom Существующий DOM-узел.
- * @param {string} path Путь в дереве, по которому хранятся DOM-узлы и состояние.
- * @param {object|null|undefined} previousElement Предыдущий виртуальный элемент.
- * @param {Node} parentDom Родитель для вставки, замены и удаления узла.
- * @returns {Node|null} Обновлённый DOM-узел или null после удаления.
  */
 function reconcile(
     element: VNode | null | undefined,
@@ -204,10 +191,6 @@ function reconcile(
 /**
  * Строит путь по key, а если его нет — по индексу среди детей.
  * Стабильный key позволяет сохранить узел и состояние при перестановке.
- * @param {string} parentPath Путь родителя.
- * @param {object|null|undefined} child Дочерний элемент.
- * @param {number} index Позиция в массиве детей.
- * @returns {string} Путь дочернего элемента.
  */
 function getChildPath(parentPath: string, child: VNode | null | undefined, index: number): string {
     if (child?.key !== null && child?.key !== undefined) {
@@ -219,8 +202,6 @@ function getChildPath(parentPath: string, child: VNode | null | undefined, index
 /**
  * Удаляет сохранённые узлы, состояния и результаты компонентов для всей ветки.
  * Сам DOM здесь не меняется.
- * @param {string} path Путь удаляемой или заменяемой ветки.
- * @returns {void}
  */
 function clearPath(path: string): void {
     const prefix = `${path}.`
@@ -244,10 +225,6 @@ function clearPath(path: string): void {
 /**
  * Обновляет свойства, атрибуты, стили и обработчики событий, убирает старые значения.
  * Дочерние элементы обрабатываются отдельно в reconcile.
- * @param {HTMLElement} dom Обновляемый DOM-элемент.
- * @param {object} previousProps Предыдущие свойства.
- * @param {object} nextProps Новые свойства.
- * @returns {void}
  */
 function updateProps(dom: HTMLElement | SVGElement, previousProps: Props, nextProps: Props): void {
     const isSvg = dom.namespaceURI === SVG_NAMESPACE

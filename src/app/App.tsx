@@ -1,3 +1,4 @@
+import type { VNode } from '@navse200/my-react'
 import { createElement, render } from '@navse200/my-react'
 import { createPlayer } from '../shared/audio/player.ts'
 import { connectionAvailable, observeConnection, subscribeConnection } from '../shared/offline/network.ts'
@@ -12,8 +13,7 @@ import { modals } from '../components/modal/manager.ts'
 import { HomePage } from '../pages/HomePage.tsx'
 import { ProfilePage } from '../pages/ProfilePage.tsx'
 import { LogoutDialog } from '../components/profile/LogoutDialog.tsx'
-import { LoginPage } from '../pages/LoginPage.tsx'
-import { SignupPage } from '../pages/SignupPage.tsx'
+import { AuthPage } from '../pages/AuthPage.tsx'
 import { NotFoundPage } from '../pages/NotFoundPage.tsx'
 import type { User, Track, EntityId } from '../types/domain.ts'
 import type { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
@@ -27,8 +27,7 @@ const titles: Record<string, string> = {
     'not-found': 'Страница не найдена',
 }
 
-/** One TS host for the profile/session from dev and the artist/offline features from MUSIC-51. */
-export function mountApp(container: HTMLElement, router: VanillaRouter) {
+export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
     const stopObserving = observeConnection()
     appStore.reset()
     const session = createSession()
@@ -36,11 +35,17 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     const artist = artistFeature.createController()
     void favorites.load(null, true)
     let disposed = false
-    let initial = true
     let notice = ''
     let selectedTrack: Track | undefined
     let activeTrackId: EntityId | undefined
     let queue: Track[] = []
+
+    const resetMusic = () => {
+        selectedTrack = undefined
+        activeTrackId = undefined
+        appStore.reset()
+        artist.reset()
+    }
 
     const registered = () => {
         notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
@@ -48,46 +53,27 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     }
     const authenticated = (user: User) => {
         const next = router.getCurrentUrl().searchParams.get('next')
-        selectedTrack = undefined
-        activeTrackId = undefined
-        appStore.reset()
-        artist.reset()
+        resetMusic()
         session.setUser(user)
         notice = ''
         router.navigate(next === '/profile' ? next : '/')
     }
-    const updated = (user: User) => session.setUser(user)
-    const accountClosed = (message: string) => {
-        appStore.reset()
-        artist.reset()
-        selectedTrack = undefined
-        activeTrackId = undefined
+    const accountClosed = (message: string, path = '/login') => {
+        resetMusic()
         session.clear()
         modals.close()
         notice = message
-        router.navigate('/login', { replace: true })
+        router.navigate(path, { replace: true })
     }
-    const expired = () => {
-        appStore.reset()
-        artist.reset()
-        selectedTrack = undefined
-        session.clear()
-        modals.close()
-        notice = 'Сессия истекла. Войдите снова.'
-        router.navigate('/login?next=/profile', { replace: true })
-    }
+    const expired = () => accountClosed('Сессия истекла. Войдите снова.', '/login?next=/profile')
     const signOut = async () => {
         if (!connectionAvailable()) throw new Error('Для выхода из аккаунта подключитесь к интернету.')
-        if (await session.signOut()) {
-            appStore.reset()
-            artist.reset()
-            selectedTrack = undefined
-            activeTrackId = undefined
-            modals.close()
-            router.navigate('/login')
-        } else {
+        if (!(await session.signOut())) {
             throw new Error(session.getState().error || 'Не удалось выйти из аккаунта. Попробуйте ещё раз.')
         }
+        resetMusic()
+        modals.close()
+        router.navigate('/login')
     }
     const confirmSignOut = () => modals.open(<LogoutDialog onConfirm={signOut} />)
     const selectTrack = (track: Track) => {
@@ -103,15 +89,21 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     const retry = async () => {
         await session.restore()
         if (disposed) return
-        void favorites.load(session.getState().user?.id ?? null, true)
+        retryFavorites()
         if (session.getState().status === 'ready') {
-            appStore.setState({ catalogStatus: 'idle', offline: false })
+            appStore.setState({ status: 'idle', offline: false })
         }
         syncRoute(true)
         renderCurrent()
     }
 
-    function renderCurrent(focusHeading = false) {
+    const retryArtist = () => {
+        const match = router.findRoute(router.getCurrentUrl().pathname)
+        void artist.load(match?.params.id ?? '', getCacheScope())
+    }
+    const retryFavorites = () => void favorites.load(session.getState().user?.id ?? null, true)
+
+    const renderCurrent = () => {
         if (disposed) return
         const { user, status, error, pending } = session.getState()
         const match = router.findRoute(router.getCurrentUrl().pathname)
@@ -124,117 +116,99 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         const activeTrack = selectedTrack ?? queue.find(track => track.id === activeTrackId) ?? queue[0]
         if (activeTrack) activeTrackId = activeTrack.id
         const needsSession = ['home', 'profile', 'artist'].includes(route)
-        const offline =
-            !connectionAvailable() || status === 'offline' || (route === 'artist' ? screen.offline : catalog.offline)
+        const data = route === 'artist' ? screen : catalog
+        const offline = !connectionAvailable() || status === 'offline' || data.offline
         player.setTrack(needsSession ? activeTrack : undefined)
         document.title = `${titles[route] ?? titles['not-found']} — На все 200`
 
-        const renderPage = () => {
-            if (needsSession && (status === 'idle' || status === 'loading')) {
-                return (
+        const trackProps = {
+            activeTrack,
+            onTrackSelect: selectTrack,
+            tracksStatus: data.status === 'idle' ? ('loading' as const) : data.status,
+            tracksError: data.error,
+            onTracksRetry: route === 'artist' ? retryArtist : appStore.loadCatalog,
+        }
+        const pages: Record<string, VNode> = {
+            home: <HomePage {...catalog} {...trackProps} />,
+            artist: (
+                <artistFeature.Page
+                    artist={currentArtist}
+                    artistId={match?.params.id ?? ''}
+                    {...trackProps}
+                    offline={offline}
+                />
+            ),
+            profile: user ? (
+                <fieldset className="offline-auth" disabled={offline}>
+                    <ProfilePage
+                        user={user}
+                        onUserUpdated={session.setUser}
+                        onSessionExpired={expired}
+                        onAccountClosed={accountClosed}
+                        onLogout={confirmSignOut}
+                        authAction={pending}
+                    />
+                </fieldset>
+            ) : (
+                <p role="status">Профиль не сохранён. Подключитесь к интернету и войдите.</p>
+            ),
+            login: <AuthPage key="login" mode="login" notice={notice} onAuthenticated={authenticated} />,
+            signup: <AuthPage key="signup" mode="signup" onRegistered={registered} />,
+        }
+        let page = pages[route] ?? <NotFoundPage />
+        if (route === 'login' || route === 'signup') {
+            page = (
+                <fieldset className="offline-auth" disabled={offline}>
+                    {page}
+                </fieldset>
+            )
+        }
+        const waiting = needsSession && ['idle', 'loading', 'error'].includes(status)
+        if (waiting) {
+            page =
+                status === 'error' ? (
+                    <main className="session-loading" role="alert">
+                        <p>{error}</p>
+                        <button type="button" onClick={retry}>
+                            Попробовать ещё раз
+                        </button>
+                    </main>
+                ) : (
                     <main className="session-loading" aria-live="polite">
                         Проверяем сессию…
                     </main>
                 )
-            }
-            if (needsSession && status === 'error') {
-                return (
-                    <main className="session-loading" role="alert">
-                        <p>{error}</p>
-                        <button type="button" onClick={() => void retry()}>
-                            Попробовать ещё раз
-                        </button>
-                    </main>
-                )
-            }
-            switch (route) {
-                case 'home':
-                    return (
-                        <HomePage
-                            {...catalog}
-                            tracksStatus={catalog.catalogStatus === 'idle' ? 'loading' : catalog.catalogStatus}
-                            tracksError={catalog.catalogError}
-                            onTracksRetry={() => void appStore.loadCatalog()}
-                            activeTrack={activeTrack}
-                            onTrackSelect={selectTrack}
-                        />
-                    )
-                case 'artist':
-                    return (
-                        <artistFeature.Page
-                            artist={currentArtist}
-                            artistId={match?.params.id ?? ''}
-                            tracksStatus={screen.status === 'idle' ? 'loading' : screen.status}
-                            tracksError={screen.error}
-                            offline={offline}
-                            onTracksRetry={() => void artist.load(match?.params.id ?? '', getCacheScope())}
-                            activeTrack={activeTrack}
-                            onTrackSelect={selectTrack}
-                        />
-                    )
-                case 'profile':
-                    return user ? (
-                        <fieldset className="offline-auth" disabled={offline}>
-                            <ProfilePage
-                                user={user}
-                                onUserUpdated={updated}
-                                onSessionExpired={expired}
-                                onAccountClosed={accountClosed}
-                                onLogout={confirmSignOut}
-                                authAction={pending}
-                            />
-                        </fieldset>
-                    ) : (
-                        <p role="status">Профиль не сохранён. Подключитесь к интернету и войдите.</p>
-                    )
-                case 'login':
-                    return (
-                        <fieldset className="offline-auth" disabled={offline}>
-                            <LoginPage notice={notice} onAuthenticated={authenticated} />
-                        </fieldset>
-                    )
-                case 'signup':
-                    return (
-                        <fieldset className="offline-auth" disabled={offline}>
-                            <SignupPage onRegistered={registered} />
-                        </fieldset>
-                    )
-                default:
-                    return <NotFoundPage />
-            }
+        } else {
+            page = (
+                <AppLayout
+                    player={player}
+                    tracks={queue}
+                    route={route}
+                    user={user}
+                    onTrackSelect={selectTrack}
+                    activeTrack={activeTrack}
+                    sessionError={error}
+                >
+                    {page}
+                </AppLayout>
+            )
         }
-        const page = renderPage()
-        const waiting = needsSession && ['idle', 'loading', 'error'].includes(status)
         render(
             <div className="application">
                 {offline ? (
                     <div className="offline-banner" role="status">
                         Нет соединения. Доступны сохранённые экраны; вход и изменения требуют интернета.
-                        <button type="button" onClick={() => void retry()}>
+                        <button className="offline-banner__retry" type="button" onClick={retry}>
                             Проверить соединение
                         </button>
                     </div>
                 ) : null}
-                {waiting ? (
-                    page
-                ) : (
-                    <AppLayout
-                        player={player}
-                        tracks={queue}
-                        route={route}
-                        user={user}
-                        onTrackSelect={selectTrack}
-                        activeTrack={activeTrack}
-                        sessionError={error}
-                    >
-                        {page}
-                    </AppLayout>
-                )}
+                {page}
                 <ModalHost />
                 {favoriteState.error ? (
                     <div className="favorites-error" role="alert">
                         {favoriteState.error}
-                        <button type="button" onClick={() => void favorites.load(user?.id ?? null, true)}>
+                        <button className="favorites-error__retry" type="button" onClick={retryFavorites}>
                             Повторить
                         </button>
                     </div>
@@ -242,23 +216,16 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
             </div>,
             container,
         )
-        if (!initial && focusHeading) {
-            container.querySelector<HTMLElement>('h1')?.focus()
-            window.scrollTo(0, 0)
-        }
-        initial = false
     }
 
-    function syncRoute(force = false) {
+    const syncRoute = (force = false) => {
         if (disposed) return
         const match = router.findRoute(router.getCurrentUrl().pathname)
         const route = match?.value
         if (!['home', 'profile', 'artist'].includes(route ?? '')) return
         const { user, status } = session.getState()
         if (status === 'idle') {
-            void session.restore().then(() => {
-                if (!disposed) syncRoute()
-            })
+            void session.restore().then(() => syncRoute())
             return
         }
         if (status === 'ready' && !user && route !== 'artist') {
@@ -269,40 +236,37 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
             return
         }
         if (status !== 'ready' && status !== 'offline') return
-        if (route === 'home' && appStore.getState().catalogStatus === 'idle') void appStore.loadCatalog()
-        if (
-            route === 'artist' &&
-            match?.params.id &&
-            (force || artist.getState().id !== match.params.id || artist.getState().status === 'idle')
-        ) {
+        if (route === 'home' && appStore.getState().status === 'idle') void appStore.loadCatalog()
+        if (route !== 'artist' || !match?.params.id) return
+        const screen = artist.getState()
+        if (force || screen.id !== match.params.id || screen.status === 'idle')
             void artist.load(match.params.id, getCacheScope())
-        }
     }
     const handleRoute = () => {
         modals.close()
         artist.cancel()
-        renderCurrent(true)
+        renderCurrent()
+        container.querySelector<HTMLElement>('h1')?.focus()
+        window.scrollTo(0, 0)
         syncRoute(true)
     }
+    const sessionChanged = () => {
+        const { status, user } = session.getState()
+        if (status === 'ready' || status === 'offline') void favorites.load(user?.id ?? null)
+        renderCurrent()
+    }
+    const connectionChanged = () => {
+        if (!connectionAvailable()) modals.close()
+        renderCurrent()
+        if (connectionAvailable())
+            queueMicrotask(() => {
+                if (!disposed) void retry()
+            })
+    }
     const unsubscribe = [
-        session.subscribe(() => {
-            const state = session.getState()
-            if (state.status === 'ready' || state.status === 'offline') void favorites.load(state.user?.id ?? null)
-            renderCurrent()
-        }),
-        favorites.subscribe(() => renderCurrent()),
-        player.subscribe(() => renderCurrent()),
-        artist.subscribe(() => renderCurrent()),
-        appStore.subscribe(() => renderCurrent()),
-        modals.subscribe(() => renderCurrent()),
-        subscribeConnection(() => {
-            if (!connectionAvailable()) modals.close()
-            renderCurrent()
-            if (connectionAvailable())
-                queueMicrotask(() => {
-                    if (!disposed) void retry()
-                })
-        }),
+        session.subscribe(sessionChanged),
+        ...[favorites, player, artist, appStore, modals].map(store => store.subscribe(renderCurrent)),
+        subscribeConnection(connectionChanged),
     ]
     renderCurrent()
     router.on('route', handleRoute).listen()

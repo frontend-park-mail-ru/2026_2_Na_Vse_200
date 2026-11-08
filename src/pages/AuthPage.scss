@@ -127,7 +127,7 @@
 }
 
 .form-field__input:focus-visible,
-.auth-page a:focus-visible,
+.auth-page__switch-link:focus-visible,
 .auth-page__submit:focus-visible {
     outline: 2px solid var(--auth-accent);
     outline-offset: 3px;
@@ -185,7 +185,7 @@
     line-height: 1.5;
 }
 
-.auth-page__switch a {
+.auth-page__switch-link {
     color: var(--auth-accent);
 }
 

@@ -88,22 +88,42 @@ export function Player({
     const isLiked = track ? favorites.isLiked(track.id) : false
     const isDisliked = track ? !isLiked && Boolean(dislikedTracks[track.id]) : false
 
-    function selectAdjacent(offset: number) {
+    const selectAdjacent = (offset: number) => {
         if (!tracks.length) return
         const index = tracks.findIndex(item => item.id === track?.id)
         onTrackSelect(tracks[(Math.max(0, index) + offset + tracks.length) % tracks.length])
     }
 
-    function toggleLike() {
+    const toggleLike = () => {
         if (!track) return
         void favorites.toggle(track.id)
         if (!isLiked) setDislikedTracks(previous => ({ ...previous, [track.id]: false }))
     }
 
-    function toggleDislike() {
+    const toggleDislike = () => {
         if (!track) return
         setDislikedTracks(previous => ({ ...previous, [track.id]: !isDisliked }))
         if (!isDisliked && isLiked) void favorites.toggle(track.id)
+    }
+
+    const skipButton = (direction: 'previous' | 'next') => {
+        const previous = direction === 'previous'
+        const select = () => selectAdjacent(previous ? -1 : 1)
+        return (
+            <button
+                className={`player__button player__control player__control--${direction}`}
+                type="button"
+                aria-label={previous ? 'Предыдущий трек' : 'Следующий трек'}
+                disabled={!track}
+                onClick={select}
+            >
+                <img
+                    className={`player__image player__control-image player__control-image--${direction}`}
+                    src={previous ? previousIcon : nextIcon}
+                    alt=""
+                />
+            </button>
+        )
     }
 
     return (
@@ -133,19 +153,7 @@ export function Player({
                 </div>
                 <div className="player__center">
                     <div className="player__controls">
-                        <button
-                            className="player__button player__control player__control--previous"
-                            type="button"
-                            aria-label="Предыдущий трек"
-                            disabled={!track}
-                            onClick={() => selectAdjacent(-1)}
-                        >
-                            <img
-                                className="player__image player__control-image player__control-image--previous"
-                                src={previousIcon}
-                                alt=""
-                            />
-                        </button>
+                        {skipButton('previous')}
                         <button
                             className="player__button player__control player__control--play"
                             type="button"
@@ -159,19 +167,7 @@ export function Player({
                                 <Icon className="player__play-icon" name="play" size={30} label={undefined} />
                             )}
                         </button>
-                        <button
-                            className="player__button player__control player__control--next"
-                            type="button"
-                            aria-label="Следующий трек"
-                            disabled={!track}
-                            onClick={() => selectAdjacent(1)}
-                        >
-                            <img
-                                className="player__image player__control-image player__control-image--next"
-                                src={nextIcon}
-                                alt=""
-                            />
-                        </button>
+                        {skipButton('next')}
                     </div>
                     <div className="player__progress">
                         <button

@@ -43,13 +43,13 @@ body {
     min-width: 0;
 }
 
-.application > .app-shell {
+.application__layout {
     flex: 1;
     height: auto;
     min-height: 0;
 }
 
-.application > #main-content {
+.application__content {
     flex: 1;
     min-height: 0;
     min-width: 0;
@@ -146,7 +146,6 @@ input:focus-visible {
     font-weight: 700;
     text-decoration: none;
 }
-/* Connectivity status stays visible on both authentication and application screens. */
 .offline-banner {
     padding: 10px 20px;
     background: #353044;
@@ -155,7 +154,7 @@ input:focus-visible {
     text-align: center;
 }
 
-.offline-banner button {
+.offline-banner__retry {
     margin-left: 12px;
     border: 1px solid currentColor;
     border-radius: 6px;
@@ -185,7 +184,7 @@ input:focus-visible {
     color: #fff;
 }
 
-.favorites-error button {
+.favorites-error__retry {
     margin-left: 12px;
     border: 0;
     background: transparent;
