@@ -72,10 +72,16 @@ export const AccountDialog = ({ action, user, onSuccess, onExpired }: AccountDia
                 onExpired()
                 return
             }
+            const fieldErrors = error instanceof AccountError ? error.fields : {}
+            const hasFieldError = fields[action].some(field => Boolean(fieldErrors[field.name]))
             setState(previous => ({
                 ...previous,
-                errors: error instanceof AccountError ? error.fields : {},
-                message: error instanceof Error ? error.message : 'Не удалось сохранить изменения.',
+                errors: fieldErrors,
+                message: hasFieldError
+                    ? ''
+                    : error instanceof Error
+                      ? error.message
+                      : 'Не удалось сохранить изменения.',
                 pending: false,
             }))
         }

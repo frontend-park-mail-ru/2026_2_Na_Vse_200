@@ -15,6 +15,8 @@ node_modules/
 /.parcel-cache/
 .eslintcache
 *.tsbuildinfo
+/test-results/
+/playwright-report/
 
 # Локальные файлы переменных окружения
 .env

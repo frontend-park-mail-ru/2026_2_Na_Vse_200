@@ -38,7 +38,7 @@ export function findArtist(catalog: Catalog, id: string): Artist | undefined {
             .filter(track => track.artists.some(item => item.id === id))
             .map(track => ({
                 ...track,
-                artists: track.artists.map(item => item.name),
+                artists: track.artists,
                 duration: Math.floor(track.duration_ms / 1000),
                 is_liked: Boolean(track.is_liked),
             })),

@@ -20,21 +20,32 @@
 }
 
 .artist-albums__title {
-    display: block;
-    height: 28px;
+    display: -webkit-box;
+    min-height: 36px;
+    max-height: 36px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
     margin: 0;
     font-family: var(--font-heading);
-    font-size: 11px;
+    font-size: 14px;
     font-weight: 500;
-    line-height: 14px;
+    line-height: 18px;
     overflow-wrap: anywhere;
 }
 
 .artist-albums__artist {
-    margin: 0;
+    display: -webkit-box;
+    min-height: 32px;
+    max-height: 32px;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+    overflow-wrap: anywhere;
+    margin: 4px 0 0;
     color: #7f7c9b;
-    font-size: 10px;
-    line-height: 13px;
+    font-size: 12px;
+    line-height: 16px;
 }
 
 @media (max-width: 1200px) {

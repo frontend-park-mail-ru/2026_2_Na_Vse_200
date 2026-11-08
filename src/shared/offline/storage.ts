@@ -8,9 +8,8 @@ export interface OfflineUser {
     avatar_url?: string | null
 }
 
-export interface CachedValue<T> {
+interface CachedValue<T> {
     data: T
-    savedAt: number
 }
 
 interface OfflineDB extends DBSchema {
@@ -44,7 +43,7 @@ function database() {
 }
 
 export const getCacheScope = (): CacheScope => ({ userId: activeUser, revision })
-export const isCurrentScope = (scope: CacheScope): boolean => scope.userId === activeUser && scope.revision === revision
+const isCurrentScope = (scope: CacheScope): boolean => scope.userId === activeUser && scope.revision === revision
 
 /** Storage is optional: private mode, quota errors or a missing IDB must not break online requests. */
 export async function readCached<T>(userId: string, key: string): Promise<CachedValue<T> | undefined> {
@@ -52,7 +51,7 @@ export async function readCached<T>(userId: string, key: string): Promise<Cached
     try {
         db = await database()
         const entry = await db.get('entries', [userId, key])
-        return entry ? { data: entry.data as T, savedAt: entry.savedAt } : undefined
+        return entry ? { data: entry.data as T } : undefined
     } catch {
         return undefined
     } finally {
@@ -66,7 +65,7 @@ export async function writeCached<T>(userId: string, key: string, data: T, scope
         db = await database()
         if (!isCurrentScope(scope) || scope.userId !== userId) return
         const tx = db.transaction('entries', 'readwrite')
-        await tx.store.put({ userId, key, data, savedAt: Date.now() })
+        await tx.store.put({ userId, key, data })
         await tx.done
     } catch {
         // An unavailable cache never turns a successful API response into an error.
@@ -75,7 +74,7 @@ export async function writeCached<T>(userId: string, key: string, data: T, scope
     }
 }
 
-export async function clearUserCache(userId: string): Promise<void> {
+async function clearUserCache(userId: string): Promise<void> {
     let db
     try {
         db = await database()
@@ -128,7 +127,6 @@ export async function rememberUser(user: OfflineUser | null): Promise<void> {
                 ...(typeof user.avatar_url === 'string' ? { avatar_url: user.avatar_url } : {}),
             }
             await db.put('session', display, 'last-user')
-            await writeCached(activeUser, 'profile', display, scope)
         } else {
             await db.delete('session', 'last-user')
             if (previous !== 'guest') await clearUserCache(previous)

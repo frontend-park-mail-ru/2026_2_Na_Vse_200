@@ -1,9 +1,8 @@
 import { createElement, useState } from '@navse200/my-react'
-import chevron from '../assets/artist/figma/chevron.svg'
 import chevronSmall from '../assets/artist/figma/chevron-small.svg'
 import playIcon from '../assets/artist/figma/listen-play.svg'
 import { ArtistCover } from '../components/artist/ArtistCover.tsx'
-import { ArtistTracks } from '../components/artist/ArtistTracks.tsx'
+import { TrackList } from '../components/music/TrackList.tsx'
 import { ArtistAlbums } from '../components/artist/ArtistAlbums.tsx'
 import type { ArtistPageProps } from '../features/artist/types.ts'
 import './ArtistPage.scss'
@@ -77,11 +76,17 @@ export function ArtistPage({
             <div className="artist-page__columns">
                 <section className="artist-page__tracks" aria-labelledby="artist-tracks-title">
                     <h2 className="artist-page__section-title" id="artist-tracks-title">
-                        Популярные треки <img className="artist-page__section-icon" src={chevron} alt="" />
+                        Популярные треки
                     </h2>
-                    <ArtistTracks tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
-                    {artist.tracks.length > 5 && (
-                        <button className="artist-page__more" type="button" onClick={() => setAllTracks(!allTracks)}>
+                    <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
+                    {artist.tracks.length > 0 && (
+                        <button
+                            className="artist-page__more"
+                            type="button"
+                            disabled={artist.tracks.length <= 5}
+                            aria-expanded={allTracks ? 'true' : 'false'}
+                            onClick={() => setAllTracks(!allTracks)}
+                        >
                             <span className="artist-page__more-label">{allTracks ? 'Свернуть' : 'Смотреть все'}</span>
                             <img className="artist-page__more-icon" src={chevronSmall} alt="" />
                         </button>
@@ -92,11 +97,17 @@ export function ArtistPage({
                         className="artist-page__section-title artist-page__section-title--albums"
                         id="artist-albums-title"
                     >
-                        Альбомы <img className="artist-page__section-icon" src={chevron} alt="" />
+                        Альбомы
                     </h2>
                     <ArtistAlbums albums={albums} />
-                    {artist.albums.length > 3 && (
-                        <button className="artist-page__more" type="button" onClick={() => setAllAlbums(!allAlbums)}>
+                    {artist.albums.length > 0 && (
+                        <button
+                            className="artist-page__more"
+                            type="button"
+                            disabled={artist.albums.length <= 3}
+                            aria-expanded={allAlbums ? 'true' : 'false'}
+                            onClick={() => setAllAlbums(!allAlbums)}
+                        >
                             <span className="artist-page__more-label">{allAlbums ? 'Свернуть' : 'Смотреть все'}</span>
                             <img className="artist-page__more-icon" src={chevronSmall} alt="" />
                         </button>

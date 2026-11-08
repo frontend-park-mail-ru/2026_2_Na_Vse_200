@@ -1,15 +1,10 @@
-import type { HomePageProps, CollectionItem, CatalogStatus } from '../types/domain.ts'
+import type { CollectionItem, CatalogStatus } from '../types/domain.ts'
+import type { IconName } from '../components/ui/Icon.tsx'
 
 export interface CoverProps {
     cover?: string | null
-    className?: string
-    icon?: string
+    icon?: IconName
 }
-
-export type TrackListProps = Required<
-    Pick<HomePageProps, 'tracks' | 'onTrackSelect' | 'tracksStatus' | 'tracksError' | 'onTracksRetry'>
-> &
-    Pick<HomePageProps, 'activeTrack'>
 
 export interface CollectionProps {
     title: string

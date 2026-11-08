@@ -272,11 +272,6 @@
     height: calc(26 * var(--player-unit));
 }
 
-.player__reaction-image {
-    width: calc(26 * var(--player-unit));
-    height: calc(26 * var(--player-unit));
-}
-
 .player__like--inactive {
     opacity: 0.4;
 }

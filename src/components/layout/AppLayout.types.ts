@@ -1,8 +1,9 @@
 import type { Child } from '@navse200/my-react'
 import type { AudioPlayer } from '../../shared/audio/player.ts'
-import type { AccountProps, Track } from '../../types/domain.ts'
+import type { User, Track } from '../../types/domain.ts'
 
-export interface AppLayoutProps extends Pick<AccountProps, 'user'> {
+export interface AppLayoutProps {
+    user: User | null
     player: AudioPlayer
     route: string
     tracks: Track[]

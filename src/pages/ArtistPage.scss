@@ -103,14 +103,6 @@
     line-height: 40px;
 }
 
-.artist-page__section-icon {
-    flex-shrink: 0;
-}
-
-.artist-page__section-title--albums {
-    gap: 10px;
-}
-
 .artist-page__more {
     display: inline-flex;
     align-items: center;
@@ -145,11 +137,6 @@
 
 .artist-page__more:disabled {
     cursor: default;
-}
-
-.artist-page__empty {
-    color: #a29cb3;
-    font-size: 14px;
 }
 
 .artist-page--empty {

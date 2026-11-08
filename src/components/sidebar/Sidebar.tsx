@@ -20,9 +20,9 @@ const navigation = [
 ]
 
 const playlists = [
-    { name: 'Любимые треки', detail: 'Плейлист · 124 трека', icon: 'heart', color: 'rose' },
-    { name: 'В дорогу', detail: 'Плейлист · 36 треков', icon: 'star', color: 'teal' },
-    { name: 'Вечер', detail: 'Плейлист · 58 треков', icon: 'moon', color: 'amber' },
+    { name: 'Любимые треки', detail: 'Плейлист · 124 трека', color: 'rose' },
+    { name: 'В дорогу', detail: 'Плейлист · 36 треков', color: 'teal' },
+    { name: 'Вечер', detail: 'Плейлист · 58 треков', color: 'amber' },
 ]
 
 export function Sidebar({ route, user, className = '' }: SidebarProps) {

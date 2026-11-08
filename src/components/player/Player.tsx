@@ -1,6 +1,9 @@
 import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../ui/Icon.tsx'
-import { getArtistName, getTrackCover } from '../../features/music/presentation.ts'
+import { getTrackCover } from '../../features/music/presentation.ts'
+import { ArtistLinks } from '../artist/ArtistLinks.tsx'
+import { favorites } from '../../features/music/favorites.ts'
+import type { Track } from '../../types/domain.ts'
 import previousIcon from '../../assets/artist/figma/previous.svg'
 import nextIcon from '../../assets/artist/figma/next.svg'
 import pauseIcon from '../../assets/artist/figma/pause.svg'
@@ -11,22 +14,15 @@ import './Player.scss'
 import type { AudioPlayer, PlaybackState } from '../../shared/audio/player.ts'
 import { connectionAvailable } from '../../shared/offline/network.ts'
 
-interface PlayerTrack {
-    id: string | number
-    title?: string
-    is_liked?: boolean
-    liked?: boolean
-}
-
 interface Props {
     player?: AudioPlayer
     className?: string
     queueOpen?: boolean
     onQueueToggle?: () => void
     onQueueClose?: () => void
-    track?: PlayerTrack
-    tracks?: PlayerTrack[]
-    onTrackSelect?: (track: PlayerTrack) => void
+    track?: Track
+    tracks?: Track[]
+    onTrackSelect?: (track: Track) => void
 }
 
 function formatTime(seconds: number) {
@@ -87,11 +83,10 @@ export function Player({
     const { playing: isPlaying, muted } = playback
     const volume = muted ? 0 : Math.round(playback.volume * 10000) / 100
     const [failedCover, setFailedCover] = useState('')
-    const [likedTracks, setLikedTracks] = useState<Record<string, boolean>>({})
     const [dislikedTracks, setDislikedTracks] = useState<Record<string, boolean>>({})
     const cover = getTrackCover(track)
-    const isLiked = track ? (likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)) : false
-    const isDisliked = track ? Boolean(dislikedTracks[track.id]) : false
+    const isLiked = track ? favorites.isLiked(track.id) : false
+    const isDisliked = track ? !isLiked && Boolean(dislikedTracks[track.id]) : false
 
     function selectAdjacent(offset: number) {
         if (!tracks.length) return
@@ -101,14 +96,14 @@ export function Player({
 
     function toggleLike() {
         if (!track) return
-        setLikedTracks(previous => ({ ...previous, [track.id]: !isLiked }))
+        void favorites.toggle(track.id)
         if (!isLiked) setDislikedTracks(previous => ({ ...previous, [track.id]: false }))
     }
 
     function toggleDislike() {
         if (!track) return
         setDislikedTracks(previous => ({ ...previous, [track.id]: !isDisliked }))
-        if (!isDisliked) setLikedTracks(previous => ({ ...previous, [track.id]: false }))
+        if (!isDisliked && isLiked) void favorites.toggle(track.id)
     }
 
     return (
@@ -131,7 +126,7 @@ export function Player({
                         <span className="player__track-copy">
                             <strong className="player__title">{track?.title || 'Выберите трек'}</strong>
                             <small className="player__artists">
-                                {track ? getArtistName(track) : 'Популярные треки'}
+                                {track ? <ArtistLinks track={track} /> : 'Популярные треки'}
                             </small>
                         </span>
                     </div>
@@ -195,7 +190,7 @@ export function Player({
                             type="button"
                             aria-label={isLiked ? 'Убрать трек из избранного' : 'Добавить трек в избранное'}
                             aria-pressed={isLiked ? 'true' : 'false'}
-                            disabled={!track}
+                            disabled={!track || !favorites.canToggle(track.id)}
                             onClick={toggleLike}
                         >
                             <img className="player__image player__reaction-image" src={heartIcon} alt="" />

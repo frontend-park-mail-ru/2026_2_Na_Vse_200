@@ -3,7 +3,6 @@
     --color-panel: #16181f;
     --color-hover: #20232c;
     --color-text: #f2f1ee;
-    --color-text-muted: #a1a6b8;
     --font-body: 'Onest', ui-sans-serif, system-ui, sans-serif;
     --font-heading: 'Geologica', ui-sans-serif, system-ui, sans-serif;
 
@@ -92,12 +91,6 @@ input:focus-visible {
     font-size: clamp(27px, 5vw, 38px);
 }
 
-.not-found-page__description {
-    color: var(--color-text-muted);
-    font-size: 15px;
-    line-height: 1.7;
-}
-
 .not-found-page__code {
     color: #b9a1ff;
     font-size: 12px;
@@ -120,26 +113,6 @@ input:focus-visible {
     place-items: center;
     background: var(--color-background);
     color: var(--color-text);
-}
-
-.session-loading--error {
-    align-content: center;
-    gap: 20px;
-    padding: 24px;
-    text-align: center;
-}
-
-.session-loading--error p {
-    margin: 0;
-}
-
-.session-loading--error button {
-    padding: 12px 20px;
-    border: 0;
-    border-radius: 999px;
-    background: #a28aff;
-    color: #08070c;
-    cursor: pointer;
 }
 
 .not-found-page__link {
@@ -176,4 +149,25 @@ input:focus-visible {
     border: 0;
     padding: 0;
     margin: 0;
+}
+
+.favorites-error {
+    position: fixed;
+    z-index: 20;
+    right: 20px;
+    bottom: 130px;
+    max-width: min(420px, calc(100vw - 40px));
+    padding: 14px 18px;
+    border: 1px solid #8e6e8e;
+    border-radius: 12px;
+    background: #352536;
+    color: #fff;
+}
+
+.favorites-error button {
+    margin-left: 12px;
+    border: 0;
+    background: transparent;
+    color: #c5b1ff;
+    cursor: pointer;
 }

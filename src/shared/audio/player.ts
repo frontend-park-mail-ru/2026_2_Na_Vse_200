@@ -16,7 +16,7 @@ export interface PlaybackState {
     error: string
 }
 
-export function getAudioUrl(track?: PlayableTrack): string {
+function getAudioUrl(track?: PlayableTrack): string {
     if (!track || (typeof track.id !== 'string' && typeof track.id !== 'number')) return ''
     if (typeof track.id === 'number' && !Number.isFinite(track.id)) return ''
     const id = String(track.id)

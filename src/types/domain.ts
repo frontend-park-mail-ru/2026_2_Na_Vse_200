@@ -1,5 +1,9 @@
 /** Domain data accepted by the UI. API boundaries validate external JSON. */
 export type EntityId = string | number
+export interface TrackArtist {
+    id?: EntityId
+    name?: string
+}
 export interface CollectionItem {
     id: EntityId
     name?: string
@@ -10,8 +14,8 @@ export interface CollectionItem {
 export interface Track {
     id: EntityId
     title?: string
-    artists?: (string | { name?: string })[]
-    artist?: string | { name?: string }
+    artists?: (string | TrackArtist)[]
+    artist?: string | TrackArtist
     artist_name?: string
     cover_url?: string | null
     cover?: string
@@ -40,11 +44,6 @@ export interface FormState {
     errors: FieldErrors
     message: string
     pending: boolean
-}
-export interface AccountProps {
-    user: User | null
-    onLogout: () => void
-    authAction: boolean
 }
 export interface HomePageProps {
     tracks?: Track[]

@@ -1,102 +1,22 @@
-import type { Track, CollectionItem, HomePageProps } from '../types/domain.ts'
-import type { CoverProps, TrackListProps, CollectionProps } from './HomePage.types.ts'
+import type { CollectionItem, HomePageProps } from '../types/domain.ts'
+import type { CoverProps, CollectionProps } from './HomePage.types.ts'
 import { createElement, useState } from '@navse200/my-react'
 import { Icon } from '../components/ui/Icon.tsx'
-import { getArtistName, getTrackCover } from '../features/music/presentation.ts'
+import { TrackList } from '../components/music/TrackList.tsx'
 import './HomePage.scss'
 import { artistHref } from '../features/artist/route.ts'
 
-const formatDuration = (duration: Track['duration']) => {
-    if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
-    const seconds = Number(
-        typeof duration === 'object' ? (duration.seconds ?? duration.duration_seconds ?? 0) : (duration ?? 0),
-    )
-    if (!Number.isFinite(seconds) || seconds <= 0) return '—:——'
-    return `${Math.floor(seconds / 60)}:${String(Math.floor(seconds % 60)).padStart(2, '0')}`
-}
-const Cover = ({ cover, className = '', icon = 'music' }: CoverProps) => {
+const Cover = ({ cover, icon = 'music' }: CoverProps) => {
     const [failedCover, setFailedCover] = useState('')
     const coverError = () => setFailedCover(cover ?? '')
     return (
-        <span className={`music-cover ${className}`}>
+        <span className="music-cover">
             {cover && failedCover !== cover ? (
                 <img src={cover} alt="" loading="lazy" onError={coverError} />
             ) : (
                 <Icon name={icon} size={20} />
             )}
         </span>
-    )
-}
-const TrackList = ({
-    tracks,
-    activeTrack,
-    onTrackSelect,
-    tracksStatus,
-    tracksError,
-    onTracksRetry,
-}: TrackListProps) => {
-    const [likedTracks, setLikedTracks] = useState<Record<string, boolean>>({})
-    if (tracksStatus === 'loading') {
-        return (
-            <p className="home-page__message" aria-live="polite">
-                Загружаем треки…
-            </p>
-        )
-    }
-    if (tracksStatus === 'error') {
-        return (
-            <div className="home-page__message home-page__message--error" role="alert">
-                <span>{tracksError}</span>
-                <button type="button" onClick={onTracksRetry}>
-                    Попробовать ещё раз
-                </button>
-            </div>
-        )
-    }
-    if (!tracks.length) return <p className="home-page__message">Пока нет треков.</p>
-    const renderTrack = (track: Track, index: number) => {
-        const isActive = activeTrack?.id === track.id
-        const isLiked = likedTracks[track.id] ?? Boolean(track.is_liked || track.liked)
-        const selectTrack = () => onTrackSelect(track)
-        const toggleLike = () => setLikedTracks(previous => ({ ...previous, [track.id]: !isLiked }))
-        return (
-            <li
-                className={`track-list__item${isActive ? ' track-list__item--active' : ''}`}
-                key={track.id ?? `${track.title}-${index}`}
-            >
-                <button
-                    className="track-list__select"
-                    type="button"
-                    onClick={selectTrack}
-                    aria-current={isActive ? 'true' : undefined}
-                >
-                    <span className="track-list__index">{index + 1}</span>
-                    <Cover cover={getTrackCover(track)} />
-                    <span className="track-list__meta">
-                        <strong>{track.title || 'Без названия'}</strong>
-                        <small>{getArtistName(track)}</small>
-                    </span>
-                    <span className="track-list__duration">
-                        {formatDuration(track.duration ?? track.duration_seconds ?? (track.duration_ms ?? 0) / 1000)}
-                    </span>
-                </button>
-                <button
-                    className="track-list__like"
-                    type="button"
-                    aria-label={`${isLiked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
-                    aria-pressed={isLiked ? 'true' : 'false'}
-                    onClick={toggleLike}
-                >
-                    <Icon name="heart" size={19} />
-                </button>
-                <Icon name="more" size={20} className="track-list__more" />
-            </li>
-        )
-    }
-    return (
-        <ol className="track-list" aria-label="Популярные треки">
-            {tracks.slice(0, 6).map(renderTrack)}
-        </ol>
     )
 }
 const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps) => {
@@ -108,14 +28,18 @@ const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps
     const renderCard = (item: CollectionItem) => (
         <article className="music-collection__card" key={item.id}>
             {type === 'artist' ? (
-                <a href={artistHref(item.id)} data-link>
+                <a
+                    className="music-collection__card-content music-collection__artist-link"
+                    href={artistHref(item.id)}
+                    data-link
+                >
                     <Cover cover={item.image_url} icon="artist" />
-                    <strong>{item.name}</strong>
+                    <strong title={item.name}>{item.name}</strong>
                 </a>
             ) : (
                 <div className="music-collection__card-content">
                     <Cover cover={item.cover_url} icon="music" />
-                    <strong>{item.title}</strong>
+                    <strong title={item.title}>{item.title}</strong>
                 </div>
             )}
         </article>
@@ -174,12 +98,13 @@ export const HomePage = ({
             <section className="home-page__popular" aria-labelledby="popular-title">
                 <h2 id="popular-title">Популярные треки</h2>
                 <TrackList
-                    tracks={tracks}
+                    tracks={tracks.slice(0, 6)}
                     activeTrack={activeTrack}
                     onTrackSelect={onTrackSelect}
-                    tracksStatus={tracksStatus}
-                    tracksError={tracksError}
-                    onTracksRetry={onTracksRetry}
+                    status={tracksStatus}
+                    error={tracksError}
+                    onRetry={onTracksRetry}
+                    columns
                 />
             </section>
 

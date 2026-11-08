@@ -5,11 +5,13 @@ import { artistFeature } from '../features/artist/feature.ts'
 import { getCacheScope } from '../shared/offline/storage.ts'
 import { appStore } from './store.ts'
 import { createSession } from './session.ts'
+import { favorites } from '../features/music/favorites.ts'
 import { AppLayout } from '../components/layout/AppLayout.tsx'
 import { ModalHost } from '../components/modal/ModalHost.tsx'
 import { modals } from '../components/modal/manager.ts'
 import { HomePage } from '../pages/HomePage.tsx'
 import { ProfilePage } from '../pages/ProfilePage.tsx'
+import { LogoutDialog } from '../components/profile/LogoutDialog.tsx'
 import { LoginPage } from '../pages/LoginPage.tsx'
 import { SignupPage } from '../pages/SignupPage.tsx'
 import { NotFoundPage } from '../pages/NotFoundPage.tsx'
@@ -32,6 +34,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     const session = createSession()
     const player = createPlayer()
     const artist = artistFeature.createController()
+    void favorites.load(null, true)
     let disposed = false
     let initial = true
     let notice = ''
@@ -74,7 +77,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         router.navigate('/login?next=/profile', { replace: true })
     }
     const signOut = async () => {
-        if (!connectionAvailable()) return
+        if (!connectionAvailable()) throw new Error('Для выхода из аккаунта подключитесь к интернету.')
         if (await session.signOut()) {
             appStore.reset()
             artist.reset()
@@ -82,8 +85,11 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
             activeTrackId = undefined
             modals.close()
             router.navigate('/login')
+        } else {
+            throw new Error(session.getState().error || 'Не удалось выйти из аккаунта. Попробуйте ещё раз.')
         }
     }
+    const confirmSignOut = () => modals.open(<LogoutDialog onConfirm={signOut} />)
     const selectTrack = (track: Track) => {
         selectedTrack = track
         activeTrackId = track.id
@@ -97,6 +103,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
     const retry = async () => {
         await session.restore()
         if (disposed) return
+        void favorites.load(session.getState().user?.id ?? null, true)
         if (session.getState().status === 'ready') {
             appStore.setState({ catalogStatus: 'idle', offline: false })
         }
@@ -110,6 +117,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         const match = router.findRoute(router.getCurrentUrl().pathname)
         const route = match?.value ?? 'not-found'
         const catalog = appStore.getState()
+        const favoriteState = favorites.getState()
         const screen = artist.getState()
         const currentArtist = screen.id === match?.params.id ? screen.artist : undefined
         queue = route === 'artist' ? (currentArtist?.tracks ?? []) : catalog.tracks
@@ -172,7 +180,7 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
                                 onUserUpdated={updated}
                                 onSessionExpired={expired}
                                 onAccountClosed={accountClosed}
-                                onLogout={() => void signOut()}
+                                onLogout={confirmSignOut}
                                 authAction={pending}
                             />
                         </fieldset>
@@ -223,6 +231,14 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
                     </AppLayout>
                 )}
                 <ModalHost />
+                {favoriteState.error ? (
+                    <div className="favorites-error" role="alert">
+                        {favoriteState.error}
+                        <button type="button" onClick={() => void favorites.load(user?.id ?? null, true)}>
+                            Повторить
+                        </button>
+                    </div>
+                ) : null}
             </div>,
             container,
         )
@@ -269,7 +285,12 @@ export function mountApp(container: HTMLElement, router: VanillaRouter) {
         syncRoute(true)
     }
     const unsubscribe = [
-        session.subscribe(() => renderCurrent()),
+        session.subscribe(() => {
+            const state = session.getState()
+            if (state.status === 'ready' || state.status === 'offline') void favorites.load(state.user?.id ?? null)
+            renderCurrent()
+        }),
+        favorites.subscribe(() => renderCurrent()),
         player.subscribe(() => renderCurrent()),
         artist.subscribe(() => renderCurrent()),
         appStore.subscribe(() => renderCurrent()),

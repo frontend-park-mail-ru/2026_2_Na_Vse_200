@@ -33,7 +33,7 @@ function optionalStrings(value: Record<string, unknown>, keys: string[]): boolea
     return keys.every(
         key =>
             value[key] === undefined ||
-            (['cover_url', 'image_url', 'audio_url'].includes(key) && value[key] === null) ||
+            (['cover_url', 'image_url'].includes(key) && value[key] === null) ||
             typeof value[key] === 'string',
     )
 }
@@ -45,13 +45,18 @@ function isCollectionItem(value: unknown): value is CollectionItem {
     )
 }
 function isArtist(value: unknown): boolean {
-    return typeof value === 'string' || (isRecord(value) && optionalStrings(value, ['name']))
+    return (
+        typeof value === 'string' ||
+        (isRecord(value) &&
+            optionalStrings(value, ['name']) &&
+            (value.id === undefined || typeof value.id === 'string' || typeof value.id === 'number'))
+    )
 }
 function isTrack(value: unknown): value is Track {
     if (!isCollectionItem(value) || !isRecord(value)) return false
     const duration = value.duration
     return (
-        optionalStrings(value, ['artist_name', 'cover', 'audio_url']) &&
+        optionalStrings(value, ['artist_name', 'cover']) &&
         (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist))) &&
         (value.artist === undefined || isArtist(value.artist)) &&
         (value.album === undefined || (isRecord(value.album) && optionalStrings(value.album, ['cover_url']))) &&

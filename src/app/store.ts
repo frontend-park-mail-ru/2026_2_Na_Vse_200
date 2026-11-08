@@ -4,7 +4,6 @@ import { getHomeData } from '../features/music/api.ts'
 import { getCacheScope } from '../shared/offline/storage.ts'
 
 import { createStore } from '../shared/lib/store.ts'
-export { createStore } from '../shared/lib/store.ts'
 
 interface AppState extends Catalog {
     catalogStatus: CatalogStatus

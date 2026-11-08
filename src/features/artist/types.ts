@@ -1,7 +1,9 @@
+import type { TrackArtist, CatalogStatus } from '../../types/domain.ts'
+
 export interface ArtistTrack {
     id: string
     title: string
-    artists: string[]
+    artists: (string | TrackArtist)[]
     cover_url: string | null
     duration: number
     is_liked: boolean
@@ -27,7 +29,7 @@ export interface Artist {
 export interface ArtistPageProps {
     offline?: boolean
     artist?: Artist
-    tracksStatus?: string
+    tracksStatus?: CatalogStatus
     tracksError?: string
     onTracksRetry?: () => void
     artistId: string

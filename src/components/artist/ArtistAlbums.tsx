@@ -19,8 +19,12 @@ export function ArtistAlbums({ albums }: Props) {
                         src={album.cover_url}
                         name={`Обложка ${album.title}`}
                     />
-                    <strong className="artist-albums__title">{album.title}</strong>
-                    <p className="artist-albums__artist">{album.artist}</p>
+                    <strong className="artist-albums__title" title={album.title}>
+                        {album.title}
+                    </strong>
+                    <p className="artist-albums__artist" title={album.artist}>
+                        {album.artist}
+                    </p>
                 </article>
             ))}
         </div>

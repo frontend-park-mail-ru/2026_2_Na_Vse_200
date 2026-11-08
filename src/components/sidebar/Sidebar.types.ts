@@ -1,6 +1,7 @@
-import type { AccountProps } from '../../types/domain.ts'
+import type { User } from '../../types/domain.ts'
 
-export interface SidebarProps extends Pick<AccountProps, 'user'> {
+export interface SidebarProps {
+    user: User | null
     route: string
     className?: string
 }

@@ -1,0 +1,173 @@
+.track-list {
+    display: grid;
+    gap: 16px;
+    padding: 0;
+    margin: 0;
+    list-style: none;
+}
+
+.track-list--columns {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    grid-template-rows: repeat(3, auto);
+    grid-auto-flow: column;
+    gap: 10px 12px;
+}
+
+.track-list__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 26px 28px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    min-height: 50px;
+    padding: 5px 14px;
+    border: 1px solid transparent;
+    border-radius: 10px;
+    background: #20232c;
+    color: inherit;
+}
+
+.track-list__item:hover,
+.track-list__item--active {
+    border-color: #3c3f4b;
+    background: #272a34;
+}
+
+.track-list__select {
+    display: grid;
+    grid-template-columns: 20px 40px minmax(0, 1fr) 36px;
+    align-items: center;
+    gap: 10px;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+
+.track-list__cover {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+.track-list__index,
+.track-list__duration {
+    color: #a29eb6;
+    font: 12px var(--font-body);
+    font-variant-numeric: tabular-nums;
+    text-align: center;
+}
+.track-list__meta {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+}
+.track-list__meta strong,
+.track-list__meta small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+.track-list__meta strong {
+    font: 500 14px var(--font-body);
+}
+.track-list__meta small {
+    color: #8d88a6;
+    font: 10px var(--font-body);
+}
+.track-list__like,
+.track-list__more {
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    color: #c5c4cd;
+    cursor: pointer;
+    min-height: 30px;
+}
+.track-list__like {
+    color: #777184;
+}
+.track-list__like svg {
+    fill: currentColor;
+    stroke-width: 0;
+}
+.track-list__like[aria-pressed='true'] {
+    color: #ff8279;
+}
+.track-list__like:disabled {
+    cursor: default;
+    opacity: 0.6;
+}
+.track-list__menu {
+    position: absolute;
+    z-index: 5;
+    top: calc(100% + 4px);
+    right: 0;
+    display: grid;
+    min-width: 190px;
+    padding: 6px;
+    border: 1px solid #454050;
+    border-radius: 12px;
+    background: #24212e;
+    box-shadow: 0 8px 24px #0006;
+}
+.track-list__menu button {
+    padding: 10px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: inherit;
+    text-align: left;
+    cursor: pointer;
+}
+.track-list__menu button:hover {
+    background: #393244;
+}
+.track-list-message {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    justify-content: center;
+    min-height: 100px;
+    color: #b8bac8;
+}
+.track-list-message button {
+    border: 0;
+    background: transparent;
+    color: #b9a5ff;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+@media (max-width: 1100px) {
+    .track-list--columns {
+        grid-template-columns: 1fr;
+        grid-template-rows: none;
+        grid-auto-flow: row;
+    }
+}
+
+@media (max-width: 560px) {
+    .track-list__item {
+        gap: 6px;
+        padding: 5px 7px;
+        grid-template-columns: minmax(0, 1fr) 24px 24px;
+    }
+    .track-list__select {
+        grid-template-columns: 14px 32px minmax(0, 1fr) 32px;
+        gap: 6px;
+    }
+    .track-list__cover {
+        width: 32px;
+        height: 32px;
+    }
+    .track-list__meta strong {
+        font-size: 12px;
+    }
+}

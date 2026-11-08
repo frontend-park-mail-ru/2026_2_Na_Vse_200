@@ -43,7 +43,17 @@ export async function getArtistData(id: string, scope?: CacheScope, signal?: Abo
         },
         scope,
     )
-    return { artist: result.data, offline: result.offline }
+    const artist = result.data
+    if (artist) {
+        // Older offline entries stored artist names without their IDs.
+        artist.tracks = artist.tracks.map(track => ({
+            ...track,
+            artists: track.artists.map(item =>
+                typeof item === 'string' && item === artist.name ? { id: artist.id, name: item } : item,
+            ),
+        }))
+    }
+    return { artist, offline: result.offline }
 }
 
 function image(value: unknown): string | null {

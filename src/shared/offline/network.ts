@@ -1,5 +1,4 @@
 export class NetworkError extends Error {
-    readonly code = 'network_error'
     constructor() {
         super('Нет соединения с сервером.')
         this.name = 'NetworkError'

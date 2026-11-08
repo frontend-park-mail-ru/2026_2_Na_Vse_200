@@ -22,6 +22,38 @@ export function readApiError(body: unknown) {
         fields,
     }
 }
+
+let csrfToken = ''
+let csrfRequest: Promise<string> | undefined
+
+async function getCSRF(request: Fetch): Promise<string> {
+    const cookie =
+        typeof document === 'undefined'
+            ? undefined
+            : document.cookie
+                  .split('; ')
+                  .find(value => value.startsWith('csrf_token='))
+                  ?.slice('csrf_token='.length)
+    if (cookie) return cookie
+    if (csrfToken) return csrfToken
+    if (!csrfRequest) {
+        csrfRequest = (async () => {
+            const response = await request(`${API_URL}/auth/csrf`, {
+                ...API_REQUEST_OPTIONS,
+                signal: AbortSignal.timeout(15000),
+            })
+            const body: unknown = await response.json()
+            if (!response.ok || !isRecord(body) || typeof body.csrf_token !== 'string')
+                throw new Error('Не удалось подготовить защищённый запрос.')
+            csrfToken = body.csrf_token
+            return csrfToken
+        })().finally(() => {
+            csrfRequest = undefined
+        })
+    }
+    return csrfRequest
+}
+
 export async function requestJson(path: string, options: RequestOptions = {}, request: Fetch = fetch) {
     const { multipart = false, ...config } = options
     const headers = new Headers(config.headers)
@@ -29,6 +61,8 @@ export async function requestJson(path: string, options: RequestOptions = {}, re
     let response: Response
     try {
         if (typeof window !== 'undefined' && window.navigator.onLine === false) throw new NetworkError()
+        const mutation = !['GET', 'HEAD', 'OPTIONS'].includes((config.method ?? 'GET').toUpperCase())
+        if (mutation) headers.set('X-CSRF-Token', await getCSRF(request))
         response = await request(`${API_URL}${path}`, {
             ...API_REQUEST_OPTIONS,
             ...config,
@@ -42,5 +76,7 @@ export async function requestJson(path: string, options: RequestOptions = {}, re
     }
     reportConnection(true)
     const body: unknown = await response.json().catch(() => null)
+    if (response.status === 403 && readApiError(body).code === 'csrf_rejected') csrfToken = ''
+    if (['/auth/signup', '/auth/login', '/auth/logout'].includes(path)) csrfToken = ''
     return { response, body }
 }
