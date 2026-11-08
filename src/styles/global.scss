@@ -1,0 +1,194 @@
+:root {
+    --color-background: #0d0e13;
+    --color-panel: #16181f;
+    --color-hover: #20232c;
+    --color-text: #f2f1ee;
+    --font-body: 'Onest', ui-sans-serif, system-ui, sans-serif;
+    --font-heading: 'Geologica', ui-sans-serif, system-ui, sans-serif;
+
+    font-family: var(--font-body);
+    color: var(--color-text);
+    background: var(--color-background);
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    font-optical-sizing: auto;
+}
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    width: 100%;
+    min-width: 320px;
+    height: 100%;
+    min-height: 100%;
+    margin: 0;
+}
+
+body {
+    overflow: hidden;
+    background: var(--color-background);
+}
+
+.application {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    min-width: 0;
+}
+
+.application > .app-shell {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+}
+
+.application > #main-content {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    font-family: var(--font-heading);
+    font-weight: 900;
+}
+
+button,
+input,
+a {
+    -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input {
+    font: inherit;
+}
+
+button:focus-visible,
+a:focus-visible,
+input:focus-visible {
+    outline: 2px solid #bea8ff;
+    outline-offset: 3px;
+}
+
+.app-shell__skip-link {
+    position: absolute;
+    z-index: 10;
+    top: -100px;
+    left: 16px;
+    padding: 12px;
+    border-radius: 8px;
+    background: #fff;
+    color: #17151f;
+}
+
+.app-shell__skip-link:focus {
+    top: 12px;
+}
+
+.not-found-page {
+    text-align: center;
+    max-width: 650px;
+    margin: 0 auto;
+    padding: 48px 28px;
+}
+
+.not-found-page__title {
+    margin: 18px 0;
+    color: var(--color-text);
+    font-size: clamp(27px, 5vw, 38px);
+}
+
+.not-found-page__code {
+    color: #b9a1ff;
+    font-size: 12px;
+    font-weight: 750;
+    letter-spacing: 0.12em;
+}
+
+.app-shell__session-error {
+    flex: 0 0 auto;
+    margin: 0;
+    padding: 9px 20px;
+    background: #3b2028;
+    color: #ffc0c9;
+    font-size: 12px;
+}
+
+.session-loading {
+    display: grid;
+    min-height: 100dvh;
+    place-items: center;
+    background: var(--color-background);
+    color: var(--color-text);
+}
+
+.not-found-page__link {
+    display: inline-block;
+    margin-top: 12px;
+    padding: 11px 17px;
+    border-radius: 9px;
+    background: #927bf3;
+    color: #17151f;
+    font-weight: 700;
+    text-decoration: none;
+}
+/* Connectivity status stays visible on both authentication and application screens. */
+.offline-banner {
+    padding: 10px 20px;
+    background: #353044;
+    color: #fff;
+    font-size: 14px;
+    text-align: center;
+}
+
+.offline-banner button {
+    margin-left: 12px;
+    border: 1px solid currentColor;
+    border-radius: 6px;
+    padding: 4px 8px;
+    color: inherit;
+    background: transparent;
+    cursor: pointer;
+}
+
+.offline-auth {
+    min-width: 0;
+    border: 0;
+    padding: 0;
+    margin: 0;
+}
+
+.favorites-error {
+    position: fixed;
+    z-index: 20;
+    right: 20px;
+    bottom: 130px;
+    max-width: min(420px, calc(100vw - 40px));
+    padding: 14px 18px;
+    border: 1px solid #8e6e8e;
+    border-radius: 12px;
+    background: #352536;
+    color: #fff;
+}
+
+.favorites-error button {
+    margin-left: 12px;
+    border: 0;
+    background: transparent;
+    color: #c5b1ff;
+    cursor: pointer;
+}

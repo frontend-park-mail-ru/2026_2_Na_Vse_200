@@ -1,0 +1,10 @@
+import { mountApp } from './app/App.tsx'
+import { createAppRouter } from './app/router.ts'
+import './styles/global.scss'
+import { registerOfflineWorker } from './shared/offline/register.ts'
+
+const container = document.getElementById('root')
+if (!container) throw new Error('Root container #root was not found')
+const dispose = mountApp(container, createAppRouter())
+registerOfflineWorker()
+if (import.meta.hot) import.meta.hot.dispose(dispose)

@@ -1,0 +1,115 @@
+.modal--confirmation {
+    position: fixed;
+    width: min(700px, calc(100% - 32px));
+    min-height: 380px;
+    padding: 117px 51px 104px;
+    border-radius: 30px;
+    background: #20232c;
+    color: #fff;
+
+    .modal__header {
+        display: block;
+        margin-bottom: 60px;
+    }
+
+    .modal__header h2 {
+        font-family: var(--font-heading);
+        font-size: 32px;
+        font-weight: 600;
+        line-height: 40px;
+        text-align: center;
+        overflow-wrap: anywhere;
+    }
+
+    .modal__close {
+        position: absolute;
+        top: 25px;
+        right: 25px;
+        width: 28px;
+        height: 28px;
+    }
+
+    .modal__close-image {
+        position: absolute;
+        top: -1.5px;
+        left: -1.5px;
+        display: block;
+        max-width: none;
+    }
+}
+
+.logout-dialog__actions {
+    display: flex;
+    justify-content: center;
+    gap: 36px;
+}
+
+.logout-dialog__button {
+    flex: 0 1 170px;
+    min-width: 0;
+    min-height: 59px;
+    padding: 13px 16px;
+    border: 0;
+    border-radius: 30px;
+    color: #000;
+    font-family: var(--font-heading);
+    font-size: 24px;
+    font-weight: 600;
+    line-height: 30px;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        filter: brightness(1.08);
+    }
+    &:disabled {
+        opacity: 0.6;
+        cursor: wait;
+    }
+}
+
+.logout-dialog__button--cancel {
+    background: #e57e70;
+}
+.logout-dialog__button--confirm {
+    background: #9d8cff;
+}
+.logout-dialog__error {
+    margin: 20px 0 0;
+    color: #ff9ab2;
+    font-size: 14px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+@media (max-width: 600px) {
+    .modal--confirmation {
+        min-height: 300px;
+        padding: 82px 24px 48px;
+
+        .modal__header {
+            margin-bottom: 36px;
+        }
+        .modal__header h2 {
+            font-size: clamp(22px, 5vw, 28px);
+            line-height: 1.3;
+        }
+    }
+    .logout-dialog__actions {
+        gap: 16px;
+    }
+    .logout-dialog__button {
+        font-size: 20px;
+        min-height: 54px;
+    }
+}
+
+@media (max-height: 480px) {
+    .modal--confirmation {
+        min-height: 0;
+        padding: 64px 24px 24px;
+
+        .modal__header {
+            margin-bottom: 24px;
+        }
+    }
+}
