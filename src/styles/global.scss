@@ -35,6 +35,27 @@ body {
     background: var(--color-background);
 }
 
+.application {
+    display: flex;
+    flex-direction: column;
+    height: 100dvh;
+    min-height: 0;
+    min-width: 0;
+}
+
+.application > .app-shell {
+    flex: 1;
+    height: auto;
+    min-height: 0;
+}
+
+.application > #main-content {
+    flex: 1;
+    min-height: 0;
+    min-width: 0;
+    overflow: auto;
+}
+
 h1,
 h2,
 h3,

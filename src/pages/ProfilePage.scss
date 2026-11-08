@@ -188,4 +188,14 @@
         grid-template-columns: 1fr;
         gap: 8px;
     }
+    .profile-page__hero > * {
+        min-width: 0;
+        max-width: 100%;
+    }
+    .profile-page__actions {
+        flex-direction: column;
+    }
+    .profile-page__actions .profile-button {
+        width: 100%;
+    }
 }

@@ -205,6 +205,26 @@
         padding: 24px;
         border-radius: 22px;
     }
+    .music-collection__list {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 12px;
+    }
+    .music-collection__heading {
+        flex-wrap: wrap;
+    }
+    .music-collection__card .music-cover {
+        width: min(100%, 140px);
+    }
+    .music-collection__list--artist .music-cover {
+        width: min(100%, 112px);
+    }
+    .featured-playlist p {
+        font-size: 13px;
+    }
+    .featured-playlist button {
+        min-height: 40px;
+        font-size: 13px;
+    }
 }
 
 .music-collection__card-content {

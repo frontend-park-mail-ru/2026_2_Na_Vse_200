@@ -227,4 +227,20 @@
     .auth-page__title {
         font-size: clamp(30px, 8vw, 40px);
     }
+    .form-field__input {
+        font-size: 16px;
+    }
+}
+
+@media (max-width: bp.$mobile) {
+    .auth-page__art {
+        gap: 12px;
+        padding: 24px 20px;
+    }
+    .auth-page__logo {
+        width: 130px;
+    }
+    .auth-page__slogan {
+        font-size: 22px;
+    }
 }

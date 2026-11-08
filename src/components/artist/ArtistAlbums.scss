@@ -64,3 +64,11 @@
     color: #a29cb3;
     font-size: 14px;
 }
+
+@media (max-width: 520px) {
+    .artist-albums {
+        width: 100%;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 18px 14px;
+    }
+}

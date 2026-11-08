@@ -74,6 +74,8 @@
 @media (max-width: bp.$mobile) {
     .profile-edit__photo {
         gap: 18px;
+        flex-direction: column;
+        text-align: center;
     }
 
     .profile-edit__avatar {
@@ -87,10 +89,12 @@
 
     .profile-edit__actions {
         gap: 12px;
+        flex-wrap: wrap;
     }
 
     .profile-edit__actions .profile-button {
         min-width: 0;
         flex: 1;
+        padding-inline: 16px;
     }
 }
