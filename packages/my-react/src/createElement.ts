@@ -2,6 +2,10 @@ import type { Child, Component, Key, Props, VNode } from './types.js'
 
 /**
  * JSX вызывает эту функцию вместо React.createElement.
+ * @param type HTML-тег или компонент.
+ * @param props Свойства элемента; key сохраняет идентичность элемента в списке.
+ * @param children Дочерние элементы и текст.
+ * @returns Виртуальный узел без создания DOM.
  */
 export function createElement<P extends object>(
     type: string | Component<P>,

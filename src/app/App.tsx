@@ -27,6 +27,10 @@ const titles: Record<string, string> = {
     'not-found': 'Страница не найдена',
 }
 
+/**
+ * Запускает приложение и подписывает его на изменения данных и маршрута.
+ * @returns Функцию очистки подписок, запросов и плеера при размонтировании.
+ */
 export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
     const stopObserving = observeConnection()
     appStore.reset()

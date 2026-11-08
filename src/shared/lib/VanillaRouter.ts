@@ -1,9 +1,9 @@
-/** Роутер с режимами history и hash. Клики по ссылкам обрабатывает через document. */
 interface RouterOptions {
     type?: 'history' | 'hash'
     routes?: Record<string, string>
     root?: string
 }
+/** Роутер с режимами history и hash; перехватывает внутренние ссылки с data-link. */
 export class VanillaRouter {
     type: 'history' | 'hash'
     routes: Record<string, string>
@@ -26,6 +26,7 @@ export class VanillaRouter {
         this.handleLinkClick = event => this.onLinkClick(event)
     }
 
+    /** Подписывается на переходы и сразу сообщает текущий маршрут. */
     listen() {
         if (this.started) return this
 
@@ -47,6 +48,11 @@ export class VanillaRouter {
         return this
     }
 
+    /**
+     * Переходит по адресу и уведомляет подписчиков.
+     * @param to Адрес перехода. Внешняя ссылка открывается обычной навигацией браузера.
+     * @param options При replace заменяет текущую запись истории.
+     */
     navigate(to: string, { replace = false }: { replace?: boolean } = {}) {
         const target = new URL(to, window.location.origin)
         if (target.origin !== window.location.origin) {
@@ -71,6 +77,7 @@ export class VanillaRouter {
         return this
     }
 
+    /** Снимает обработчики, добавленные в listen(). */
     destroy() {
         if (!this.started) return this
 

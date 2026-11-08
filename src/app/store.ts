@@ -22,6 +22,7 @@ const store = createStore<AppState>({
 let catalogRequest: Promise<(Catalog & { offline: boolean }) | null> | null = null
 let controller: AbortController | null = null
 
+/** Повторный вызов использует текущий запрос; ответ отменённого запроса не меняет каталог. */
 const loadCatalog = async () => {
     if (catalogRequest) return catalogRequest
     const request = new AbortController()

@@ -14,6 +14,8 @@ let currentHookIndex = 0
 /**
  * Обновляет DOM по новому дереву, по возможности сохраняя существующие узлы.
  * Движок хранит один корень: его же обновляет setState.
+ * @param element Виртуальное дерево; null очищает контейнер.
+ * @param container Корневой DOM-контейнер приложения.
  */
 export function render(element: VNode | null, container: HTMLElement): void {
     const previousRootElement = rootElement
@@ -26,6 +28,8 @@ export function render(element: VNode | null, container: HTMLElement): void {
  * Хранит состояние по пути компонента и порядку вызова хука.
  * Вызывается внутри компонента, каждый раз в одном и том же порядке, без условий.
  * Начальное значение сохраняется как есть; функция-инициализатор не поддерживается.
+ * @param initialValue Начальное состояние компонента.
+ * @returns Текущее значение и setter, принимающий значение или функцию обновления.
  */
 export function useState<S>(initialValue: S): [S, StateSetter<S>] {
     const path = currentPath

@@ -12,6 +12,7 @@ interface SessionState {
     pending: boolean
 }
 
+/** Управляет серверной сессией; при сетевой ошибке восстанавливает сохранённые данные для просмотра. */
 export const createSession = () => {
     const store = createStore<SessionState>({ user: null, status: 'idle', error: '', pending: false })
     let request: AbortController | null = null
