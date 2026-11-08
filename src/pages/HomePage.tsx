@@ -5,14 +5,16 @@ import { Icon } from '../components/ui/Icon.tsx'
 import { TrackList } from '../components/music/TrackList.tsx'
 import './HomePage.scss'
 import { artistHref } from '../features/artist/route.ts'
+import { API_ORIGIN } from '../config.ts'
 
 const Cover = ({ cover, icon = 'music' }: CoverProps) => {
     const [failedCover, setFailedCover] = useState('')
-    const coverError = () => setFailedCover(cover ?? '')
+    const image = cover?.startsWith('/') ? API_ORIGIN.replace(/\/$/, '') + cover : cover
+    const coverError = () => setFailedCover(image ?? '')
     return (
         <span className="music-cover">
-            {cover && failedCover !== cover ? (
-                <img src={cover} alt="" loading="lazy" onError={coverError} />
+            {image && failedCover !== image ? (
+                <img src={image} alt="" loading="lazy" onError={coverError} />
             ) : (
                 <Icon name={icon} size={20} />
             )}
