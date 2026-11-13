@@ -91,7 +91,11 @@
     gap: 5px;
     min-height: 38px;
     padding: 8px 15px 10px;
+    border: 0;
     border-radius: 13px;
+    background: transparent;
+    font: inherit;
+    text-align: left;
     color: #fff;
     text-decoration: none;
     font-size: 16px;
@@ -104,9 +108,9 @@
     line-height: 20px;
 }
 
-.sidebar__nav-link:hover,
+.sidebar__nav-link:hover:not(:disabled),
 .sidebar__playlist-add:hover,
-.sidebar__playlist-link:hover {
+.sidebar__playlist-link:hover:not(:disabled) {
     background: var(--color-hover);
     color: #fff;
 }
@@ -149,7 +153,11 @@
     gap: 12px;
     min-width: 0;
     padding: 0;
+    border: 0;
     border-radius: 8px;
+    background: transparent;
+    font: inherit;
+    text-align: left;
     color: #b1b4c1;
     text-decoration: none;
     font-size: 11px;
@@ -157,6 +165,12 @@
         background 0.18s ease,
         color 0.18s ease;
     width: 100%;
+}
+
+.sidebar__nav-link:disabled,
+.sidebar__playlist-link:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
 }
 
 .sidebar__playlist-copy {

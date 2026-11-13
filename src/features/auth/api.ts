@@ -68,7 +68,7 @@ export async function logout(request = fetch, signal?: AbortSignal) {
     )
 }
 
-function parseUser(body: unknown): User {
+export function parseUser(body: unknown): User {
     if (
         !isRecord(body) ||
         (typeof body.id !== 'string' && typeof body.id !== 'number') ||

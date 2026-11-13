@@ -51,10 +51,6 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         artist.reset()
     }
 
-    const registered = () => {
-        notice = 'Аккаунт создан. Войдите, используя свою почту и пароль.'
-        router.navigate('/login')
-    }
     const authenticated = (user: User) => {
         const next = router.getCurrentUrl().searchParams.get('next')
         resetMusic()
@@ -77,7 +73,8 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         }
         resetMusic()
         modals.close()
-        router.navigate('/login')
+        notice = ''
+        router.navigate('/', { replace: true })
     }
     const confirmSignOut = () => modals.open(<LogoutDialog onConfirm={signOut} />)
     const selectTrack = (track: Track) => {
@@ -157,7 +154,7 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                 <p role="status">Профиль не сохранён. Подключитесь к интернету и войдите.</p>
             ),
             login: <AuthPage key="login" mode="login" notice={notice} onAuthenticated={authenticated} />,
-            signup: <AuthPage key="signup" mode="signup" onRegistered={registered} />,
+            signup: <AuthPage key="signup" mode="signup" onRegistered={authenticated} />,
         }
         let page = pages[route] ?? <NotFoundPage />
         if (route === 'login' || route === 'signup') {
@@ -178,9 +175,7 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                         </button>
                     </main>
                 ) : (
-                    <main className="session-loading" aria-live="polite">
-                        Проверяем сессию…
-                    </main>
+                    <main className="session-loading" aria-label="Загрузка" aria-busy="true" />
                 )
         } else {
             page = (
@@ -232,11 +227,11 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
             void session.restore().then(() => syncRoute())
             return
         }
-        if (status === 'ready' && !user && route !== 'artist') {
+        if (status === 'ready' && !user && route === 'profile') {
             appStore.reset()
             artist.reset()
             selectedTrack = undefined
-            router.navigate(route === 'profile' ? '/login?next=/profile' : '/signup', { replace: true })
+            router.navigate('/login?next=/profile', { replace: true })
             return
         }
         if (status !== 'ready' && status !== 'offline') return

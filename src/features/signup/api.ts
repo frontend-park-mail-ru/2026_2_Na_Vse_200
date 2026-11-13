@@ -1,6 +1,7 @@
 import type { FieldErrors } from '../../types/domain.ts'
 import type { SignupValues } from './validation.ts'
 import { readApiError, requestJson } from '../../shared/api/request.ts'
+import { parseUser } from '../auth/api.ts'
 
 export class SignupError extends Error {
     fields: FieldErrors
@@ -11,6 +12,7 @@ export class SignupError extends Error {
     }
 }
 
+/** Регистрирует пользователя; сервер устанавливает cookie сессии и возвращает профиль. */
 export async function signup(data: SignupValues, request = fetch) {
     let result: Awaited<ReturnType<typeof requestJson>>
     try {
@@ -20,7 +22,7 @@ export async function signup(data: SignupValues, request = fetch) {
     }
 
     const { response, body } = result
-    if (response.status === 201) return
+    if (response.status === 201) return parseUser(body)
     const error = readApiError(body)
 
     if (response.status === 409 && error.code === 'email_taken') {

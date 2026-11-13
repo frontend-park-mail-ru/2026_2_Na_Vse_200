@@ -69,11 +69,11 @@ export const AuthPage = (props: AuthPageProps) => {
         setState({ errors: {}, message: '', pending: true })
         try {
             if (props.mode === 'signup') {
-                await signup(data)
+                const user = await signup(data)
                 if (!form.isConnected) return
                 const password = form.elements.namedItem('password') as HTMLInputElement
                 password.value = ''
-                props.onRegistered()
+                props.onRegistered(user)
             } else {
                 const user = await login({ email: data.email, password: data.password })
                 if (form.isConnected) props.onAuthenticated?.(user)
@@ -125,11 +125,6 @@ export const AuthPage = (props: AuthPageProps) => {
                     <h1 className="auth-page__title" id={`${props.mode}-title`} tabIndex={-1}>
                         {title}
                     </h1>
-                    <p className="auth-page__intro">
-                        {registration
-                            ? 'Пара секунд — и можно слушать.'
-                            : ['С возвращением! ', <br />, 'Войдите, чтобы продолжить слушать.']}
-                    </p>
                     {props.mode === 'login' && props.notice && (
                         <p className="auth-page__notice" role="status">
                             {props.notice}

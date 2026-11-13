@@ -40,6 +40,33 @@
     background: var(--color-background);
 }
 
+.app-shell__auth {
+    display: flex;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    padding: 12px 20px;
+    flex-shrink: 0;
+}
+
+.app-shell__auth-link {
+    padding: 10px 16px;
+    border: 1px solid #9d8cff;
+    border-radius: 24px;
+    color: var(--color-text);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.app-shell__auth-link--signup {
+    background: #9d8cff;
+    color: #08070c;
+}
+
+.app-shell__auth-link:hover {
+    filter: brightness(1.15);
+}
+
 .app-shell__content {
     width: 100%;
     min-height: 0;

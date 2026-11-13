@@ -14,9 +14,9 @@ const navigationIcons: Record<string, string> = { home: homeIcon, search: search
 const playlistImages: Record<string, string> = { rose: heartIcon }
 
 const navigation = [
-    { label: 'Главная', href: '/', icon: 'home' },
-    { label: 'Поиск', href: '#search', icon: 'search' },
-    { label: 'Медиатека', href: '#library', icon: 'library' },
+    { label: 'Главная', href: '/', icon: 'home', disabled: false },
+    { label: 'Поиск', icon: 'search', disabled: true },
+    { label: 'Медиатека', icon: 'library', disabled: true },
 ]
 
 const playlists = [
@@ -33,25 +33,30 @@ export function Sidebar({ route, user, className = '' }: SidebarProps) {
             </a>
 
             <nav className="sidebar__nav" aria-label="Основная навигация">
-                {navigation.map(item => (
-                    <a
-                        className={`sidebar__nav-link${item.href === '/' && route === 'home' ? ' sidebar__nav-link--active' : ''}`}
-                        href={item.href}
-                        data-link={item.href.startsWith('/') ? 'true' : undefined}
-                        key={item.label}
-                    >
-                        <img
-                            src={navigationIcons[item.icon]}
-                            className={`sidebar__nav-icon sidebar__nav-icon--${item.icon}`}
-                            alt=""
-                        />
-                        <span
-                            className={`sidebar__nav-label${item.icon !== 'home' ? ' sidebar__nav-label--offset' : ''}`}
+                {navigation.map(item => {
+                    const Tag = item.disabled ? 'button' : 'a'
+                    return (
+                        <Tag
+                            className={`sidebar__nav-link${item.href === '/' && route === 'home' ? ' sidebar__nav-link--active' : ''}`}
+                            href={item.href}
+                            type={item.disabled ? 'button' : undefined}
+                            disabled={item.disabled}
+                            data-link={item.disabled ? undefined : 'true'}
+                            key={item.label}
                         >
-                            {item.label}
-                        </span>
-                    </a>
-                ))}
+                            <img
+                                src={navigationIcons[item.icon]}
+                                className={`sidebar__nav-icon sidebar__nav-icon--${item.icon}`}
+                                alt=""
+                            />
+                            <span
+                                className={`sidebar__nav-label${item.icon !== 'home' ? ' sidebar__nav-label--offset' : ''}`}
+                            >
+                                {item.label}
+                            </span>
+                        </Tag>
+                    )
+                })}
             </nav>
 
             <div className="sidebar__divider"></div>
@@ -64,7 +69,7 @@ export function Sidebar({ route, user, className = '' }: SidebarProps) {
 
             <nav className="sidebar__playlists" aria-label="Плейлисты">
                 {playlists.map(playlist => (
-                    <a className="sidebar__playlist-link" href={`#${playlist.color}`} key={playlist.name}>
+                    <button className="sidebar__playlist-link" type="button" disabled key={playlist.name}>
                         <span className={`sidebar__playlist-icon sidebar__playlist-icon--${playlist.color}`}>
                             {playlistImages[playlist.color] ? (
                                 <img src={playlistImages[playlist.color]} alt="" />
@@ -76,22 +81,22 @@ export function Sidebar({ route, user, className = '' }: SidebarProps) {
                             <strong className="sidebar__playlist-name">{playlist.name}</strong>
                             <small className="sidebar__playlist-detail">{playlist.detail.replace(' · ', '  ')}</small>
                         </span>
-                    </a>
+                    </button>
                 ))}
             </nav>
 
             <div className="sidebar__account">
                 <a
                     className="sidebar__profile"
-                    href="/profile"
+                    href={user ? '/profile' : '/login'}
                     data-link
-                    aria-label="Открыть профиль"
+                    aria-label={user ? 'Открыть профиль' : 'Войти в аккаунт'}
                     aria-current={route === 'profile' ? 'page' : undefined}
                 >
                     <UserAvatar src={user?.avatar_url} className="sidebar__avatar" />
                     <span className="sidebar__account-copy">
                         <strong className="sidebar__account-name">
-                            {user?.display_name || user?.email || 'Пользователь'}
+                            {user?.display_name || user?.email || 'Войдите в профиль'}
                         </strong>
                         <small className="sidebar__account-detail">Личный аккаунт</small>
                     </span>
