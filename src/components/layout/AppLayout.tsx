@@ -39,14 +39,24 @@ export function AppLayout({
             </a>
             <Sidebar className="app-shell__sidebar" route={route} user={user} />
             <div className="app-shell__main-column">
+                {!user && (
+                    <nav className="app-shell__auth" aria-label="Аккаунт">
+                        <a className="app-shell__auth-link" href="/login" data-link>
+                            Войти
+                        </a>
+                        <a className="app-shell__auth-link app-shell__auth-link--signup" href="/signup" data-link>
+                            Зарегистрироваться
+                        </a>
+                    </nav>
+                )}
                 <nav className="app-shell__mobile-nav" aria-label="Навигация">
                     <a href="/" data-link>
                         Главная
                     </a>
                     <a
-                        href="/profile"
+                        href={user ? '/profile' : '/login'}
                         data-link
-                        aria-label="Открыть профиль"
+                        aria-label={user ? 'Открыть профиль' : 'Войти в аккаунт'}
                         aria-current={route === 'profile' ? 'page' : undefined}
                     >
                         <UserAvatar src={user?.avatar_url} />
