@@ -1,12 +1,13 @@
 import { createStore } from '../../shared/lib/store.ts'
 import { isRecord, readApiError, requestJson } from '../../shared/api/request.ts'
 import { loadWithCache } from '../../shared/offline/load.ts'
-import { getCacheScope, writeCached } from '../../shared/offline/storage.ts'
+import { getCacheScope, readCached, writeCached } from '../../shared/offline/storage.ts'
 import { connectionAvailable } from '../../shared/offline/network.ts'
-import type { EntityId } from '../../types/domain.ts'
+import type { EntityId, Track } from '../../types/domain.ts'
 
 interface FavoritesState {
     ids: Record<string, boolean>
+    tracks: Record<string, Track>
     pending: Record<string, boolean>
     status: 'idle' | 'loading' | 'ready' | 'unavailable' | 'error'
     error: string
@@ -14,11 +15,12 @@ interface FavoritesState {
 
 class UnavailableError extends Error {}
 
-const initial = (): FavoritesState => ({ ids: {}, pending: {}, status: 'idle', error: '' })
+const initial = (): FavoritesState => ({ ids: {}, tracks: {}, pending: {}, status: 'idle', error: '' })
 const store = createStore<FavoritesState>(initial())
 let owner: string | null | undefined
 let generation = 0
 let confirmed: Record<string, boolean> = {}
+let savedTracks: Record<string, Track> = {}
 let persistence = Promise.resolve()
 const mutations = new Set<AbortController>()
 
@@ -31,32 +33,37 @@ async function load(userId: EntityId | null, force = false) {
     mutations.clear()
     const version = ++generation
     confirmed = {}
+    savedTracks = {}
     const scope = getCacheScope()
     store.setState({ ...initial(), status: next === null ? 'idle' : 'loading' })
     if (next === null) return
     try {
-        const result = await loadWithCache(
-            'favorites',
-            async () => {
-                const { response, body } = await requestJson('/favorites')
-                if (response.status === 404 || response.status === 405) {
-                    throw new UnavailableError()
-                }
-                if (!response.ok) throw new Error(readApiError(body).message || 'Не удалось загрузить избранное.')
-                if (
-                    !isRecord(body) ||
-                    !Array.isArray(body.track_ids) ||
-                    !body.track_ids.every(id => typeof id === 'string')
-                ) {
-                    throw new Error('Сервер вернул неверные данные избранного.')
-                }
-                return Object.fromEntries(body.track_ids.map(id => [id, true])) as Record<string, boolean>
-            },
-            scope,
-        )
+        const [result, cachedTracks] = await Promise.all([
+            loadWithCache(
+                'favorites',
+                async () => {
+                    const { response, body } = await requestJson('/favorites')
+                    if (response.status === 404 || response.status === 405) {
+                        throw new UnavailableError()
+                    }
+                    if (!response.ok) throw new Error(readApiError(body).message || 'Не удалось загрузить избранное.')
+                    if (
+                        !isRecord(body) ||
+                        !Array.isArray(body.track_ids) ||
+                        !body.track_ids.every(id => typeof id === 'string')
+                    ) {
+                        throw new Error('Сервер вернул неверные данные избранного.')
+                    }
+                    return Object.fromEntries(body.track_ids.map(id => [id, true])) as Record<string, boolean>
+                },
+                scope,
+            ),
+            readCached<Record<string, Track>>(scope.userId, 'favorite-tracks'),
+        ])
         if (version === generation) {
             confirmed = { ...result.data }
-            store.setState({ ids: result.data, status: 'ready' })
+            savedTracks = Object.fromEntries(Object.entries(cachedTracks?.data ?? {}).filter(([id]) => confirmed[id]))
+            store.setState({ ids: result.data, tracks: savedTracks, status: 'ready' })
         }
     } catch (error) {
         if (version !== generation) return
@@ -81,7 +88,8 @@ export const favorites = {
         !store.getState().pending[String(id)] &&
         connectionAvailable(),
     /** Сразу обновляет лайк в интерфейсе и откатывает его при ошибке сервера. */
-    async toggle(id: EntityId) {
+    async toggle(track: Track) {
+        const { id } = track
         if (!favorites.canToggle(id)) return
         const key = String(id)
         const previous = favorites.isLiked(id)
@@ -91,6 +99,7 @@ export const favorites = {
         mutations.add(controller)
         store.setState(state => ({
             ids: { ...state.ids, [key]: !previous },
+            tracks: { ...state.tracks, [key]: track },
             pending: { ...state.pending, [key]: true },
             error: '',
         }))
@@ -105,8 +114,15 @@ export const favorites = {
             if (response.status !== 204) throw new Error(readApiError(body).message || 'Не удалось сохранить лайк.')
             if (version !== generation) return
             confirmed = { ...confirmed, [key]: !previous }
+            savedTracks = { ...savedTracks }
+            if (previous) delete savedTracks[key]
+            else savedTracks[key] = track
             const snapshot = confirmed
-            persistence = persistence.then(() => writeCached(scope.userId, 'favorites', snapshot, scope))
+            const trackSnapshot = savedTracks
+            persistence = persistence.then(async () => {
+                await writeCached(scope.userId, 'favorites', snapshot, scope)
+                await writeCached(scope.userId, 'favorite-tracks', trackSnapshot, scope)
+            })
             await persistence
         } catch (error) {
             if (version === generation)

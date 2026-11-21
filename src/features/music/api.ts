@@ -41,7 +41,8 @@ function isCollectionItem(value: unknown): value is CollectionItem {
     return (
         isRecord(value) &&
         (typeof value.id === 'string' || typeof value.id === 'number') &&
-        optionalStrings(value, ['name', 'title', 'image_url', 'cover_url'])
+        optionalStrings(value, ['name', 'title', 'image_url', 'cover_url']) &&
+        (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist)))
     )
 }
 function isArtist(value: unknown): boolean {
@@ -57,9 +58,14 @@ function isTrack(value: unknown): value is Track {
     const duration = value.duration
     return (
         optionalStrings(value, ['artist_name', 'cover']) &&
-        (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist))) &&
         (value.artist === undefined || isArtist(value.artist)) &&
-        (value.album === undefined || (isRecord(value.album) && optionalStrings(value.album, ['cover_url']))) &&
+        (value.album_id == null || typeof value.album_id === 'string' || typeof value.album_id === 'number') &&
+        (value.album === undefined ||
+            (isRecord(value.album) &&
+                optionalStrings(value.album, ['cover_url']) &&
+                (value.album.id === undefined ||
+                    typeof value.album.id === 'string' ||
+                    typeof value.album.id === 'number'))) &&
         ['duration_seconds', 'duration_ms'].every(key => value[key] === undefined || typeof value[key] === 'number') &&
         ['is_liked', 'liked'].every(key => value[key] === undefined || typeof value[key] === 'boolean') &&
         (duration === undefined ||

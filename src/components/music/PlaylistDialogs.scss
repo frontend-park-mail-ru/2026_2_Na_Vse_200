@@ -1,0 +1,228 @@
+@use '../../styles/breakpoints' as bp;
+
+.playlist-dialog {
+    width: min(700px, calc(100% - 24px));
+    background: var(--color-hover);
+
+    h2 {
+        font-family: var(--font-heading);
+    }
+}
+
+.playlist-dialog__form {
+    display: grid;
+    gap: 20px;
+}
+
+.playlist-dialog__upload {
+    display: flex;
+    align-items: center;
+    gap: clamp(12px, 3vw, 28px);
+
+    small {
+        display: block;
+        margin-top: 12px;
+        color: #a39ab9;
+        font-weight: 600;
+    }
+}
+
+.playlist-dialog__cover {
+    width: clamp(74px, 12vw, 130px);
+    height: auto;
+    aspect-ratio: 1;
+    border-radius: 20px;
+}
+
+.playlist-dialog__cover .artist-cover__icon {
+    width: 46px;
+    height: 46px;
+}
+
+.playlist-dialog__file {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    opacity: 0;
+
+    &:focus-visible + label {
+        outline: 2px solid #bea8ff;
+        outline-offset: 3px;
+    }
+
+    &:disabled + label {
+        opacity: 0.5;
+        pointer-events: none;
+    }
+}
+
+.playlist-dialog__field {
+    display: grid;
+    gap: 9px;
+    font-family: var(--font-heading);
+    font-weight: 500;
+
+    input,
+    textarea {
+        width: 100%;
+        padding: 16px 20px;
+        border: 0;
+        border-radius: 18px;
+        background: var(--color-panel);
+        color: inherit;
+        font: inherit;
+
+        &::placeholder {
+            color: #a39ab9;
+        }
+
+        &:focus-visible {
+            outline: 2px solid #bea8ff;
+        }
+    }
+
+    textarea {
+        min-height: 116px;
+        resize: vertical;
+    }
+}
+
+.playlist-dialog__actions {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 12px 20px;
+    margin-top: 28px;
+
+    .catalog-button {
+        min-width: min(100%, 140px);
+        min-height: 50px;
+    }
+}
+
+.playlist-dialog__error,
+.playlist-dialog__empty {
+    margin: 0;
+    padding: 12px 0;
+    color: #f3afa7;
+}
+
+.playlist-dialog__subtitle {
+    margin: 0 0 14px;
+    color: #b2a6cc;
+}
+
+.playlist-dialog--picker {
+    width: min(900px, calc(100% - 24px));
+
+    .modal__header {
+        margin-bottom: 12px;
+    }
+
+    .catalog-search-field input {
+        height: 54px;
+        font-size: 15px;
+        background: var(--color-panel);
+    }
+
+    .playlist-dialog__actions {
+        padding-top: 16px;
+        border-top: 1px solid #393544;
+    }
+}
+
+.playlist-dialog__selection {
+    margin-right: auto;
+}
+
+.playlist-picker {
+    display: grid;
+    gap: 4px;
+    max-height: min(310px, 36dvh);
+    margin: 16px 0 0;
+    padding: 0 4px 0 0;
+    overflow: auto;
+    list-style: none;
+}
+
+.playlist-picker__row {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 12px;
+    min-height: 58px;
+    padding: 8px 10px;
+    border-radius: 12px;
+
+    &:has(input) {
+        cursor: pointer;
+    }
+
+    &:has(input):hover,
+    &--selected {
+        background: #2b2a3d;
+    }
+
+    small {
+        color: #b2a6cc;
+    }
+}
+
+.playlist-picker__meta {
+    display: grid;
+    min-width: 0;
+    gap: 4px;
+
+    strong,
+    small {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.playlist-picker__choice {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+
+    input {
+        width: 20px;
+        height: 20px;
+        margin: 0;
+        accent-color: #9d8cff;
+    }
+}
+
+.playlist-dialog--delete {
+    width: min(560px, calc(100% - 24px));
+
+    .playlist-dialog__actions .catalog-button {
+        flex: 1;
+    }
+
+    p {
+        overflow-wrap: anywhere;
+    }
+}
+
+@media (max-width: bp.$mobile) {
+    .playlist-dialog__actions {
+        gap: 10px;
+        margin-top: 14px;
+
+        .catalog-button {
+            min-width: 0;
+            flex: 1;
+        }
+    }
+
+    .playlist-dialog__selection {
+        width: 100%;
+    }
+
+    .playlist-picker__choice small {
+        display: none;
+    }
+}

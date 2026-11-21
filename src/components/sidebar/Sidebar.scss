@@ -39,10 +39,11 @@
 .sidebar__playlists {
     display: grid;
     gap: 23px;
-    flex: 0 0 auto;
+    flex: 0 1 auto;
     min-height: 0;
     align-content: start;
-    overflow: hidden;
+    overflow-y: auto;
+    scrollbar-width: thin;
     margin-left: 9px;
     margin-bottom: 24px;
 }
@@ -118,6 +119,10 @@
 .sidebar__nav-link--active {
     background: #20232c;
     color: #fff;
+}
+
+.sidebar__playlist-link[aria-current='page'] {
+    background: var(--color-hover);
 }
 
 .sidebar__nav-icon {
@@ -209,16 +214,6 @@
     place-items: center;
     border-radius: 9px;
     color: #fff;
-}
-
-.sidebar__playlist-icon--rose {
-    background: rgb(255 138 122 / 89%);
-    color: #624777;
-}
-
-.sidebar__playlist-icon--teal,
-.sidebar__playlist-icon--amber {
-    background: #16181f;
 }
 
 .sidebar__avatar {

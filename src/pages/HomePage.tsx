@@ -5,6 +5,7 @@ import { Icon } from '../components/ui/Icon.tsx'
 import { TrackList } from '../components/music/TrackList.tsx'
 import './HomePage.scss'
 import { artistHref } from '../features/artist/route.ts'
+import { albumHref } from '../features/music/catalog.ts'
 import { API_ORIGIN } from '../config.ts'
 
 const Cover = ({ cover, icon = 'music' }: CoverProps) => {
@@ -22,6 +23,10 @@ const Cover = ({ cover, icon = 'music' }: CoverProps) => {
     )
 }
 const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps) => {
+    const [expanded, setExpanded] = useState(false)
+    const previewSize = 4
+    const visibleItems = expanded ? items : items.slice(0, previewSize)
+    const listId = `home-collection-${type}`
     const emptyMessage = () => {
         if (tracksStatus === 'loading') return 'Загружаем…'
         if (tracksStatus === 'error') return 'Не удалось загрузить данные.'
@@ -39,10 +44,10 @@ const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps
                     <strong title={item.name}>{item.name}</strong>
                 </a>
             ) : (
-                <div className="music-collection__card-content">
+                <a className="music-collection__card-content" href={albumHref(item.id)} data-link>
                     <Cover cover={item.cover_url} icon="music" />
                     <strong title={item.title}>{item.title}</strong>
-                </div>
+                </a>
             )}
         </article>
     )
@@ -50,15 +55,20 @@ const CollectionSection = ({ title, items, type, tracksStatus }: CollectionProps
         <section className="music-collection" aria-label={title}>
             <div className="music-collection__heading">
                 <h2>{title}</h2>
-                {items.length > 0 && (
-                    <button type="button">
-                        Смотреть все <Icon name="chevronRight" size={16} />
+                {items.length > previewSize && (
+                    <button
+                        type="button"
+                        aria-controls={listId}
+                        aria-expanded={expanded ? 'true' : 'false'}
+                        onClick={() => setExpanded(!expanded)}
+                    >
+                        {expanded ? 'Свернуть' : 'Смотреть все'} <Icon name="chevronRight" size={16} />
                     </button>
                 )}
             </div>
             {items.length === 0 && <p className="music-collection__empty">{emptyMessage()}</p>}
-            <div className={`music-collection__list music-collection__list--${type}`}>
-                {items.slice(0, 4).map(renderCard)}
+            <div className={`music-collection__list music-collection__list--${type}`} id={listId}>
+                {visibleItems.map(renderCard)}
             </div>
         </section>
     )

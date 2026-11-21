@@ -9,6 +9,11 @@ export const createAppRouter = () =>
             '/signup': 'signup',
             '/login': 'login',
             '/artists/:id': 'artist',
+            '/albums/:id': 'album',
+            '/search': 'search',
+            '/library': 'library',
+            '/playlists/:id': 'playlist',
+            '/favorites': 'favorites',
             '*': 'not-found',
         },
     })

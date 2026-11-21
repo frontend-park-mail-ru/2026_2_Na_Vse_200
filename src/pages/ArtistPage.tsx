@@ -7,6 +7,9 @@ import { ArtistAlbums } from '../components/artist/ArtistAlbums.tsx'
 import type { ArtistPageProps } from '../features/artist/types.ts'
 import './ArtistPage.scss'
 
+const trackPreviewSize = 5
+const albumPreviewSize = 3
+
 export function ArtistPage({
     artist,
     artistId,
@@ -48,8 +51,8 @@ export function ArtistPage({
         )
     }
 
-    const tracks = allTracks ? artist.tracks : artist.tracks.slice(0, 5)
-    const albums = allAlbums ? artist.albums : artist.albums.slice(0, 3)
+    const tracks = allTracks ? artist.tracks : artist.tracks.slice(0, trackPreviewSize)
+    const albums = allAlbums ? artist.albums : artist.albums.slice(0, albumPreviewSize)
 
     return (
         <div className="artist-page">
@@ -79,11 +82,10 @@ export function ArtistPage({
                         Популярные треки
                     </h2>
                     <TrackList tracks={tracks} activeTrack={activeTrack} onTrackSelect={onTrackSelect} />
-                    {artist.tracks.length > 0 && (
+                    {artist.tracks.length > trackPreviewSize && (
                         <button
                             className="artist-page__more"
                             type="button"
-                            disabled={artist.tracks.length <= 5}
                             aria-expanded={allTracks ? 'true' : 'false'}
                             onClick={() => setAllTracks(!allTracks)}
                         >
@@ -99,12 +101,11 @@ export function ArtistPage({
                     >
                         Альбомы
                     </h2>
-                    <ArtistAlbums albums={albums} />
-                    {artist.albums.length > 0 && (
+                    <ArtistAlbums albums={albums} artistId={artist.id} />
+                    {artist.albums.length > albumPreviewSize && (
                         <button
                             className="artist-page__more"
                             type="button"
-                            disabled={artist.albums.length <= 3}
                             aria-expanded={allAlbums ? 'true' : 'false'}
                             onClick={() => setAllAlbums(!allAlbums)}
                         >
