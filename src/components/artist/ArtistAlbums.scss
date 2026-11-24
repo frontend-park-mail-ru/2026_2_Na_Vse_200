@@ -12,6 +12,17 @@
     text-align: center;
 }
 
+.artist-albums__link {
+    display: block;
+    border-radius: 10px;
+    color: inherit;
+    text-decoration: none;
+
+    &:hover strong {
+        color: #b5a2ff;
+    }
+}
+
 .artist-albums__cover {
     width: 100%;
     height: auto;

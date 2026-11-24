@@ -5,9 +5,35 @@ import type { ModalState } from './Modal.types.ts'
 const store = createStore<ModalState>({ content: null })
 let dialog: HTMLDialogElement | null = null
 
+let stopTrackingPlayer: (() => void) | undefined
+
 const attach: ElementRef = element => {
-    dialog = element as HTMLDialogElement | null
-    if (dialog && !dialog.open) dialog.showModal()
+    stopTrackingPlayer?.()
+    stopTrackingPlayer = undefined
+    dialog = element instanceof HTMLDialogElement ? element : null
+    if (!dialog) return
+    const current = dialog
+
+    // Open after the renderer has finished inserting and ordering the dialog node.
+    queueMicrotask(() => {
+        if (dialog !== current || !current.isConnected) return
+        const player = current.parentElement?.querySelector('.app-shell__player')
+        if (player) {
+            const updatePosition = () => {
+                const reservedSpace = window.innerHeight - player.getBoundingClientRect().top + 12
+                current.style.setProperty('--modal-bottom', `${Math.max(16, reservedSpace)}px`)
+            }
+            updatePosition()
+            const observer = new ResizeObserver(updatePosition)
+            observer.observe(player)
+            window.addEventListener('resize', updatePosition)
+            stopTrackingPlayer = () => {
+                observer.disconnect()
+                window.removeEventListener('resize', updatePosition)
+            }
+        }
+        if (!current.open) current.showModal()
+    })
 }
 
 const close = () => {

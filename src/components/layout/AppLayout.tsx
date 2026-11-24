@@ -13,6 +13,10 @@ export function AppLayout({
     activeTrack,
     sessionError,
     player,
+    playlists,
+    favoriteCount,
+    playlistId,
+    onCreatePlaylist,
     children,
 }: AppLayoutProps) {
     const [queueOpen, setQueueOpen] = useState(false)
@@ -37,7 +41,15 @@ export function AppLayout({
             <a className="app-shell__skip-link" href="#main-content">
                 К содержимому
             </a>
-            <Sidebar className="app-shell__sidebar" route={route} user={user} />
+            <Sidebar
+                className="app-shell__sidebar"
+                route={route}
+                user={user}
+                playlists={playlists}
+                favoriteCount={favoriteCount}
+                playlistId={playlistId}
+                onCreate={onCreatePlaylist}
+            />
             <div className="app-shell__main-column">
                 {!user && (
                     <nav className="app-shell__auth" aria-label="Аккаунт">
@@ -50,8 +62,18 @@ export function AppLayout({
                     </nav>
                 )}
                 <nav className="app-shell__mobile-nav" aria-label="Навигация">
-                    <a href="/" data-link>
+                    <a href="/" data-link aria-current={route === 'home' ? 'page' : undefined}>
                         Главная
+                    </a>
+                    <a href="/search" data-link aria-current={route === 'search' ? 'page' : undefined}>
+                        Поиск
+                    </a>
+                    <a
+                        href="/library"
+                        data-link
+                        aria-current={['library', 'playlist', 'favorites'].includes(route) ? 'page' : undefined}
+                    >
+                        Медиатека
                     </a>
                     <a
                         href={user ? '/profile' : '/login'}

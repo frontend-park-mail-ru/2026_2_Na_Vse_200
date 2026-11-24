@@ -14,9 +14,12 @@ interface Props<T extends Track> {
     error?: string
     onRetry?: () => void
     columns?: boolean
+    longColumns?: boolean
+    label?: string
+    onRemove?: (track: T) => void
 }
 
-function formatDuration(track: Track) {
+export function formatDuration(track: Track) {
     const duration = track.duration ?? track.duration_seconds ?? (track.duration_ms ?? 0) / 1000
     if (typeof duration === 'string' && /^\d+:\d{2}$/.test(duration)) return duration
     const seconds = Number(
@@ -34,6 +37,9 @@ export function TrackList<T extends Track>({
     error = '',
     onRetry,
     columns = false,
+    longColumns = false,
+    label = 'Популярные треки',
+    onRemove,
 }: Props<T>) {
     const [menuTrack, setMenuTrack] = useState<Track['id'] | null>(null)
     if (status === 'loading')
@@ -53,7 +59,13 @@ export function TrackList<T extends Track>({
         )
     if (!tracks.length) return <p className="track-list-message">Пока нет треков.</p>
     return (
-        <ol className={`track-list${columns ? ' track-list--columns' : ''}`} aria-label="Популярные треки">
+        <ol
+            className={`track-list${columns ? ' track-list--columns' : ''}${longColumns ? ' track-list--long-columns' : ''}`}
+            aria-label={label}
+            onKeyDown={event => {
+                if (event.key === 'Escape') setMenuTrack(null)
+            }}
+        >
             {tracks.map((track, index) => {
                 const liked = favorites.isLiked(track.id)
                 const canToggle = favorites.canToggle(track.id)
@@ -82,7 +94,7 @@ export function TrackList<T extends Track>({
                             disabled={!canToggle}
                             aria-label={`${liked ? 'Убрать из' : 'Добавить в'} избранное: ${track.title}`}
                             aria-pressed={liked ? 'true' : 'false'}
-                            onClick={() => void favorites.toggle(track.id)}
+                            onClick={() => void favorites.toggle(track)}
                         >
                             <Icon name="heart" size={21} />
                         </button>
@@ -110,12 +122,23 @@ export function TrackList<T extends Track>({
                                     type="button"
                                     disabled={!canToggle}
                                     onClick={() => {
-                                        void favorites.toggle(track.id)
+                                        void favorites.toggle(track)
                                         setMenuTrack(null)
                                     }}
                                 >
                                     {liked ? 'Убрать из избранного' : 'Добавить в избранное'}
                                 </button>
+                                {onRemove && (
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            onRemove(track)
+                                            setMenuTrack(null)
+                                        }}
+                                    >
+                                        Убрать из плейлиста
+                                    </button>
+                                )}
                             </div>
                         )}
                     </li>

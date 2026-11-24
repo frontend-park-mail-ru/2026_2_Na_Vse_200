@@ -13,6 +13,7 @@ export interface CatalogTrack {
     duration_ms: number
     artists: CatalogArtist[]
     is_liked?: boolean
+    album_id?: string
 }
 
 export interface CatalogAlbum {

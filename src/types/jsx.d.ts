@@ -29,7 +29,7 @@ interface InputProps extends DOMProps {
     autoFocus?: boolean
     accept?: string
     name?: string
-    type?: 'text' | 'email' | 'password' | 'range' | 'file'
+    type?: 'text' | 'email' | 'password' | 'range' | 'file' | 'search' | 'checkbox'
     placeholder?: string
     autoComplete?: string
     required?: boolean
@@ -37,6 +37,8 @@ interface InputProps extends DOMProps {
     value?: string | number
     min?: string | number
     max?: string | number
+    checked?: boolean
+    maxLength?: number
 }
 interface SVGProps extends DOMProps {
     width?: number | string
@@ -92,11 +94,13 @@ declare global {
             strong: DOMProps
             small: DOMProps
             ol: DOMProps
+            ul: DOMProps
             li: DOMProps
             br: DOMProps
             a: DOMProps & { href?: string; target?: string; download?: string | boolean }
             label: DOMProps & { htmlFor?: string }
             input: InputProps
+            textarea: DOMProps & { name?: string; placeholder?: string; maxLength?: number }
             button: DOMProps & { type?: 'button' | 'submit' | 'reset'; disabled?: boolean }
             form: DOMProps & { noValidate?: boolean }
             fieldset: DOMProps & { disabled?: boolean }

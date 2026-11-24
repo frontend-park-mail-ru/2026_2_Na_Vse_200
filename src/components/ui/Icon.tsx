@@ -8,6 +8,7 @@ const glyphs = {
     music: ['M9 18V5l12-2v13', 'M9 18a3 3 0 1 1-3-3c1.7 0 3 .9 3 2Z', 'M21 16a3 3 0 1 1-3-3c1.7 0 3 .9 3 2Z'],
     artist: ['M12 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Z', 'M4 21a8 8 0 0 1 16 0'],
     queue: ['M4 5h16', 'M4 12h16', 'M4 19h16'],
+    trash: ['M4 6h16M9 6V3h6v3M6 6l1 15h10l1-15M10 10v7m4-7v7'],
 }
 
 export type IconName = keyof typeof glyphs

@@ -98,14 +98,14 @@ export function Player({
 
     const toggleLike = () => {
         if (!track) return
-        void favorites.toggle(track.id)
+        void favorites.toggle(track)
         if (!isLiked) setDislikedTracks(previous => ({ ...previous, [track.id]: false }))
     }
 
     const toggleDislike = () => {
         if (!track) return
         setDislikedTracks(previous => ({ ...previous, [track.id]: !isDisliked }))
-        if (!isDisliked && isLiked) void favorites.toggle(track.id)
+        if (!isDisliked && isLiked) void favorites.toggle(track)
     }
 
     const skipButton = (direction: 'previous' | 'next') => {

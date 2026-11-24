@@ -41,7 +41,8 @@ function isCollectionItem(value: unknown): value is CollectionItem {
     return (
         isRecord(value) &&
         (typeof value.id === 'string' || typeof value.id === 'number') &&
-        optionalStrings(value, ['name', 'title', 'image_url', 'cover_url'])
+        optionalStrings(value, ['name', 'title', 'image_url', 'cover_url']) &&
+        (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist)))
     )
 }
 function isArtist(value: unknown): boolean {
@@ -52,14 +53,19 @@ function isArtist(value: unknown): boolean {
             (value.id === undefined || typeof value.id === 'string' || typeof value.id === 'number'))
     )
 }
-function isTrack(value: unknown): value is Track {
+export function isTrack(value: unknown): value is Track {
     if (!isCollectionItem(value) || !isRecord(value)) return false
     const duration = value.duration
     return (
         optionalStrings(value, ['artist_name', 'cover']) &&
-        (value.artists === undefined || (Array.isArray(value.artists) && value.artists.every(isArtist))) &&
         (value.artist === undefined || isArtist(value.artist)) &&
-        (value.album === undefined || (isRecord(value.album) && optionalStrings(value.album, ['cover_url']))) &&
+        (value.album_id == null || typeof value.album_id === 'string' || typeof value.album_id === 'number') &&
+        (value.album === undefined ||
+            (isRecord(value.album) &&
+                optionalStrings(value.album, ['cover_url']) &&
+                (value.album.id === undefined ||
+                    typeof value.album.id === 'string' ||
+                    typeof value.album.id === 'number'))) &&
         ['duration_seconds', 'duration_ms'].every(key => value[key] === undefined || typeof value[key] === 'number') &&
         ['is_liked', 'liked'].every(key => value[key] === undefined || typeof value[key] === 'boolean') &&
         (duration === undefined ||
@@ -81,4 +87,52 @@ function isCatalog(value: unknown): value is Catalog {
         Array.isArray(value.albums) &&
         value.albums.every(isCollectionItem)
     )
+}
+
+export type SearchKind = 'all' | 'tracks' | 'artists' | 'albums'
+export type SearchResults = Catalog & { hasMore: Record<Exclude<SearchKind, 'all'>, boolean> }
+
+export async function getSearch(
+    query: string,
+    type: SearchKind,
+    offset: number,
+    signal: AbortSignal,
+): Promise<SearchResults> {
+    const params = new URLSearchParams({ q: query, type, limit: '20', offset: String(offset) })
+    const { response, body } = await requestJson('/search?' + params, { signal })
+    if (!response.ok) throw new Error(readApiError(body).message || 'Не удалось загрузить результаты поиска.')
+    if (!isCatalog(body) || !isRecord(body) || !isRecord(body.has_more)) {
+        throw new Error('Сервер вернул неверные результаты поиска.')
+    }
+    const { tracks, artists, albums } = body.has_more
+    if (typeof tracks !== 'boolean' || typeof artists !== 'boolean' || typeof albums !== 'boolean') {
+        throw new Error('Сервер вернул неверные параметры поиска.')
+    }
+    return { tracks: body.tracks, artists: body.artists, albums: body.albums, hasMore: { tracks, artists, albums } }
+}
+
+export interface AlbumDetail extends CollectionItem {
+    tracks: Track[]
+}
+
+export async function getAlbum(id: string, signal: AbortSignal) {
+    const { data, offline } = await loadWithCache(
+        'album:' + id,
+        async (): Promise<AlbumDetail | null> => {
+            const { response, body } = await requestJson('/albums/' + encodeURIComponent(id), { signal })
+            if (response.status === 404) return null
+            if (!response.ok) throw new Error(readApiError(body).message || 'Не удалось загрузить альбом.')
+            if (
+                !isCollectionItem(body) ||
+                !isRecord(body) ||
+                !Array.isArray(body.tracks) ||
+                !body.tracks.every(isTrack)
+            ) {
+                throw new Error('Сервер вернул неверные данные альбома.')
+            }
+            return { ...body, tracks: body.tracks }
+        },
+        getCacheScope(),
+    )
+    return { album: data, offline }
 }

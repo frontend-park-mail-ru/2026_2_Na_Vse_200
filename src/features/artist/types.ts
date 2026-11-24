@@ -7,6 +7,7 @@ export interface ArtistTrack {
     cover_url: string | null
     duration: number
     is_liked: boolean
+    album_id?: string
 }
 
 export interface ArtistAlbum {
@@ -14,6 +15,7 @@ export interface ArtistAlbum {
     title: string
     artist: string
     cover_url: string | null
+    artists?: TrackArtist[]
 }
 
 export interface Artist {

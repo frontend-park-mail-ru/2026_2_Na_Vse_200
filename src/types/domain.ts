@@ -10,6 +10,7 @@ export interface CollectionItem {
     title?: string
     image_url?: string | null
     cover_url?: string | null
+    artists?: (string | TrackArtist)[]
 }
 export interface Track {
     id: EntityId
@@ -20,7 +21,8 @@ export interface Track {
     cover_url?: string | null
     cover?: string
     image_url?: string | null
-    album?: { cover_url?: string | null }
+    album_id?: EntityId | null
+    album?: { id?: EntityId; cover_url?: string | null }
     duration?: number | string | { seconds?: number; duration_seconds?: number }
     duration_seconds?: number
     duration_ms?: number

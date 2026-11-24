@@ -8,9 +8,13 @@
 
 .track-list--columns {
     grid-template-columns: repeat(2, minmax(0, 1fr));
-    grid-template-rows: repeat(3, auto);
+    grid-template-rows: repeat(var(--track-list-rows, 3), auto);
     grid-auto-flow: column;
     gap: 10px 12px;
+}
+
+.track-list--long-columns {
+    --track-list-rows: 7;
 }
 
 .track-list__item {

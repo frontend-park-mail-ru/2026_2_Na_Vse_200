@@ -87,6 +87,7 @@ function track(value: unknown): CatalogTrack {
         cover_url: image(value.cover_url),
         artists: value.artists.map(reference),
         is_liked: value.is_liked === true,
+        album_id: typeof value.album_id === 'string' ? value.album_id : undefined,
     }
 }
 

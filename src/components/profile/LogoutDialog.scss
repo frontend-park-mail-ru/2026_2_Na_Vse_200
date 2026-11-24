@@ -1,7 +1,6 @@
 .modal--confirmation {
-    position: fixed;
     width: min(700px, calc(100% - 32px));
-    min-height: 380px;
+    min-height: min(380px, var(--modal-max-height));
     padding: 117px 51px 104px;
     border-radius: 30px;
     background: #20232c;
@@ -83,7 +82,7 @@
 
 @media (max-width: 600px) {
     .modal--confirmation {
-        min-height: 300px;
+        min-height: min(300px, var(--modal-max-height));
         padding: 82px 24px 48px;
 
         .modal__header {
