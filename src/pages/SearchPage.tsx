@@ -4,10 +4,11 @@ import { CatalogEmpty } from '../components/music/CatalogEmpty.tsx'
 import { CatalogSearchField } from '../components/music/CatalogSearchField.tsx'
 import { TrackList } from '../components/music/TrackList.tsx'
 import { Icon } from '../components/ui/Icon.tsx'
-import { albumHref, searchCatalog } from '../features/music/catalog.ts'
+import { albumHref } from '../features/music/catalog.ts'
 import { getArtistName } from '../features/music/presentation.ts'
 import { artistHref } from '../features/artist/route.ts'
-import type { Catalog, CatalogStatus, Track } from '../types/domain.ts'
+import type { SearchResults } from '../features/music/api.ts'
+import type { CatalogStatus, Track } from '../types/domain.ts'
 import './CatalogPages.scss'
 
 const tabs = [
@@ -20,7 +21,9 @@ type Tab = (typeof tabs)[number]['id']
 const trackPreviewSize = 6
 
 interface Props {
-    catalog: Catalog
+    results: SearchResults
+    loadingMore: boolean
+    onMore: () => void
     status: CatalogStatus
     error: string
     onRetry: () => void
@@ -32,7 +35,9 @@ interface Props {
 }
 
 export function SearchPage({
-    catalog,
+    results,
+    loadingMore,
+    onMore,
     status,
     error,
     onRetry,
@@ -44,25 +49,21 @@ export function SearchPage({
 }: Props) {
     const [query, setQuery] = useState(initialQuery)
     const [tab, setTab] = useState<Tab>(tabs.find(item => item.id === initialTab)?.id ?? 'all')
-    const [allTracks, setAllTracks] = useState(false)
-    const results = searchCatalog(catalog, query)
     const hasResults = Boolean(results.tracks.length || results.artists.length || results.albums.length)
     const changeQuery = (value: string) => {
         setQuery(value)
         setTab('all')
-        setAllTracks(false)
         onSearchChange(value, 'all')
     }
-    const changeTab = (value: Tab, expandTracks = false) => {
+    const changeTab = (value: Tab) => {
         setTab(value)
-        setAllTracks(expandTracks)
         onSearchChange(query, value)
     }
 
     const showTracks = (tab === 'all' || tab === 'tracks') && results.tracks.length > 0
     const showArtists = (tab === 'all' || tab === 'artists') && results.artists.length > 0
     const showAlbums = (tab === 'all' || tab === 'albums') && results.albums.length > 0
-    const tracks = allTracks ? results.tracks : results.tracks.slice(0, trackPreviewSize)
+    const tracks = tab === 'tracks' ? results.tracks : results.tracks.slice(0, trackPreviewSize)
 
     return (
         <section className="catalog-page search-page">
@@ -89,7 +90,7 @@ export function SearchPage({
                     onTrackSelect={() => {}}
                 />
             )}
-            {query.trim() && status === 'ready' && !hasResults && (
+            {query.trim() && status === 'ready' && tab === 'all' && !hasResults && (
                 <CatalogEmpty
                     title="Ничего не найдено"
                     description="Попробуйте изменить запрос или проверьте написание."
@@ -104,7 +105,7 @@ export function SearchPage({
                     </button>
                 </CatalogEmpty>
             )}
-            {hasResults && status === 'ready' && (
+            {query.trim() && status === 'ready' && (tab !== 'all' || hasResults) && (
                 <div className="search-page__results">
                     <div className="search-page__filters" role="group" aria-label="Тип результатов">
                         {tabs.map(item => (
@@ -125,20 +126,12 @@ export function SearchPage({
                                 tracks={tracks}
                                 activeTrack={activeTrack}
                                 onTrackSelect={track => onPlay(track, results.tracks)}
-                                columns={!allTracks}
+                                columns={tab === 'all'}
                                 label="Треки"
                             />
-                            {results.tracks.length > trackPreviewSize && (
-                                <button
-                                    className="catalog-more"
-                                    type="button"
-                                    aria-expanded={allTracks ? 'true' : 'false'}
-                                    onClick={() => {
-                                        if (tab === 'all') changeTab('tracks', true)
-                                        else setAllTracks(!allTracks)
-                                    }}
-                                >
-                                    {allTracks ? 'Свернуть' : 'Смотреть все'} <Icon name="chevronRight" size={16} />
+                            {tab === 'all' && results.tracks.length > trackPreviewSize && (
+                                <button className="catalog-more" type="button" onClick={() => changeTab('tracks')}>
+                                    Смотреть все <Icon name="chevronRight" size={16} />
                                 </button>
                             )}
                         </section>
@@ -196,6 +189,12 @@ export function SearchPage({
                             )}
                         </div>
                     )}
+                    {tab !== 'all' && results.hasMore[tab] && (
+                        <button className="catalog-button" type="button" onClick={onMore} disabled={loadingMore}>
+                            {loadingMore ? 'Загружаем…' : 'Загрузить ещё'}
+                        </button>
+                    )}
+                    {error && <p role="alert">{error}</p>}
                     {!showTracks && !showArtists && !showAlbums && (
                         <CatalogEmpty title="Ничего не найдено в этой категории" />
                     )}

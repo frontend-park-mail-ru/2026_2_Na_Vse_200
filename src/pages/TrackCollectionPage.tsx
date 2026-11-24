@@ -29,7 +29,7 @@ interface Props {
     onAdd?: () => void
     onEdit?: () => void
     onDelete?: () => void
-    onRemove?: (track: Track) => void
+    onRemove?: (track: Track) => Promise<void>
 }
 
 export function TrackCollectionPage({
@@ -53,6 +53,7 @@ export function TrackCollectionPage({
     onRemove,
 }: Props) {
     const [removeError, setRemoveError] = useState('')
+    const [removing, setRemoving] = useState(false)
     const favorite = kind === 'favorites'
     const columns = tracks.length > 7 && tracks.length <= 14
     const shuffleTracks = () => {
@@ -63,12 +64,16 @@ export function TrackCollectionPage({
         }
         if (queue[0]) onPlay(queue[0], queue)
     }
-    const removeTrack = (track: Track) => {
+    const removeTrack = async (track: Track) => {
+        if (removing) return
+        setRemoving(true)
         try {
-            onRemove?.(track)
+            await onRemove?.(track)
             setRemoveError('')
         } catch (failure) {
             setRemoveError(errorMessage(failure))
+        } finally {
+            setRemoving(false)
         }
     }
 
@@ -146,7 +151,7 @@ export function TrackCollectionPage({
                             columns={columns}
                             longColumns={columns}
                             label={`Треки — ${title}`}
-                            onRemove={onRemove ? removeTrack : undefined}
+                            onRemove={onRemove && !removing ? removeTrack : undefined}
                         />
                     </div>
                 ) : favorite ? (

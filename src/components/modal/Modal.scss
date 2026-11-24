@@ -1,8 +1,16 @@
 @use '../../styles/breakpoints' as bp;
 
 .modal {
+    --modal-top: 16px;
+    --modal-bottom: 16px;
+    --modal-max-height: calc(100dvh - var(--modal-top) - var(--modal-bottom));
+
+    position: fixed;
+    inset: var(--modal-top) 0 var(--modal-bottom);
     width: min(680px, calc(100% - 32px));
-    max-height: calc(100dvh - 32px);
+    height: fit-content;
+    max-height: var(--modal-max-height);
+    margin: auto;
     padding: 30px 34px;
     overflow-y: auto;
     border: 0;

@@ -4,20 +4,21 @@ import { modals } from '../modal/manager.ts'
 import { CatalogCover } from './CatalogCover.tsx'
 import { CatalogSearchField } from './CatalogSearchField.tsx'
 import { formatDuration } from './TrackList.tsx'
-import { matchesQuery, mergeTracks } from '../../features/music/catalog.ts'
+import type { createSearch } from '../../features/music/controllers.ts'
 import { getArtistName, getTrackCover } from '../../features/music/presentation.ts'
 import { errorMessage } from '../../shared/lib/forms.ts'
 import type { Playlist, PlaylistDetails } from '../../features/music/playlists.ts'
-import type { CatalogStatus, Track } from '../../types/domain.ts'
+import type { Track } from '../../types/domain.ts'
 import './PlaylistDialogs.scss'
 
 interface FormProps {
     playlist?: Playlist
-    onSave: (details: PlaylistDetails) => void
+    onSave: (details: PlaylistDetails) => Promise<unknown>
 }
 
 export function PlaylistForm({ playlist, onSave }: FormProps) {
     const [cover, setCover] = useState(playlist?.cover ?? '')
+    const [coverFile, setCoverFile] = useState<File | undefined>(undefined)
     const [busy, setBusy] = useState(false)
     const [error, setError] = useState('')
 
@@ -39,6 +40,7 @@ export function PlaylistForm({ playlist, onSave }: FormProps) {
             image.onload = () => {
                 if (!input.isConnected) return
                 setCover(image.src)
+                setCoverFile(file)
                 setBusy(false)
             }
             image.onerror = () => {
@@ -56,7 +58,7 @@ export function PlaylistForm({ playlist, onSave }: FormProps) {
         reader.readAsDataURL(file)
     }
 
-    const submit = (event: Event) => {
+    const submit = async (event: Event) => {
         event.preventDefault()
         const data = new FormData(event.currentTarget as HTMLFormElement)
         const name = String(data.get('name') ?? '').trim()
@@ -64,11 +66,16 @@ export function PlaylistForm({ playlist, onSave }: FormProps) {
             setError('Введите название плейлиста.')
             return
         }
+        if (busy) return
+        setBusy(true)
+        setError('')
         try {
-            onSave({ name, description: String(data.get('description') ?? '').trim(), cover })
+            await onSave({ name, description: String(data.get('description') ?? '').trim(), cover, coverFile })
             modals.close()
         } catch (failure) {
             setError(errorMessage(failure))
+        } finally {
+            setBusy(false)
         }
     }
 
@@ -133,29 +140,34 @@ export function PlaylistForm({ playlist, onSave }: FormProps) {
 
 interface PickerProps {
     playlist: Playlist
-    tracks: Track[]
-    getCatalog: () => { tracks: Track[]; status: CatalogStatus; error: string }
-    onRetry: () => void
-    onSave: (tracks: Track[]) => void
+    search: ReturnType<typeof createSearch>
+    onSave: (tracks: Track[]) => Promise<void>
 }
 
-export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onSave }: PickerProps) {
+export function PlaylistTrackPicker({ playlist, search, onSave }: PickerProps) {
     const [query, setQuery] = useState('')
     const [selected, setSelected] = useState<Track[]>([])
     const [error, setError] = useState('')
-    const catalog = getCatalog()
+    const [busy, setBusy] = useState(false)
+    const state = search.getState()
     const existing = new Set(playlist.tracks.map(track => String(track.id)))
-    const results = mergeTracks(tracks, catalog.tracks).filter(track =>
-        matchesQuery(`${track.title ?? ''} ${getArtistName(track)}`, query),
-    )
-    const submit = (event: Event) => {
+    const results = state.results.tracks
+    const changeQuery = (value: string) => {
+        setQuery(value)
+        search.load(value, 'tracks', 250)
+    }
+    const submit = async (event: Event) => {
         event.preventDefault()
-        if (!selected.length) return
+        if (!selected.length || busy) return
+        setBusy(true)
+        setError('')
         try {
-            onSave(selected)
+            await onSave(selected)
             modals.close()
         } catch (failure) {
             setError(errorMessage(failure))
+        } finally {
+            setBusy(false)
         }
     }
 
@@ -165,7 +177,7 @@ export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onS
                 <p className="playlist-dialog__subtitle">В плейлист «{playlist.name}»</p>
                 <CatalogSearchField
                     query={query}
-                    onChange={setQuery}
+                    onChange={changeQuery}
                     label="Найти трек"
                     placeholder="Трек или исполнитель"
                 />
@@ -192,6 +204,7 @@ export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onS
                                                 <input
                                                     type="checkbox"
                                                     checked={checked}
+                                                    disabled={busy}
                                                     aria-label={`Выбрать ${track.title || 'трек'}`}
                                                     onChange={() =>
                                                         setSelected(current =>
@@ -208,18 +221,29 @@ export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onS
                             )
                         })}
                     </ul>
-                ) : catalog.status === 'error' ? (
+                ) : state.status === 'error' ? (
                     <div className="track-list-message" role="alert">
-                        <span>{catalog.error}</span>
-                        <button type="button" onClick={onRetry}>
+                        <span>{state.error}</span>
+                        <button type="button" onClick={search.retry}>
                             Попробовать ещё раз
                         </button>
                     </div>
                 ) : (
                     <p className="playlist-dialog__empty" role="status">
-                        {catalog.status === 'ready' ? 'Треки не найдены.' : 'Загружаем треки…'}
+                        {state.status === 'ready' ? 'Треки не найдены.' : 'Загружаем треки…'}
                     </p>
                 )}
+                {state.results.hasMore.tracks && (
+                    <button
+                        type="button"
+                        className="catalog-button"
+                        disabled={state.loadingMore || busy}
+                        onClick={search.more}
+                    >
+                        {state.loadingMore ? 'Загружаем…' : 'Загрузить ещё'}
+                    </button>
+                )}
+                {state.status === 'ready' && state.error && <p role="alert">{state.error}</p>}
                 {error && (
                     <p className="playlist-dialog__error" role="alert">
                         {error}
@@ -227,10 +251,15 @@ export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onS
                 )}
                 <div className="playlist-dialog__actions">
                     <strong className="playlist-dialog__selection">Выбрано: {selected.length}</strong>
-                    <button className="catalog-button catalog-button--coral" type="button" onClick={modals.close}>
+                    <button
+                        className="catalog-button catalog-button--coral"
+                        type="button"
+                        onClick={modals.close}
+                        disabled={busy}
+                    >
                         Отмена
                     </button>
-                    <button className="catalog-button" type="submit" disabled={!selected.length}>
+                    <button className="catalog-button" type="submit" disabled={busy || !selected.length}>
                         Добавить
                     </button>
                 </div>
@@ -239,14 +268,20 @@ export function PlaylistTrackPicker({ playlist, tracks, getCatalog, onRetry, onS
     )
 }
 
-export function PlaylistDelete({ playlist, onDelete }: { playlist: Playlist; onDelete: () => void }) {
+export function PlaylistDelete({ playlist, onDelete }: { playlist: Playlist; onDelete: () => Promise<void> }) {
     const [error, setError] = useState('')
-    const confirm = () => {
+    const [busy, setBusy] = useState(false)
+    const confirm = async () => {
+        if (busy) return
+        setBusy(true)
+        setError('')
         try {
-            onDelete()
+            await onDelete()
             modals.close()
         } catch (failure) {
             setError(errorMessage(failure))
+        } finally {
+            setBusy(false)
         }
     }
     return (
@@ -258,10 +293,20 @@ export function PlaylistDelete({ playlist, onDelete }: { playlist: Playlist; onD
                 </p>
             )}
             <div className="playlist-dialog__actions">
-                <button className="catalog-button catalog-button--dark" type="button" onClick={modals.close}>
+                <button
+                    className="catalog-button catalog-button--dark"
+                    type="button"
+                    onClick={modals.close}
+                    disabled={busy}
+                >
                     Отмена
                 </button>
-                <button className="catalog-button catalog-button--coral" type="button" onClick={confirm}>
+                <button
+                    className="catalog-button catalog-button--coral"
+                    type="button"
+                    onClick={confirm}
+                    disabled={busy}
+                >
                     Удалить
                 </button>
             </div>

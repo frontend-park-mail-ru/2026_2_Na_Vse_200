@@ -22,7 +22,7 @@ export function Sidebar({ route, user, className = '', playlists, favoriteCount,
         ...playlists.map(playlist => ({
             ...playlist,
             href: playlistHref(playlist.id),
-            count: playlist.tracks.length,
+            count: playlist.trackCount,
             favorite: false,
         })),
     ]
@@ -60,19 +60,21 @@ export function Sidebar({ route, user, className = '', playlists, favoriteCount,
             </nav>
 
             <div className="sidebar__divider"></div>
-            <div className="sidebar__playlist-heading">
-                <span>Плейлисты</span>
-                <button
-                    className="sidebar__playlist-add"
-                    type="button"
-                    aria-label="Создать плейлист"
-                    onClick={onCreate}
-                >
-                    <img src={plusIcon} alt="" />
-                </button>
-            </div>
+            {onCreate && (
+                <div className="sidebar__playlist-heading">
+                    <span>Плейлисты</span>
+                    <button
+                        className="sidebar__playlist-add"
+                        type="button"
+                        aria-label="Создать плейлист"
+                        onClick={onCreate}
+                    >
+                        <img src={plusIcon} alt="" />
+                    </button>
+                </div>
+            )}
 
-            <nav className="sidebar__playlists" aria-label="Плейлисты">
+            <nav className="sidebar__playlists" aria-label={onCreate ? 'Плейлисты' : 'Избранное'}>
                 {shortcuts.map(playlist => (
                     <a
                         className="sidebar__playlist-link"

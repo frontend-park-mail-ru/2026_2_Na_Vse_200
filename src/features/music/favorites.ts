@@ -1,3 +1,4 @@
+import { isTrack } from './api.ts'
 import { createStore } from '../../shared/lib/store.ts'
 import { isRecord, readApiError, requestJson } from '../../shared/api/request.ts'
 import { loadWithCache } from '../../shared/offline/load.ts'
@@ -38,6 +39,7 @@ async function load(userId: EntityId | null, force = false) {
     store.setState({ ...initial(), status: next === null ? 'idle' : 'loading' })
     if (next === null) return
     try {
+        let serverTracks: Track[] | undefined
         const [result, cachedTracks] = await Promise.all([
             loadWithCache(
                 'favorites',
@@ -54,6 +56,12 @@ async function load(userId: EntityId | null, force = false) {
                     ) {
                         throw new Error('Сервер вернул неверные данные избранного.')
                     }
+                    if (body.tracks !== undefined) {
+                        if (!Array.isArray(body.tracks) || !body.tracks.every(isTrack)) {
+                            throw new Error('Сервер вернул неверный состав избранного.')
+                        }
+                        serverTracks = body.tracks
+                    }
                     return Object.fromEntries(body.track_ids.map(id => [id, true])) as Record<string, boolean>
                 },
                 scope,
@@ -62,7 +70,14 @@ async function load(userId: EntityId | null, force = false) {
         ])
         if (version === generation) {
             confirmed = { ...result.data }
-            savedTracks = Object.fromEntries(Object.entries(cachedTracks?.data ?? {}).filter(([id]) => confirmed[id]))
+            const tracks = serverTracks
+                ? serverTracks.map(track => [String(track.id), track] as const)
+                : Object.entries(cachedTracks?.data ?? {})
+            savedTracks = Object.fromEntries(tracks.filter(([id]) => confirmed[id]))
+            if (serverTracks) {
+                const snapshot = savedTracks
+                persistence = persistence.then(() => writeCached(scope.userId, 'favorite-tracks', snapshot, scope))
+            }
             store.setState({ ids: result.data, tracks: savedTracks, status: 'ready' })
         }
     } catch (error) {
@@ -99,7 +114,9 @@ export const favorites = {
         mutations.add(controller)
         store.setState(state => ({
             ids: { ...state.ids, [key]: !previous },
-            tracks: { ...state.tracks, [key]: track },
+            tracks: previous
+                ? Object.fromEntries(Object.entries(state.tracks).filter(([id]) => id !== key))
+                : { ...state.tracks, [key]: track },
             pending: { ...state.pending, [key]: true },
             error: '',
         }))
@@ -128,6 +145,9 @@ export const favorites = {
             if (version === generation)
                 store.setState(state => ({
                     ids: { ...state.ids, [key]: previous },
+                    tracks: previous
+                        ? { ...state.tracks, [key]: savedTracks[key] ?? track }
+                        : Object.fromEntries(Object.entries(state.tracks).filter(([id]) => id !== key)),
                     error: error instanceof Error ? error.message : 'Не удалось сохранить лайк.',
                 }))
         } finally {

@@ -21,7 +21,9 @@ import { TrackCollectionPage } from '../pages/TrackCollectionPage.tsx'
 import { CatalogEmpty } from '../components/music/CatalogEmpty.tsx'
 import { PlaylistDelete, PlaylistForm, PlaylistTrackPicker } from '../components/music/PlaylistDialogs.tsx'
 import { createPlaylists } from '../features/music/playlists.ts'
-import { getAlbumTracks, mergeTracks, playlistHref } from '../features/music/catalog.ts'
+import { createAlbum, createSearch } from '../features/music/controllers.ts'
+import type { SearchKind } from '../features/music/api.ts'
+import { playlistHref } from '../features/music/catalog.ts'
 import type { User, Track, EntityId } from '../types/domain.ts'
 import type { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
 
@@ -40,7 +42,8 @@ const titles: Record<string, string> = {
 }
 
 const sessionRoutes = ['home', 'profile', 'artist', 'album', 'search', 'library', 'playlist', 'favorites']
-const catalogRoutes = ['home', 'album', 'search', 'playlist', 'favorites']
+const searchKind = (value: string | null): SearchKind =>
+    value === 'tracks' || value === 'artists' || value === 'albums' ? value : 'all'
 
 /**
  * Запускает приложение и подписывает его на изменения данных и маршрута.
@@ -53,6 +56,9 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
     const player = createPlayer()
     const artist = artistFeature.createController()
     const playlists = createPlaylists()
+    const albumController = createAlbum()
+    const search = createSearch()
+    const picker = createSearch(true)
     void favorites.load(null, true)
     let disposed = false
     let notice = ''
@@ -68,6 +74,7 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         selectedQueue = undefined
         appStore.reset()
         artist.reset()
+        albumController.reset()
     }
 
     const authenticated = (user: User) => {
@@ -75,7 +82,10 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         resetMusic()
         session.setUser(user)
         notice = ''
-        router.navigate(next === '/profile' || next === '/favorites' ? next : '/')
+        const canResume =
+            next &&
+            (next === '/profile' || next === '/library' || next === '/favorites' || /^\/playlists\/[^/?#]+$/.test(next))
+        router.navigate(canResume ? next : '/')
     }
     const accountClosed = (message: string, path = '/login') => {
         resetMusic()
@@ -113,6 +123,7 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         retryFavorites()
         if (session.getState().status === 'ready') {
             appStore.setState({ status: 'idle', offline: false })
+            playlists.refresh()
         }
         syncRoute(true)
         renderCurrent()
@@ -123,14 +134,24 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         void artist.load(match?.params.id ?? '', getCacheScope())
     }
     const retryFavorites = () => void favorites.load(session.getState().user?.id ?? null, true)
-    const retryCatalog = () => void appStore.loadCatalog().then(() => syncRoute())
-    const createPlaylist = () =>
-        modals.open(<PlaylistForm onSave={details => router.navigate(playlistHref(playlists.create(details)))} />)
-    const updateSearchUrl = (query: string, tab: string) => {
+    const createPlaylist = () => {
+        if (!session.getState().user) return
+        modals.open(
+            <PlaylistForm
+                onSave={async details => {
+                    const id = await playlists.save(details)
+                    router.navigate(playlistHref(id))
+                }}
+            />,
+        )
+    }
+    const updateSearch = (query: string, tab: SearchKind) => {
         const params = new URLSearchParams()
         if (query.trim()) params.set('q', query.trim())
+        const delay = search.getState().query !== query.trim() ? 250 : 0
         if (tab !== 'all') params.set('type', tab)
         window.history.replaceState(window.history.state, '', params.size ? `/search?${params}` : '/search')
+        search.load(query, tab, delay)
     }
 
     const renderCurrent = () => {
@@ -144,24 +165,18 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         const favoriteState = favorites.getState()
         const library = playlists.getState()
         const playlistNotice = library.notice?.href === url.pathname ? library.notice.message : ''
-        const playlist = library.items.find(item => item.id === id)
+        const playlist = user && library.detailId === id ? library.detail : null
         const screen = artist.getState()
         const currentArtist = screen.id === id ? screen.artist : undefined
-        const albumArtistId = route === 'album' ? getAlbumArtistId(id, url.searchParams.get('artist')) : ''
-        const albumArtist = albumArtistId && screen.id === albumArtistId ? screen.artist : undefined
-        const album =
-            albumArtist?.albums.find(item => item.id === id) ?? catalog.albums.find(item => String(item.id) === id)
-        const knownTracks = mergeTracks(
-            Object.values(favoriteState.tracks),
-            catalog.tracks,
-            screen.artist?.tracks ?? [],
-        )
-        const albumTracks = album ? getAlbumTracks(album, knownTracks) : []
-        const favoriteTracks = knownTracks.filter(track => favoriteState.ids[String(track.id)])
+        const albumState = albumController.getState()
+        const album = albumState.id === id ? albumState.album : null
+        const searchState = search.getState()
+        const favoriteTracks = Object.values(favoriteState.tracks).filter(track => favoriteState.ids[String(track.id)])
         const favoriteCount = Object.values(favoriteState.ids).filter(Boolean).length
         const routeQueues: Record<string, Track[]> = {
             artist: currentArtist?.tracks ?? [],
-            album: albumTracks,
+            album: album?.tracks ?? [],
+            search: searchState.results.tracks,
             playlist: playlist?.tracks ?? [],
             favorites: favoriteTracks,
         }
@@ -170,20 +185,20 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         const activeTrack = selectedTrack ?? queue.find(track => track.id === activeTrackId) ?? queue[0]
         if (activeTrack) activeTrackId = activeTrack.id
         const needsSession = sessionRoutes.includes(route)
-        const data = route === 'artist' ? screen : catalog
-        const offline = !connectionAvailable() || status === 'offline' || data.offline
+        const data = route === 'artist' ? screen : route === 'album' ? albumState : catalog
+        const offline =
+            !connectionAvailable() ||
+            status === 'offline' ||
+            (['home', 'artist', 'album'].includes(route) && data.offline)
         player.setTrack(needsSession ? activeTrack : undefined)
         document.title = `${titles[route] ?? titles['not-found']} — На все 200`
 
-        const catalogStatus = catalog.status === 'idle' ? 'loading' : catalog.status
-        const favoriteStatus =
-            favoriteState.status === 'loading' ||
-            (favoriteState.status === 'ready' && favoriteCount > favoriteTracks.length && catalogStatus === 'loading')
-                ? 'loading'
-                : 'ready'
-        const albumLoading = Boolean(albumArtistId && (screen.id !== albumArtistId || screen.status === 'loading'))
-        const albumFailed = Boolean(albumArtistId && screen.id === albumArtistId && screen.status === 'error')
-        const retryAlbum = () => void artist.load(albumArtistId, getCacheScope())
+        const albumLoading = albumState.id !== id || albumState.status === 'loading'
+        const albumFailed = albumState.id === id && albumState.status === 'error'
+        const retryAlbum = () => void albumController.load(id)
+        const playlistLoading = library.detailId !== id || library.detailStatus === 'loading'
+        const playlistFailed = library.detailId === id && library.detailStatus === 'error'
+        const retryPlaylist = () => void playlists.loadDetail(id)
         const trackProps = {
             activeTrack,
             onTrackSelect: (track: Track) => playFrom(track, routeQueue),
@@ -197,22 +212,27 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
             search: (
                 <SearchPage
                     key={searchVisit}
-                    catalog={catalog}
-                    status={catalogStatus}
-                    error={catalog.error}
-                    onRetry={appStore.loadCatalog}
+                    results={searchState.results}
+                    status={searchState.status}
+                    error={searchState.error}
+                    loadingMore={searchState.loadingMore}
+                    onMore={search.more}
+                    onRetry={search.retry}
                     initialQuery={url.searchParams.get('q') ?? ''}
                     initialTab={url.searchParams.get('type')}
-                    onSearchChange={updateSearchUrl}
+                    onSearchChange={updateSearch}
                     {...collectionProps}
                 />
             ),
             library: (
                 <LibraryPage
-                    playlists={library.items}
+                    playlists={user ? library.items : []}
                     favoriteCount={favoriteCount}
                     notice={playlistNotice}
-                    onCreate={createPlaylist}
+                    onCreate={user ? createPlaylist : undefined}
+                    loading={Boolean(user && library.status === 'loading')}
+                    error={library.error}
+                    onRetry={playlists.loadList}
                 />
             ),
             favorites: (
@@ -221,7 +241,7 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     kind="favorites"
                     tracks={favoriteTracks}
                     count={favoriteCount}
-                    status={favoriteStatus}
+                    status={favoriteState.status === 'loading' ? 'loading' : 'ready'}
                     guest={!user}
                     {...collectionProps}
                 />
@@ -231,26 +251,17 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     key={id}
                     title={album.title ?? 'Альбом'}
                     kind="album"
-                    tracks={albumTracks}
+                    tracks={album.tracks}
                     cover={album.cover_url}
                     artists={album.artists}
-                    status={albumTracks.length ? 'ready' : albumLoading ? 'loading' : albumFailed ? 'error' : 'ready'}
-                    error={albumFailed ? screen.error : undefined}
-                    onRetry={retryAlbum}
                     {...collectionProps}
                 />
-            ) : catalogStatus === 'loading' || albumLoading ? (
+            ) : albumLoading ? (
                 <CatalogEmpty title="Загружаем альбом…" />
             ) : (
-                <CatalogEmpty
-                    title={albumFailed ? screen.error : catalogStatus === 'error' ? catalog.error : 'Альбом не найден'}
-                >
-                    {(albumFailed || catalogStatus === 'error') && (
-                        <button
-                            className="catalog-button"
-                            type="button"
-                            onClick={albumFailed ? retryAlbum : retryCatalog}
-                        >
+                <CatalogEmpty title={albumFailed ? albumState.error : 'Альбом не найден'}>
+                    {albumFailed && (
+                        <button className="catalog-button" type="button" onClick={retryAlbum}>
                             Попробовать ещё раз
                         </button>
                     )}
@@ -259,7 +270,13 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     </a>
                 </CatalogEmpty>
             ),
-            playlist: playlist ? (
+            playlist: !user ? (
+                <CatalogEmpty title="Войдите, чтобы открыть плейлист">
+                    <a className="catalog-button" href={`/login?next=${encodeURIComponent(url.pathname)}`} data-link>
+                        Войти
+                    </a>
+                </CatalogEmpty>
+            ) : playlist ? (
                 <TrackCollectionPage
                     key={id}
                     title={playlist.name}
@@ -269,22 +286,21 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     tracks={playlist.tracks}
                     notice={playlistNotice}
                     {...collectionProps}
-                    onAdd={() =>
+                    onAdd={() => {
+                        picker.load('', 'tracks')
                         modals.open(
                             <PlaylistTrackPicker
                                 playlist={playlist}
-                                tracks={mergeTracks(knownTracks, playlist.tracks)}
-                                getCatalog={appStore.getState}
-                                onRetry={appStore.loadCatalog}
+                                search={picker}
                                 onSave={tracks => playlists.addTracks(playlist.id, tracks)}
                             />,
                         )
-                    }
+                    }}
                     onEdit={() =>
                         modals.open(
                             <PlaylistForm
                                 playlist={playlist}
-                                onSave={details => playlists.edit(playlist.id, details)}
+                                onSave={details => playlists.save(details, playlist.id)}
                             />,
                         )
                     }
@@ -292,8 +308,8 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                         modals.open(
                             <PlaylistDelete
                                 playlist={playlist}
-                                onDelete={() => {
-                                    playlists.remove(playlist)
+                                onDelete={async () => {
+                                    await playlists.remove(playlist)
                                     router.navigate('/library', { replace: true })
                                 }}
                             />,
@@ -301,8 +317,15 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     }
                     onRemove={track => playlists.removeTrack(playlist.id, track.id)}
                 />
+            ) : playlistLoading ? (
+                <CatalogEmpty title="Загружаем плейлист…" />
             ) : (
-                <CatalogEmpty title="Плейлист не найден">
+                <CatalogEmpty title={playlistFailed ? library.detailError : 'Плейлист не найден'}>
+                    {playlistFailed && (
+                        <button className="catalog-button" type="button" onClick={retryPlaylist}>
+                            Попробовать ещё раз
+                        </button>
+                    )}
                     <a className="catalog-button" href="/library" data-link>
                         В медиатеку
                     </a>
@@ -365,10 +388,10 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     onTrackSelect={track => playFrom(track, queue)}
                     activeTrack={activeTrack}
                     sessionError={error}
-                    playlists={library.items}
+                    playlists={user ? library.items : []}
                     favoriteCount={favoriteCount}
-                    playlistId={route === 'playlist' ? id : undefined}
-                    onCreatePlaylist={createPlaylist}
+                    playlistId={route === 'playlist' ? (playlist?.id ?? id) : undefined}
+                    onCreatePlaylist={user ? createPlaylist : undefined}
                 >
                     {page}
                 </AppLayout>
@@ -385,7 +408,16 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                     </div>
                 ) : null}
                 {page}
-                <ModalHost />
+                {library.importMessage && (
+                    <div className="favorites-error" role="status">
+                        {library.importMessage}
+                        {library.importFailed && (
+                            <button className="favorites-error__retry" type="button" onClick={playlists.retryImport}>
+                                Повторить
+                            </button>
+                        )}
+                    </div>
+                )}
                 {favoriteState.error ? (
                     <div className="favorites-error" role="alert">
                         {favoriteState.error}
@@ -394,15 +426,10 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                         </button>
                     </div>
                 ) : null}
+                <ModalHost />
             </div>,
             container,
         )
-    }
-
-    const getAlbumArtistId = (id: string, fromUrl: string | null) => {
-        const album = appStore.getState().albums.find(item => String(item.id) === id)
-        const reference = album?.artists?.find(item => typeof item !== 'string' && item.id != null)
-        return typeof reference === 'object' ? String(reference.id) : (fromUrl ?? '')
     }
 
     const syncRoute = (force = false) => {
@@ -424,15 +451,21 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
             return
         }
         if (status !== 'ready' && status !== 'offline') return
-        if (catalogRoutes.includes(route ?? '') && appStore.getState().status === 'idle') {
-            retryCatalog()
+        const id = match?.params.id ?? ''
+        if (route === 'home' && appStore.getState().status === 'idle') {
+            void appStore.loadCatalog()
+        } else if (route === 'search') {
+            const query = url.searchParams.get('q') ?? ''
+            const kind = searchKind(url.searchParams.get('type'))
+            const loaded = search.getState()
+            if (force || loaded.query !== query.trim() || loaded.kind !== kind) search.load(query, kind)
+        } else if (route === 'artist' && (force || artist.getState().id !== id)) {
+            void artist.load(id, getCacheScope())
+        } else if (route === 'album' && (force || albumController.getState().id !== id)) {
+            void albumController.load(id)
+        } else if (route === 'playlist' && user && (force || playlists.getState().detailId !== id)) {
+            void playlists.loadDetail(id)
         }
-        if (!match?.params.id || (route !== 'artist' && route !== 'album')) return
-        const artistId =
-            route === 'artist' ? match.params.id : getAlbumArtistId(match.params.id, url.searchParams.get('artist'))
-        if (!artistId) return
-        const screen = artist.getState()
-        if (force || screen.id !== artistId || screen.status === 'idle') void artist.load(artistId, getCacheScope())
     }
     const handleRoute = () => {
         modals.close()
@@ -440,6 +473,10 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         const { pathname } = router.getCurrentUrl()
         const route = router.findRoute(pathname)?.value
         if (route === 'search') searchVisit++
+        else search.cancel()
+        picker.cancel()
+        if (route !== 'album') albumController.cancel()
+        if (route !== 'playlist') playlists.clearDetail()
         if (playlists.getState().notice?.href !== pathname) playlists.clearNotice()
         renderCurrent()
         container.querySelector<HTMLElement>('h1')?.focus()
@@ -449,7 +486,8 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
     const sessionChanged = () => {
         const { status, user } = session.getState()
         if (status === 'ready' || status === 'offline') {
-            playlists.load(user?.id)
+            if (!user && modals.getState().content) modals.close()
+            playlists.load(user?.id ?? null, status === 'ready')
             void favorites.load(user?.id ?? null)
         }
         renderCurrent()
@@ -462,9 +500,16 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
                 if (!disposed) void retry()
             })
     }
+    const modalChanged = () => {
+        if (!modals.getState().content) picker.cancel()
+        renderCurrent()
+    }
     const unsubscribe = [
         session.subscribe(sessionChanged),
-        ...[favorites, player, artist, appStore, modals, playlists].map(store => store.subscribe(renderCurrent)),
+        ...[favorites, player, artist, appStore, playlists, albumController, search, picker].map(store =>
+            store.subscribe(renderCurrent),
+        ),
+        modals.subscribe(modalChanged),
         subscribeConnection(connectionChanged),
     ]
     renderCurrent()
@@ -475,6 +520,10 @@ export const mountApp = (container: HTMLElement, router: VanillaRouter) => {
         stopObserving()
         session.destroy()
         artist.destroy()
+        playlists.destroy()
+        albumController.cancel()
+        search.cancel()
+        picker.cancel()
         player.dispose()
         router.off('route', handleRoute).destroy()
         modals.close()
