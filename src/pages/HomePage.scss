@@ -1,8 +1,10 @@
+@use '../styles/breakpoints' as bp;
+
 .home-page {
     --track-cover-size: clamp(28px, 2.8vw, 34px);
     min-height: 100%;
     padding: 10px 18px 28px 26px;
-    background: #0d0e13;
+    background: var(--color-background);
     color: #f2f1f5;
 }
 
@@ -30,7 +32,12 @@
     padding: 20px clamp(28px, 3.4vw, 42px);
     border: 0;
     border-radius: 26px;
-    background: linear-gradient(105deg, #17181e 0%, #33283f 45%, #604276 100%);
+    background: linear-gradient(
+        105deg,
+        var(--color-surface-inset) 0%,
+        var(--color-gradient-middle) 45%,
+        var(--color-gradient-end) 100%
+    );
 }
 
 .featured-playlist h2 {
@@ -184,7 +191,7 @@
     overflow-wrap: anywhere;
 }
 
-@media (max-width: 900px) {
+@media (max-width: bp.$compact-desktop) {
     .home-page {
         padding: 20px 18px 26px;
     }
@@ -195,7 +202,7 @@
     }
 }
 
-@media (max-width: 560px) {
+@media (max-width: bp.$mobile) {
     .home-page {
         padding: 17px 13px 22px;
     }
@@ -239,5 +246,5 @@
 }
 
 .music-collection__artist-link:hover strong {
-    color: #c5b1ff;
+    color: var(--color-accent-light);
 }

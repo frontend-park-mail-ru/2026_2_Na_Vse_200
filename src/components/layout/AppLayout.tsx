@@ -34,9 +34,13 @@ export function AppLayout({
                 if (event.key === 'Escape') setQueueOpen(false)
             }}
         >
-            <a className="app-shell__skip-link" href="#main-content">
+            <button
+                className="app-shell__skip-link"
+                type="button"
+                onClick={() => document.getElementById('main-content')?.focus()}
+            >
                 К содержимому
-            </a>
+            </button>
             <Sidebar className="app-shell__sidebar" route={route} user={user} />
             <div className="app-shell__main-column">
                 {!user && (

@@ -2,7 +2,6 @@ import { VanillaRouter } from '../shared/lib/VanillaRouter.ts'
 
 export const createAppRouter = () =>
     new VanillaRouter({
-        type: 'history',
         routes: {
             '/': 'home',
             '/profile': 'profile',

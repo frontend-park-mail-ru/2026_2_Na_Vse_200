@@ -1,25 +1,15 @@
 interface RouterOptions {
-    type?: 'history' | 'hash'
     routes?: Record<string, string>
-    root?: string
 }
-/** Роутер с режимами history и hash; перехватывает внутренние ссылки с data-link. */
+/** Роутер на History API; перехватывает внутренние ссылки с data-link. */
 export class VanillaRouter {
-    type: 'history' | 'hash'
     routes: Record<string, string>
-    root: string
     events: DocumentFragment
     started: boolean
     handleLocationChange: () => void
     handleLinkClick: (event: MouseEvent) => void
-    constructor({ type = 'history', routes = {}, root = '/' }: RouterOptions = {}) {
-        if (!['history', 'hash'].includes(type)) {
-            throw new Error(`Unsupported router type: ${type}`)
-        }
-
-        this.type = type
+    constructor({ routes = {} }: RouterOptions = {}) {
         this.routes = routes
-        this.root = root
         this.events = document.createDocumentFragment()
         this.started = false
         this.handleLocationChange = () => this.dispatchRoute()
@@ -30,8 +20,7 @@ export class VanillaRouter {
     listen() {
         if (this.started) return this
 
-        const eventName = this.type === 'hash' ? 'hashchange' : 'popstate'
-        window.addEventListener(eventName, this.handleLocationChange)
+        window.addEventListener('popstate', this.handleLocationChange)
         document.addEventListener('click', this.handleLinkClick)
         this.started = true
         this.dispatchRoute()
@@ -60,17 +49,7 @@ export class VanillaRouter {
             return this
         }
 
-        if (this.type === 'hash') {
-            const hash = target.hash.startsWith('#/')
-                ? target.hash.slice(1)
-                : `${target.pathname}${target.search}${target.hash}`
-            if (window.location.hash === `#${hash}`) this.dispatchRoute()
-            else if (replace) window.location.replace(`#${hash}`)
-            else window.location.hash = hash
-            return this
-        }
-
-        const destination = `${target.pathname}${target.search}${target.hash}`
+        const destination = `${target.pathname}${target.search}`
         if (replace) window.history.replaceState({}, '', destination)
         else window.history.pushState({}, '', destination)
         this.dispatchRoute()
@@ -81,8 +60,7 @@ export class VanillaRouter {
     destroy() {
         if (!this.started) return this
 
-        const eventName = this.type === 'hash' ? 'hashchange' : 'popstate'
-        window.removeEventListener(eventName, this.handleLocationChange)
+        window.removeEventListener('popstate', this.handleLocationChange)
         document.removeEventListener('click', this.handleLinkClick)
         this.started = false
         return this
@@ -106,10 +84,9 @@ export class VanillaRouter {
     }
 
     getCurrentUrl() {
-        if (this.type === 'history') return new URL(window.location.href)
-
-        const hashPath = window.location.hash.slice(1) || this.root
-        return new URL(hashPath.startsWith('/') ? hashPath : `/${hashPath}`, window.location.origin)
+        const url = new URL(window.location.href)
+        url.hash = ''
+        return url
     }
 
     findRoute(pathname: string) {

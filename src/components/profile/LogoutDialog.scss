@@ -1,11 +1,13 @@
+@use '../../styles/breakpoints' as bp;
+
 .modal--confirmation {
     position: fixed;
     width: min(700px, calc(100% - 32px));
     min-height: 380px;
     padding: 117px 51px 104px;
     border-radius: 30px;
-    background: #20232c;
-    color: #fff;
+    background: var(--color-hover);
+    color: var(--color-white);
 
     .modal__header {
         display: block;
@@ -51,7 +53,7 @@
     padding: 13px 16px;
     border: 0;
     border-radius: 30px;
-    color: #000;
+    color: var(--color-black);
     font-family: var(--font-heading);
     font-size: 24px;
     font-weight: 600;
@@ -71,17 +73,17 @@
     background: #e57e70;
 }
 .logout-dialog__button--confirm {
-    background: #9d8cff;
+    background: var(--color-accent-strong);
 }
 .logout-dialog__error {
     margin: 20px 0 0;
-    color: #ff9ab2;
+    color: var(--color-error);
     font-size: 14px;
     line-height: 1.5;
     text-align: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: bp.$mobile) {
     .modal--confirmation {
         min-height: 300px;
         padding: 82px 24px 48px;
@@ -103,7 +105,7 @@
     }
 }
 
-@media (max-height: 480px) {
+@media (max-height: bp.$short-dialog) {
     .modal--confirmation {
         min-height: 0;
         padding: 64px 24px 24px;

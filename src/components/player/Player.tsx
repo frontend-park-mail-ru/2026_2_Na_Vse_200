@@ -50,7 +50,7 @@ function PlayerTimeline({ playback, player }: { playback: PlaybackState; player?
                 disabled={!available || duration <= 0}
                 aria-label="Позиция воспроизведения"
                 style={{
-                    backgroundImage: `linear-gradient(to right, #9f9ac0 ${progress}%, #827676 ${progress}%)`,
+                    backgroundImage: `linear-gradient(to right, var(--color-slider-fill) ${progress}%, var(--color-seek-track) ${progress}%)`,
                 }}
                 onInput={(event: Event) =>
                     player?.seek((Number((event.currentTarget as HTMLInputElement).value) / 100) * duration)
@@ -236,7 +236,7 @@ export function Player({
                                 player?.setVolume(Number((event.currentTarget as HTMLInputElement).value) / 100)
                             }
                             style={{
-                                backgroundImage: `linear-gradient(to right, #9f9ac0 ${volume}%, #fff ${volume}%)`,
+                                backgroundImage: `linear-gradient(to right, var(--color-slider-fill) ${volume}%, var(--color-white) ${volume}%)`,
                             }}
                         />
                     </div>

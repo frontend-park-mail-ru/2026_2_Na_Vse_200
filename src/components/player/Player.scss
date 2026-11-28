@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 @function unit($value) {
     @return calc(#{$value} * var(--player-unit));
 }
@@ -16,8 +18,8 @@
     width: 100%;
     height: unit(106);
     border-radius: unit(36);
-    background: #20232c;
-    color: #fff;
+    background: var(--color-hover);
+    color: var(--color-white);
     font-family: var(--font-heading);
     font-weight: 500;
     font-variation-settings:
@@ -56,7 +58,7 @@
     flex: 0 0 unit(70);
     overflow: hidden;
     border-radius: unit(10);
-    background: #332d40;
+    background: var(--color-cover-placeholder);
 }
 
 .player__cover-image {
@@ -86,7 +88,7 @@
 }
 
 .player__artists {
-    color: #7f7c9b;
+    color: var(--color-text-muted);
     font-size: unit(16);
     line-height: unit(20);
 }
@@ -169,8 +171,8 @@
     width: unit(50);
     height: unit(50);
     border-radius: 50%;
-    background: #fff;
-    color: #000;
+    background: var(--color-white);
+    color: var(--color-black);
 }
 
 .player__pause-image {
@@ -249,7 +251,7 @@
     appearance: none;
     border: 0;
     border-radius: 50%;
-    background: #d9d9d9;
+    background: var(--color-slider-thumb);
 }
 
 .player__seek::-moz-range-thumb {
@@ -257,7 +259,7 @@
     height: unit(11.2);
     border: 0;
     border-radius: 50%;
-    background: #d9d9d9;
+    background: var(--color-slider-thumb);
 }
 
 .player__extra {
@@ -286,7 +288,7 @@
 }
 
 .player__queue-button--open {
-    color: #c5b1ff;
+    color: var(--color-accent-light);
 }
 
 .player__volume-control {
@@ -337,10 +339,10 @@
     max-height: 300px;
     overflow: auto;
     padding: 18px;
-    border: 1px solid #454050;
+    border: 1px solid var(--color-border-panel);
     border-radius: 18px;
-    background: #20232c;
-    box-shadow: 0 8px 24px #0006;
+    background: var(--color-hover);
+    box-shadow: 0 8px 24px var(--color-shadow);
     font-size: 14px;
 }
 
@@ -372,7 +374,7 @@
 .player__queue-track:hover,
 .player__queue-track--current {
     background: #36313f;
-    color: #c5b1ff;
+    color: var(--color-accent-light);
 }
 
 @container (max-width: 740px) {
@@ -439,7 +441,7 @@
     display: none;
 }
 
-@media (max-width: 760px), (max-width: 1000px) and (max-height: 520px) {
+@media (max-width: bp.$tablet), (max-width: bp.$compact-desktop) and (max-height: bp.$short-layout) {
     .player__body {
         --player-unit: 1px;
         display: grid;

@@ -2,8 +2,8 @@
 
 .artist-page {
     min-height: 100%;
-    color: #fff;
-    background: #0d0e13;
+    color: var(--color-white);
+    background: var(--color-background);
     font-family: var(--font-heading);
     font-weight: 500;
     font-variation-settings:
@@ -64,8 +64,8 @@
     padding: 0 18px;
     border: 0;
     border-radius: 30px;
-    background: #9d8cff;
-    color: #08070c;
+    background: var(--color-accent-strong);
+    color: var(--color-on-accent);
     font-size: 13px;
     font-weight: 500;
     cursor: pointer;
@@ -112,7 +112,7 @@
     padding: 0;
     border: 0;
     background: transparent;
-    color: #7f7c9b;
+    color: var(--color-text-muted);
     font-family: var(--font-heading);
     font-size: 16px;
     font-weight: 500;
@@ -147,7 +147,7 @@
     color: #b7a3ff;
 }
 
-@media (max-width: 1200px) {
+@media (max-width: bp.$desktop) {
     .artist-page__columns {
         grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
         gap: 24px;
@@ -158,7 +158,7 @@
     }
 }
 
-@media (max-width: 1000px) {
+@media (max-width: bp.$compact-desktop) {
     .artist-page__hero {
         gap: 20px;
         min-height: 300px;

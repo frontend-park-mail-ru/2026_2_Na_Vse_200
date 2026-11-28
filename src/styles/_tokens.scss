@@ -1,0 +1,35 @@
+:root {
+    --color-background: #0d0e13;
+    --color-panel: #16181f;
+    --color-hover: #20232c;
+    --color-text: #f2f1ee;
+    --color-white: #fff;
+    --color-black: #000;
+    --color-error: #ff9ab2;
+    --color-accent-light: #c5b1ff;
+    --color-accent-strong: #9d8cff;
+    --color-accent: #a28aff;
+    --color-text-muted: #7f7c9b;
+    --color-text-secondary: #9993b0;
+    --color-text-subtle: #a1a6b8;
+    --color-text-cool: #f1f2f8;
+    --color-on-accent: #08070c;
+    --color-ink: #17151f;
+    --color-slider-thumb: #d9d9d9;
+    --color-border-panel: #454050;
+    --color-border-divider: #77718b;
+    --color-border-input: #86809e;
+    --color-surface-inset: #17181e;
+    --color-cover-placeholder: #332d40;
+    --color-gradient-middle: #33283f;
+    --color-gradient-end: #604276;
+    --color-art-shadow: #271d32;
+    --color-shadow: #0006;
+    --color-focus: #bea8ff;
+    --color-slider-fill: #9f9ac0;
+    --color-seek-track: #827676;
+
+    --font-sans-fallback: ui-sans-serif, system-ui, sans-serif;
+    --font-body: 'Onest', var(--font-sans-fallback);
+    --font-heading: 'Geologica', var(--font-sans-fallback);
+}

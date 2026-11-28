@@ -1,3 +1,5 @@
+@use '../../styles/breakpoints' as bp;
+
 .track-list {
     display: grid;
     gap: 16px;
@@ -24,7 +26,7 @@
     padding: 5px 14px;
     border: 1px solid transparent;
     border-radius: 10px;
-    background: #20232c;
+    background: var(--color-hover);
     color: inherit;
 }
 
@@ -112,10 +114,10 @@
     display: grid;
     min-width: 190px;
     padding: 6px;
-    border: 1px solid #454050;
+    border: 1px solid var(--color-border-panel);
     border-radius: 12px;
     background: #24212e;
-    box-shadow: 0 8px 24px #0006;
+    box-shadow: 0 8px 24px var(--color-shadow);
 }
 .track-list__menu button {
     padding: 10px;
@@ -145,7 +147,7 @@
     cursor: pointer;
 }
 
-@media (max-width: 1100px) {
+@media (max-width: bp.$desktop) {
     .track-list--columns {
         grid-template-columns: 1fr;
         grid-template-rows: none;
@@ -153,7 +155,7 @@
     }
 }
 
-@media (max-width: 560px) {
+@media (max-width: bp.$mobile) {
     .track-list__item {
         gap: 6px;
         padding: 5px 7px;

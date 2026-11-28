@@ -1,2 +1,10 @@
-$mobile: 520px;
+// Viewport widths. Desktop styles are the default above these limits.
+$mobile: 560px;
 $tablet: 760px;
+$compact-desktop: 1000px;
+$desktop: 1200px;
+
+// Height limits for layouts that need extra vertical space.
+$short-dialog: 480px;
+$short-layout: 520px;
+$short-sidebar: 700px;
